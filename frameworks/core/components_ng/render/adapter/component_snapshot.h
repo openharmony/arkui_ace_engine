@@ -79,5 +79,9 @@ private:
 
     WeakPtr<FrameNode> node_;
 };
+
+// Check that all image nodes in the subtree rooted at node have loaded successfully;
+// invisible subtrees are skipped and traversal statistics are collected into dfxInfo.
+bool CheckImageSuccessfullyLoad(const RefPtr<UINode>& node, SnapshotDFXInfo& dfxInfo);
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_COMPONENT_SNAPSHOT_H

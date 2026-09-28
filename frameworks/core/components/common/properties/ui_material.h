@@ -126,6 +126,7 @@ struct UiMaterialInfo {
     RefPtr<UiMaterial> material;
     std::optional<ImmersiveMaterialConfig> immersiveConfig;
     std::optional<int32_t> transparencyCallbackId;
+    std::function<void()> materialColorModeChangeCallback;
 };
 
 class ACE_FORCE_EXPORT MaterialUtils {

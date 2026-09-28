@@ -58,10 +58,6 @@ bool SafeDoubleToInt32(double value, int32_t& out)
 
 RefPtr<AceType> CreateOffscreenPattern(int32_t width, int32_t height)
 {
-    if (width <= 0 || height <= 0) {
-        LOGW("Invalid offscreen canvas dimensions: width=%{public}d, height=%{public}d", width, height);
-        return nullptr;
-    }
     constexpr int32_t maxCanvasDimension = 65536;
     if (width > maxCanvasDimension || height > maxCanvasDimension) {
         LOGW("Offscreen canvas dimensions too large: width=%{public}d, height=%{public}d", width, height);
@@ -83,10 +79,6 @@ size_t GetOffscreenBitmapSize(const RefPtr<AceType>& offscreenPattern)
 
 void UpdateOffscreenSize(const RefPtr<AceType>& offscreenPattern, int32_t width, int32_t height)
 {
-    if (width <= 0 || height <= 0) {
-        LOGW("Invalid offscreen canvas update dimensions: width=%{public}d, height=%{public}d", width, height);
-        return;
-    }
     auto* bridge = GetCanvasBridge();
     CHECK_NULL_VOID(bridge);
     CHECK_NULL_VOID(bridge->updateOffscreenSize);

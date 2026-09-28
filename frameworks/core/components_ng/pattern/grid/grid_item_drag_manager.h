@@ -127,6 +127,30 @@ private:
     void HandleOnItemLongPress(const GestureEvent& info);
 
     /**
+     * @brief Locks the dragging finger on the drag pan and lets the host Grid
+     * scroll pan escape it through the EventManager escape channel, so another
+     * finger can scroll the Grid while the item is being dragged.
+     * @param fingerId The pointer id that triggered the long-press drag.
+     */
+    void LockDragFingerAndEscapeScrollPan(int32_t fingerId);
+
+    /**
+     * @brief Driven by the host Grid on every real scroll frame while an item floats or
+     * is dragged, with the scroll source. Interrupts a float (long press without any
+     * drag update) as soon as another finger scrolls the container, and arms the edge
+     * auto-scroll suppression for the rest of that drag; a real drag is never
+     * interrupted, so one finger can drag while another scrolls.
+     * @param source The scroll source of this frame, see ScrollablePattern.
+     */
+    void HandleContainerScroll(int32_t source);
+
+    /**
+     * @brief Registers HandleContainerScroll on the host Grid for the duration of the
+     * float or drag session, released again on drag end / cancel / DeInitDragDropEvent.
+     */
+    void RegisterContainerScrollInterrupt();
+
+    /**
      * @brief Handles the start of a drag gesture.
      * Records the initial drag offset, axis direction, and item index.
      * @param info The gesture event information.
@@ -776,6 +800,10 @@ private:
     Axis axis_ = Axis::VERTICAL;
     int32_t totalCount_ = -1;
     bool scrolling_ = false;
+    // Armed by HandleContainerScroll() when another finger really scrolls the Grid,
+    // cleared again as soon as that finger leaves the container. Only then is the drag
+    // edge auto-scroll suppressed, a second finger merely resting on the Grid is not.
+    bool suppressAutoScroll_ = false;
     bool autoScrollForward_ = false; // true = scroll toward end (bottom/right)
     bool inAutoScrollHotZone_ = false; // true when finger is in top/bottom hot zone during drag
     OffsetF dragOffset_;

@@ -21,7 +21,21 @@
 #include "core/components_ng/token_theme/token_theme_storage.h"
 
 namespace OHOS::Ace::NG {
+namespace {
 constexpr char DEFAULT_THEME_TAG[] = "ThemeTag";
+
+ColorMode MapJsColorModeToColorMode(int32_t jsColorMode)
+{
+    switch (jsColorMode) {
+        case 1: // ThemeColorMode.LIGHT
+            return ColorMode::LIGHT;
+        case 2: // ThemeColorMode.DARK
+            return ColorMode::DARK;
+        default: // ThemeColorMode.SYSTEM
+            return ColorMode::COLOR_MODE_UNDEFINED;
+    }
+}
+} // namespace
 
 ArkUINativeModuleValue ThemeBridge::Create(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -42,9 +56,11 @@ ArkUINativeModuleValue ThemeBridge::Create(ArkUIRuntimeCallInfo* runtimeCallInfo
     }
     ArkUI_Int32 themeScopeId = static_cast<ArkUI_Int32>(themeScopeIdArg->Int32Value(vm));
     ArkUI_Int32 themeId = static_cast<ArkUI_Int32>(themeIdArg->Int32Value(vm));
+    ArkUI_Int32 colorMode = static_cast<ArkUI_Int32>(colorModeArg->Int32Value(vm));
+    ColorMode mappedColorMode = MapJsColorModeToColorMode(colorMode);
     std::vector<ArkUI_Uint32> lightColors;
     std::vector<RefPtr<ResourceObject>> lightResObjs;
-    if (!HandleThemeColorsArg(vm, colorsArg, lightColors, lightResObjs, themeId, false)) {
+    if (!HandleThemeColorsArg(vm, colorsArg, lightColors, lightResObjs, themeId, false, mappedColorMode)) {
         TAG_LOGD(AceLogTag::ACE_THEME, "Handle Theme Colors to array failed");
         return panda::JSValueRef::Undefined(vm);
     }
@@ -57,12 +73,11 @@ ArkUINativeModuleValue ThemeBridge::Create(ArkUIRuntimeCallInfo* runtimeCallInfo
         darkResObjs = lightResObjs; // if darkColors is not set, use lightResObjs
         TokenThemeStorage::GetInstance()->InitDarkThemeMapWithoutUserSet(themeId, true);
     } else if (!darkColorsArg->IsArray(vm) ||
-    !HandleThemeColorsArg(vm, darkColorsArg, darkColors, darkResObjs, themeId, true)) {
+    !HandleThemeColorsArg(vm, darkColorsArg, darkColors, darkResObjs, themeId, true, mappedColorMode)) {
         TAG_LOGD(AceLogTag::ACE_THEME, "Handle Theme darkColors to array failed");
         return panda::JSValueRef::Undefined(vm);
     }
 
-    ArkUI_Int32 colorMode = static_cast<ArkUI_Int32>(colorModeArg->Int32Value(vm));
     auto obj = onThemeScopeDestroyArg->ToObject(vm);
     auto containerId = Container::CurrentId();
     panda::Local<panda::FunctionRef> func = obj;
@@ -90,11 +105,14 @@ ArkUINativeModuleValue ThemeBridge::Create(ArkUIRuntimeCallInfo* runtimeCallInfo
 
 bool ThemeBridge::HandleThemeColorsArg(const EcmaVM* vm, const Local<JSValueRef>& colorsArg,
     std::vector<ArkUI_Uint32>& colors, std::vector<RefPtr<ResourceObject>>& resObjs,
-    ArkUI_Int32 themeId, bool isDark)
+    ArkUI_Int32 themeId, bool isDark, ColorMode colorMode)
 {
     auto basisTheme = TokenThemeStorage::GetInstance()->GetDefaultTheme();
     if (!basisTheme) {
-        basisTheme = TokenThemeStorage::GetInstance()->ObtainSystemTheme();
+        if (colorMode == ColorMode::COLOR_MODE_UNDEFINED) {
+            colorMode = Container::CurrentColorMode();
+        }
+        basisTheme = TokenThemeStorage::GetInstance()->ObtainSystemTheme(colorMode);
     }
     if (!basisTheme) {
         return false;

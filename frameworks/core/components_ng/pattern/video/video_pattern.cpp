@@ -325,10 +325,10 @@ RectF AdjustPaintRect(float positionX, float positionY, float width, float heigh
     return rect;
 }
 
-void RegisterMediaPlayerEventImpl(const WeakPtr<VideoPattern>& weak, const RefPtr<MediaPlayer>& mediaPlayer,
-    int32_t instanceId, const SingleTaskExecutor& uiTaskExecutor)
+PositionUpdatedEvent BuildPositionUpdatedEvent(const WeakPtr<VideoPattern>& weak,
+    const SingleTaskExecutor& uiTaskExecutor, int32_t instanceId)
 {
-    auto&& positionUpdatedEvent = [weak, uiTaskExecutor, instanceId](uint32_t currentPos) {
+    return [weak, uiTaskExecutor, instanceId](uint32_t currentPos) {
         uiTaskExecutor.PostSyncTask([weak, currentPos, instanceId] {
             auto video = weak.Upgrade();
             CHECK_NULL_VOID(video);
@@ -339,8 +339,12 @@ void RegisterMediaPlayerEventImpl(const WeakPtr<VideoPattern>& weak, const RefPt
 #endif
             }, "ArkUIVideoCurrentTimeChange");
     };
+}
 
-    auto&& stateChangedEvent = [weak, uiTaskExecutor, instanceId](PlaybackStatus status) {
+StateChangedEvent BuildStateChangedEvent(const WeakPtr<VideoPattern>& weak,
+    const SingleTaskExecutor& uiTaskExecutor, int32_t instanceId)
+{
+    return [weak, uiTaskExecutor, instanceId](PlaybackStatus status) {
         uiTaskExecutor.PostTask([weak, status, instanceId] {
             auto video = weak.Upgrade();
             CHECK_NULL_VOID(video);
@@ -348,8 +352,12 @@ void RegisterMediaPlayerEventImpl(const WeakPtr<VideoPattern>& weak, const RefPt
             video->OnPlayerStatus(status);
             }, "ArkUIVideoPlayerStatusChange");
     };
+}
 
-    auto&& errorEvent = [weak, uiTaskExecutor, instanceId]() {
+CommonEvent BuildErrorEvent(const WeakPtr<VideoPattern>& weak, const SingleTaskExecutor& uiTaskExecutor,
+    int32_t instanceId)
+{
+    return [weak, uiTaskExecutor, instanceId]() {
         uiTaskExecutor.PostTask([weak, instanceId] {
             auto video = weak.Upgrade();
             CHECK_NULL_VOID(video);
@@ -357,8 +365,12 @@ void RegisterMediaPlayerEventImpl(const WeakPtr<VideoPattern>& weak, const RefPt
             video->OnError("");
             }, "ArkUIVideoError");
     };
+}
 
-    auto&& videoErrorEvent = [weak, uiTaskExecutor, instanceId](int32_t code, const std::string& message) {
+VideoErrorEvent BuildVideoErrorEvent(const WeakPtr<VideoPattern>& weak, const SingleTaskExecutor& uiTaskExecutor,
+    int32_t instanceId)
+{
+    return [weak, uiTaskExecutor, instanceId](int32_t code, const std::string& message) {
         uiTaskExecutor.PostTask([weak, instanceId, code, message] {
             auto video = weak.Upgrade();
             CHECK_NULL_VOID(video);
@@ -366,8 +378,12 @@ void RegisterMediaPlayerEventImpl(const WeakPtr<VideoPattern>& weak, const RefPt
             video->OnError(code, message);
             }, "ArkUIVideoErrorWithParam");
     };
+}
 
-    auto&& resolutionChangeEvent = [weak, uiTaskExecutor, instanceId]() {
+CommonEvent BuildResolutionChangeEvent(const WeakPtr<VideoPattern>& weak,
+    const SingleTaskExecutor& uiTaskExecutor, int32_t instanceId)
+{
+    return [weak, uiTaskExecutor, instanceId]() {
         uiTaskExecutor.PostSyncTask([weak, instanceId] {
             auto video = weak.Upgrade();
             CHECK_NULL_VOID(video);
@@ -375,8 +391,12 @@ void RegisterMediaPlayerEventImpl(const WeakPtr<VideoPattern>& weak, const RefPt
             video->OnResolutionChange();
             }, "ArkUIVideoResolutionChange");
     };
+}
 
-    auto&& startRenderFrameEvent = [weak, uiTaskExecutor, instanceId]() {
+CommonEvent BuildStartRenderFrameEvent(const WeakPtr<VideoPattern>& weak,
+    const SingleTaskExecutor& uiTaskExecutor, int32_t instanceId)
+{
+    return [weak, uiTaskExecutor, instanceId]() {
         uiTaskExecutor.PostSyncTask([weak, instanceId] {
             auto video = weak.Upgrade();
             CHECK_NULL_VOID(video);
@@ -384,10 +404,33 @@ void RegisterMediaPlayerEventImpl(const WeakPtr<VideoPattern>& weak, const RefPt
             video->OnStartRenderFrameCb();
             }, "ArkUIVideoStartRenderFrame");
     };
+}
 
-    mediaPlayer->RegisterMediaPlayerEvent(
-        positionUpdatedEvent, stateChangedEvent, errorEvent, resolutionChangeEvent, startRenderFrameEvent);
-    mediaPlayer->RegisterMediaPlayerVideoErrorEvent(videoErrorEvent);
+SeekDoneEvent BuildSeekDoneEvent(const WeakPtr<VideoPattern>& weak, const SingleTaskExecutor& uiTaskExecutor,
+    int32_t instanceId)
+{
+    return [weak, uiTaskExecutor, instanceId](uint32_t currentPos) {
+        uiTaskExecutor.PostSyncTask(
+            [&weak, currentPos, instanceId] {
+                auto video = weak.Upgrade();
+                CHECK_NULL_VOID(video);
+                ContainerScope scope(instanceId);
+                video->SetIsSeeking(false);
+                video->OnCurrentTimeChange(currentPos);
+            }, "ArkUIVideoSeekDone");
+    };
+}
+
+void RegisterMediaPlayerEventImpl(const WeakPtr<VideoPattern>& weak, const RefPtr<MediaPlayer>& mediaPlayer,
+    int32_t instanceId, const SingleTaskExecutor& uiTaskExecutor)
+{
+    mediaPlayer->RegisterMediaPlayerEvent(BuildPositionUpdatedEvent(weak, uiTaskExecutor, instanceId),
+        BuildStateChangedEvent(weak, uiTaskExecutor, instanceId),
+        BuildErrorEvent(weak, uiTaskExecutor, instanceId),
+        BuildResolutionChangeEvent(weak, uiTaskExecutor, instanceId),
+        BuildStartRenderFrameEvent(weak, uiTaskExecutor, instanceId),
+        BuildVideoErrorEvent(weak, uiTaskExecutor, instanceId),
+        BuildSeekDoneEvent(weak, uiTaskExecutor, instanceId));
 }
 
 std::string StatusToString(PlaybackStatus status)
@@ -593,18 +636,6 @@ void VideoPattern::RegisterMediaPlayerEvent(const WeakPtr<VideoPattern>& weak, c
     CHECK_NULL_VOID(context);
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
     RegisterMediaPlayerEventImpl(weak, mediaPlayer, instanceId, uiTaskExecutor);
-
-    auto&& seekDoneEvent = [weak, uiTaskExecutor, instanceId](uint32_t currentPos) {
-        uiTaskExecutor.PostSyncTask(
-            [&weak, currentPos, instanceId] {
-                auto video = weak.Upgrade();
-                CHECK_NULL_VOID(video);
-                ContainerScope scope(instanceId);
-                video->SetIsSeeking(false);
-                video->OnCurrentTimeChange(currentPos);
-            }, "ArkUIVideoSeekDone");
-    };
-    mediaPlayer->RegisterMediaPlayerSeekDoneEvent(std::move(seekDoneEvent));
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     auto&& textureRefreshEvent = [weak, uiTaskExecutor](int32_t instanceId, int64_t textureId) {

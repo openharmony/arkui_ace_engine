@@ -148,6 +148,7 @@ public:
     ACE_WEB_EVENT_PROPERTY(OnRefreshAccessedHistory, void);
     ACE_WEB_EVENT_PROPERTY(OnResourceLoad, void);
     ACE_WEB_EVENT_PROPERTY(OnScaleChange, void);
+    ACE_WEB_EVENT_PROPERTY(OnZoomChange, void);
     ACE_WEB_EVENT_PROPERTY(OnScroll, void);
     ACE_WEB_EVENT_PROPERTY(OnPermissionRequest, void);
     ACE_WEB_EVENT_PROPERTY(OnScreenCaptureRequest, void);

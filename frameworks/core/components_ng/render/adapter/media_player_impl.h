@@ -36,7 +36,8 @@ public:
     bool SetSource(const std::string& src, const std::string& bundleName, const std::string& moduleName) override;
     void SetRenderSurface(const RefPtr<RenderSurface>& renderSurface) override;
     void RegisterMediaPlayerEvent(PositionUpdatedEvent&& positionUpdatedEvent, StateChangedEvent&& stateChangedEvent,
-        CommonEvent&& errorEvent, CommonEvent&& resolutionChangeEvent, CommonEvent&& startRenderFrameEvent) override;
+        CommonEvent&& errorEvent, CommonEvent&& resolutionChangeEvent, CommonEvent&& startRenderFrameEvent,
+        VideoErrorEvent&& videoErrorEvent, SeekDoneEvent&& seekDoneEvent) override;
     void RegisterTextureEvent(TextureRefreshEnVent&& textureRefreshEvent) override;
     int32_t GetDuration(int32_t& duration) override;
     int32_t GetVideoWidth() override;
@@ -58,7 +59,6 @@ public:
     void ProcessSurfaceChange(int32_t width, int32_t height) override;
     void ProcessSurfaceDestroy() override {}
     void ProcessTextureRefresh(int32_t instanceId, int64_t textureId) override;
-    void RegisterMediaPlayerSeekDoneEvent(SeekDoneEvent&& seekDoneEvent) override;
 
 private:
     void InitListener();

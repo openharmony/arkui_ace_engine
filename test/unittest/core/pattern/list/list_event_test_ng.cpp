@@ -18,10 +18,17 @@
 #define protected public
 #define private public
 #include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
+#include "core/common/event_manager.h"
+#include "core/components_ng/event/drag_event.h"
+#include "core/components_ng/gestures/recognizers/pan_recognizer.h"
+#include "core/components_ng/pattern/list/list_item_drag_manager.h"
+#include "core/components_ng/pattern/list/list_item_event_hub.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_model_ng.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable.h"
 #undef private
 #undef protected
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
@@ -29,6 +36,12 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float DEVIATION_HEIGHT = 20.f;
+constexpr int32_t ITEM_NUMBER_FOR_DRAG_SCROLL_COEXIST = 10;
+constexpr float DRAG_SCROLL_COEXIST_SIZE = 100.0f;
+// inside the container but far from both edge hot zones
+constexpr float DRAG_SCROLL_COEXIST_MID_MAIN_OFFSET = 200.0f;
+constexpr int32_t DRAG_FINGER_ID = 0;
+constexpr int32_t SCROLL_FINGER_ID = 1;
 } // namespace
 
 class ListEventTestNg : public ListTestNg {
@@ -1751,6 +1764,158 @@ HWTEST_F(ListEventTestNg, ListScrollToIndexTopToTopWithExternalScrollBar001, Tes
 
     EXPECT_TRUE(pattern_->IsAtTop());
     EXPECT_EQ(renderContext->GetOpacityValue(), 0);
+}
+
+/**
+ * @tc.name: DragScrollCoexistAutoScrollSuppression001
+ * @tc.desc: only a second finger that really scrolls the container stops the drag edge
+ *           auto-scroll, and it is actively stopped instead of merely skipped
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, DragScrollCoexistAutoScrollSuppression001, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(ITEM_NUMBER_FOR_DRAG_SCROLL_COEXIST);
+    CreateDone();
+    auto item = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(item, nullptr);
+    auto dragManager = AceType::MakeRefPtr<ListItemDragManager>(item, nullptr);
+    ASSERT_NE(dragManager, nullptr);
+    dragManager->listNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode_));
+    auto scrollable = pattern_->GetScrollable();
+    ASSERT_NE(scrollable, nullptr);
+    // frame rect at the container origin, so IsInHotZone() is true for item 0 and the
+    // non-suppressed path arms the edge auto-scroll; the drag point itself sits far
+    // from both edge hot zones, so no hot zone animator is actually started
+    RectF frameRect(0.0f, 0.0f, DRAG_SCROLL_COEXIST_SIZE, DRAG_SCROLL_COEXIST_SIZE);
+    PointF center(DRAG_SCROLL_COEXIST_SIZE / 2.0f, DRAG_SCROLL_COEXIST_MID_MAIN_OFFSET);
+
+    /**
+     * @tc.steps: step1. only the dragging finger is down.
+     * @tc.expected: the edge auto-scroll is armed.
+     */
+    scrollable->isTouching_ = true;
+    pattern_->activeTouchFingerIds_ = { DRAG_FINGER_ID };
+    dragManager->HandleAutoScroll(0, center, frameRect);
+    EXPECT_TRUE(dragManager->scrolling_);
+    EXPECT_NE(pattern_->hotZoneScrollCallback_, nullptr);
+
+    /**
+     * @tc.steps: step2. a second finger goes down but only rests on the List, it does
+     *              not scroll it.
+     * @tc.expected: the edge auto-scroll keeps running, a resting finger is not a
+     *              reason to give the container up.
+     */
+    pattern_->activeTouchFingerIds_ = { DRAG_FINGER_ID, SCROLL_FINGER_ID };
+    dragManager->HandleAutoScroll(0, center, frameRect);
+    EXPECT_TRUE(dragManager->scrolling_);
+    EXPECT_NE(pattern_->hotZoneScrollCallback_, nullptr);
+
+    /**
+     * @tc.steps: step3. that second finger really scrolls the List, which the host List
+     *              reports through the drag scroll callback of an ongoing drag.
+     * @tc.expected: the suppression is armed, so the next HandleAutoScroll actively
+     *              stops the auto-scroll instead of merely skipping it, and its
+     *              animator cannot keep feeding offsets behind the guard.
+     */
+    dragManager->dragState_ = ListItemDragState::DRAGGING;
+    dragManager->HandleContainerScroll(SCROLL_FROM_UPDATE);
+    EXPECT_TRUE(dragManager->suppressAutoScroll_);
+    dragManager->HandleAutoScroll(0, center, frameRect);
+    EXPECT_FALSE(dragManager->scrolling_);
+    EXPECT_EQ(pattern_->hotZoneScrollCallback_, nullptr);
+
+    /**
+     * @tc.steps: step4. the second finger is lifted again.
+     * @tc.expected: the suppression is cleared and the edge auto-scroll is armed again.
+     */
+    pattern_->activeTouchFingerIds_ = { DRAG_FINGER_ID };
+    dragManager->HandleAutoScroll(0, center, frameRect);
+    EXPECT_FALSE(dragManager->suppressAutoScroll_);
+    EXPECT_TRUE(dragManager->scrolling_);
+    EXPECT_NE(pattern_->hotZoneScrollCallback_, nullptr);
+
+    /**
+     * @tc.steps: step5. both fingers down again, but the container moves because of a
+     *              wheel/crown scroll rather than a finger.
+     * @tc.expected: that is not "another finger scrolling", the edge auto-scroll is
+     *              left alone.
+     */
+    pattern_->activeTouchFingerIds_ = { DRAG_FINGER_ID, SCROLL_FINGER_ID };
+    dragManager->HandleContainerScroll(SCROLL_FROM_AXIS);
+    EXPECT_FALSE(dragManager->suppressAutoScroll_);
+    dragManager->HandleAutoScroll(0, center, frameRect);
+    EXPECT_TRUE(dragManager->scrolling_);
+    EXPECT_NE(pattern_->hotZoneScrollCallback_, nullptr);
+    dragManager->StopAutoScroll();
+    EXPECT_FALSE(dragManager->scrolling_);
+}
+
+/**
+ * @tc.name: LockDragFingerAndEscapeScrollPan001
+ * @tc.desc: the dragging finger is locked on the drag pan and the List scroll pan escapes it
+ *           through the EventManager channel, so another finger can still scroll the List
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, LockDragFingerAndEscapeScrollPan001, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(ITEM_NUMBER_FOR_DRAG_SCROLL_COEXIST);
+    CreateDone();
+    auto item = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(item, nullptr);
+    auto dragManager = AceType::MakeRefPtr<ListItemDragManager>(item, nullptr);
+    ASSERT_NE(dragManager, nullptr);
+    dragManager->listNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode_));
+    dragManager->InitDragDropEvent();
+
+    auto listItemEventHub = item->GetEventHub<ListItemEventHub>();
+    ASSERT_NE(listItemEventHub, nullptr);
+    auto gestureHub = listItemEventHub->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    auto dragEventActuator = gestureHub->GetDragEventActuator();
+    ASSERT_NE(dragEventActuator, nullptr);
+    auto dragPan = dragEventActuator->GetDragEventPanRecognizer();
+    ASSERT_NE(dragPan, nullptr);
+
+    auto scrollable = pattern_->GetScrollable();
+    ASSERT_NE(scrollable, nullptr);
+    if (!scrollable->panRecognizerNG_) {
+        scrollable->InitPanRecognizerNG();
+    }
+    auto scrollPan = scrollable->panRecognizerNG_;
+    ASSERT_NE(scrollPan, nullptr);
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto eventManager = pipeline->GetEventManager();
+    ASSERT_NE(eventManager, nullptr);
+
+    /**
+     * @tc.steps: step1. before the long-press drag takes over.
+     * @tc.expected: neither lock nor escape is in place.
+     */
+    EXPECT_FALSE(dragPan->IsTriggeredIds(DRAG_FINGER_ID));
+    EXPECT_FALSE(scrollPan->IsFingerEscaped(DRAG_FINGER_ID));
+
+    /**
+     * @tc.steps: step2. long-press drag takes the finger over.
+     * @tc.expected: drag pan locks the finger, List scroll pan escapes it and is
+     *              bound to the EventManager escape channel.
+     */
+    dragManager->LockDragFingerAndEscapeScrollPan(DRAG_FINGER_ID);
+    EXPECT_TRUE(dragPan->IsTriggeredIds(DRAG_FINGER_ID));
+    EXPECT_TRUE(scrollPan->IsFingerEscaped(DRAG_FINGER_ID));
+    EXPECT_TRUE(scrollPan->IsEscapedToManager());
+    EXPECT_FALSE(eventManager->escapeRecognizers_.empty());
+
+    /**
+     * @tc.steps: step3. all fingers lifted, EventManager sweeps the channel.
+     * @tc.expected: no escaped recognizer is left behind and the scroll pan is re-armed.
+     */
+    eventManager->SweepEscapeRecognizers();
+    EXPECT_TRUE(eventManager->escapeRecognizers_.empty());
+    EXPECT_FALSE(scrollPan->IsEscapedToManager());
+    EXPECT_TRUE(scrollPan->GetEscapedFingerIds().empty());
 }
 
 /**

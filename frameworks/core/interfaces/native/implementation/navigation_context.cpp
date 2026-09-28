@@ -1322,6 +1322,7 @@ bool NavigationStack::GetNavDestinationNodeInUINode(
             desNode = AceType::DynamicCast<NG::NavDestinationGroupNode>(node);
             if (desNode) {
                 desNode->SetNavDestinationCustomNode(AceType::WeakClaim(AceType::RawPtr(customNode)));
+                desNode->FireAboutToAppear();
             }
             return true;
         }

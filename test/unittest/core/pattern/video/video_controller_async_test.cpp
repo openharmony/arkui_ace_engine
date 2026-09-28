@@ -211,4 +211,37 @@ HWTEST_F(VideoControllerAsyncTestNg, VideoControllerAsyncClearPattern001, TestSi
     EXPECT_FALSE(controller->IsBound());
 }
 
+/**
+ * @tc.name: VideoControllerAsyncClearThenStart001
+ * @tc.desc: Test Start after Clear reports null pattern and does not invoke the cleared impl.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoControllerAsyncTestNg, VideoControllerAsyncClearThenStart001, TestSize.Level1)
+{
+    auto controller = AceType::MakeRefPtr<VideoControllerAsync>();
+
+    bool implInvoked = false;
+    controller->SetStartImpl([&implInvoked](VideoControllerAsync::AsyncCommandCallback&& callback) {
+        implInvoked = true;
+        callback(true, "");
+    });
+
+    // Simulate UI-thread detach: the bound closure is destroyed while a command may still be in flight.
+    controller->Clear();
+
+    bool callbackCalled = false;
+    bool callbackSuccess = false;
+    std::string callbackReason;
+    controller->Start([&callbackCalled, &callbackSuccess, &callbackReason](bool success, const std::string& reason) {
+        callbackCalled = true;
+        callbackSuccess = success;
+        callbackReason = reason;
+    });
+
+    EXPECT_FALSE(implInvoked);
+    EXPECT_TRUE(callbackCalled);
+    EXPECT_FALSE(callbackSuccess);
+    EXPECT_EQ(callbackReason, "pattern is null");
+}
+
 } // namespace OHOS::Ace::NG

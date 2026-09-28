@@ -3172,7 +3172,7 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperSize(ArkUIRuntimeCallInfo* runtime
     return result;
 }
 
-Local<panda::ObjectRef> CreateClickInfo(EcmaVM* vm, const ClickInfo& info)
+Local<panda::ObjectRef> CreateClickInfo(EcmaVM* vm, ClickInfo& info)
 {
     auto obj = panda::ObjectRef::New(vm);
     Offset globalOffset = info.GetGlobalLocation();
@@ -3231,7 +3231,10 @@ Local<panda::ObjectRef> CreateClickInfo(EcmaVM* vm, const ClickInfo& info)
         panda::FunctionRef::New(vm, Framework::JsGetCurrentLocalPosition));
 #endif
     obj->SetNativePointerFieldCount(vm, 1);
-    obj->SetNativePointerField(vm, 0, static_cast<void*>(const_cast<ClickInfo*>(&info)));
+    obj->SetConcurrentNativePointerField(vm, 0, static_cast<void*>(&info),
+        [](void* env, void* nativePtr, void* data) {
+            delete static_cast<ClickInfo*>(nativePtr);
+        }, nullptr);
     return obj;
 }
 
@@ -3267,12 +3270,14 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperOnClick(ArkUIRuntimeCallInfo* runt
                 TAG_LOGW(AceLogTag::ACE_SWIPER, "Swiper onClick callback execute failed.");
                 return;
             }
-            auto newInfo = *clickInfo;
+            // The newInfoPtr can only be bound to a JS object, and its lifetime belongs to that object.
+            // It is not allowed to hold this address elsewhere.
+            auto newInfoPtr = new ClickInfo(*clickInfo);
             if (impl) {
-                impl->UpdateEventInfo(newInfo);
+                impl->UpdateEventInfo(*newInfoPtr);
             }
 
-            auto obj = CreateClickInfo(vm, newInfo);
+            auto obj = CreateClickInfo(vm, *newInfoPtr);
             panda::Local<panda::JSValueRef> params[1] = { obj };
             auto result = func->Call(vm, func.ToLocal(), params, 1);
             if (isJsView) {

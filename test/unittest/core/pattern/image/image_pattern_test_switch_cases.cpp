@@ -1305,7 +1305,7 @@ HWTEST_F(ImagePatternSwitchCasesTestNg, RecycleImageData001, TestSize.Level1)
     auto pattern = frameNode->GetPattern<ImagePattern>();
     EXPECT_NE(pattern, nullptr);
 
-    EXPECT_FALSE(pattern->RecycleImageData());
+    EXPECT_FALSE(pattern->DoRecycleImageData("recycleImageData", "OnRecycleImageData"));
 }
 
 HWTEST_F(ImagePatternSwitchCasesTestNg, DumpInfo001, TestSize.Level1)

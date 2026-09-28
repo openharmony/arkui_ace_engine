@@ -1665,13 +1665,11 @@ HWTEST_F(TabPatternTestNg, IsDividerDraggableTest001, TestSize.Level1)
     // Set non-negative barWidth → should not be draggable
     TabsModelNG modelNG;
     modelNG.SetTabBarWidth(AceType::RawPtr(frameNode_), Dimension(200.0f));
-    FlushUITasks();
 
     TabsItemDivider divider;
     divider.isNull = false;
     divider.strokeWidth = Dimension(1.0f);
     modelNG.SetDivider(AceType::RawPtr(frameNode_), divider);
-    FlushUITasks();
 
     EXPECT_FALSE(pattern_->IsDividerDraggable());
 }
@@ -1693,7 +1691,6 @@ HWTEST_F(TabPatternTestNg, IsDividerDraggableTest002, TestSize.Level1)
     // Negative barWidth (default) but no divider → not draggable
     TabsModelNG modelNG;
     modelNG.SetTabBarWidth(AceType::RawPtr(frameNode_), Dimension(-1.0f));
-    FlushUITasks();
 
     EXPECT_FALSE(pattern_->IsDividerDraggable());
 }
@@ -1719,14 +1716,13 @@ HWTEST_F(TabPatternTestNg, IsDividerDraggableTest003, TestSize.Level1)
     divider.isNull = true;
     divider.strokeWidth = Dimension(1.0f);
     modelNG.SetDivider(AceType::RawPtr(frameNode_), divider);
-    FlushUITasks();
 
     EXPECT_FALSE(pattern_->IsDividerDraggable());
 }
 
 /**
  * @tc.name: IsDividerDraggableTest004
- * @tc.desc: Test IsDividerDraggable returns true with valid divider and no barWidth
+ * @tc.desc: Test IsDividerDraggable returns true with valid divider and range property
  * @tc.type: FUNC
  */
 HWTEST_F(TabPatternTestNg, IsDividerDraggableTest004, TestSize.Level1)
@@ -1740,12 +1736,12 @@ HWTEST_F(TabPatternTestNg, IsDividerDraggableTest004, TestSize.Level1)
 
     TabsModelNG modelNG;
     modelNG.SetTabBarWidth(AceType::RawPtr(frameNode_), Dimension(-1.0f));
+    modelNG.SetMinSidebarWidth(AceType::RawPtr(frameNode_), Dimension(100.0f));
 
     TabsItemDivider divider;
     divider.isNull = false;
     divider.strokeWidth = Dimension(2.0f);
-    modelNG.SetDivider(AceType::RawPtr(frameNode_), divider);
-    FlushUITasks();
+    modelNG.SetSidebarDivider(AceType::RawPtr(frameNode_), divider);
 
     EXPECT_TRUE(pattern_->IsDividerDraggable());
 }
@@ -1770,7 +1766,6 @@ HWTEST_F(TabPatternTestNg, IsDividerDraggableTest005, TestSize.Level1)
     divider.isNull = false;
     divider.strokeWidth = Dimension(50.0f, DimensionUnit::PERCENT);
     modelNG.SetDivider(AceType::RawPtr(frameNode_), divider);
-    FlushUITasks();
 
     EXPECT_FALSE(pattern_->IsDividerDraggable());
 }
@@ -1809,19 +1804,20 @@ HWTEST_F(TabPatternTestNg, HandleDividerDragStartTest002, TestSize.Level1)
 
     TabsModelNG modelNG;
     modelNG.SetTabBarWidth(AceType::RawPtr(frameNode_), Dimension(-1.0f));
+    modelNG.SetMinSidebarWidth(AceType::RawPtr(frameNode_), Dimension(100.0f));
 
     TabsItemDivider divider;
     divider.isNull = false;
     divider.strokeWidth = Dimension(2.0f);
-    modelNG.SetDivider(AceType::RawPtr(frameNode_), divider);
-    FlushUITasks();
+    modelNG.SetSidebarDivider(AceType::RawPtr(frameNode_), divider);
 
     pattern_->realSideBarWidthPx_ = 0.0f;
     pattern_->isInDividerDrag_ = false;
     pattern_->HandleDividerDragStart();
     EXPECT_TRUE(pattern_->isInDividerDrag_);
-    EXPECT_GT(pattern_->realSideBarWidthPx_, 0.0f);
-    EXPECT_FLOAT_EQ(pattern_->preSideBarWidthPx_, pattern_->realSideBarWidthPx_);
+    EXPECT_TRUE(pattern_->realSideBarWidthPx_.has_value());
+    EXPECT_GT(pattern_->realSideBarWidthPx_.value(), 0.0f);
+    EXPECT_FLOAT_EQ(pattern_->preSideBarWidthPx_, pattern_->realSideBarWidthPx_.value());
 }
 
 /**
@@ -1840,7 +1836,7 @@ HWTEST_F(TabPatternTestNg, HandleDividerDragUpdateTest001, TestSize.Level1)
     pattern_->isInDividerDrag_ = false;
     pattern_->realSideBarWidthPx_ = 100.0f;
     pattern_->HandleDividerDragUpdate(50.0f);
-    EXPECT_FLOAT_EQ(pattern_->realSideBarWidthPx_, 100.0f);
+    EXPECT_FLOAT_EQ(pattern_->realSideBarWidthPx_.value(), 100.0f);
 }
 
 /**
@@ -1862,7 +1858,7 @@ HWTEST_F(TabPatternTestNg, HandleDividerDragUpdateTest002, TestSize.Level1)
     pattern_->maxSideBarWidth_ = 400.0f;
     pattern_->realSideBarWidthPx_ = 200.0f;
     pattern_->HandleDividerDragUpdate(50.0f);
-    EXPECT_FLOAT_EQ(pattern_->realSideBarWidthPx_, 250.0f);
+    EXPECT_FLOAT_EQ(pattern_->realSideBarWidthPx_.value(), 250.0f);
 }
 
 /**
@@ -1884,7 +1880,7 @@ HWTEST_F(TabPatternTestNg, HandleDividerDragUpdateTest003, TestSize.Level1)
     pattern_->maxSideBarWidth_ = 400.0f;
     pattern_->realSideBarWidthPx_ = 350.0f;
     pattern_->HandleDividerDragUpdate(200.0f);
-    EXPECT_FLOAT_EQ(pattern_->realSideBarWidthPx_, 400.0f);
+    EXPECT_FLOAT_EQ(pattern_->realSideBarWidthPx_.value(), 400.0f);
 }
 
 /**
@@ -1926,7 +1922,7 @@ HWTEST_F(TabPatternTestNg, HandleDividerDragCancelTest001, TestSize.Level1)
     pattern_->realSideBarWidthPx_ = 350.0f;
     pattern_->HandleDividerDragCancel();
     EXPECT_FALSE(pattern_->isInDividerDrag_);
-    EXPECT_FLOAT_EQ(pattern_->realSideBarWidthPx_, 200.0f);
+    EXPECT_FLOAT_EQ(pattern_->realSideBarWidthPx_.value(), 200.0f);
 }
 
 /**
@@ -1951,7 +1947,6 @@ HWTEST_F(TabPatternTestNg, UpdateSideBarDividerTest001, TestSize.Level1)
     TabsItemDivider nullDivider;
     nullDivider.isNull = true;
     modelNG.SetDivider(AceType::RawPtr(frameNode_), nullDivider);
-    FlushUITasks();
 
     pattern_->UpdateSideBarDivider();
     // Null divider should not update DividerRenderProperty color
@@ -1983,10 +1978,10 @@ HWTEST_F(TabPatternTestNg, UpdateSideBarDividerTest002, TestSize.Level1)
     divider.isNull = false;
     divider.strokeWidth = Dimension(5.0f);
     divider.color = Color::RED;
-    modelNG.SetDivider(AceType::RawPtr(frameNode_), divider);
-    FlushUITasks();
+    modelNG.SetSidebarDivider(AceType::RawPtr(frameNode_), divider);
+    modelNG.SetSidebarDividerColorByUser(AceType::RawPtr(frameNode_), true);
 
-    pattern_->UpdateSideBarDivider();
+    pattern_->UpdateSideBarAttributes();
     // Verify strokeWidth is updated on DividerLayoutProperty
     auto dividerLayoutProp = pattern_->sideBarDividerNode_->GetLayoutProperty<DividerLayoutProperty>();
     ASSERT_NE(dividerLayoutProp, nullptr);
@@ -1998,33 +1993,6 @@ HWTEST_F(TabPatternTestNg, UpdateSideBarDividerTest002, TestSize.Level1)
     auto dividerRenderProp = pattern_->sideBarDividerNode_->GetPaintProperty<DividerRenderProperty>();
     ASSERT_NE(dividerRenderProp, nullptr);
     EXPECT_EQ(dividerRenderProp->GetDividerColor().value_or(Color::BLACK), Color::RED);
-}
-
-/**
- * @tc.name: UpdateSideBarBackgroundColorTest001
- * @tc.desc: Test UpdateSideBarBackgroundColor with no barBackgroundColor does nothing
- * @tc.type: FUNC
- */
-HWTEST_F(TabPatternTestNg, UpdateSideBarBackgroundColorTest001, TestSize.Level1)
-{
-    auto model = CreateTabs();
-    CreateTabContents();
-    GetTabs();
-    CreateTabsDone(model);
-    ASSERT_NE(pattern_, nullptr);
-
-    pattern_->sideBarNode_ = FrameNode::CreateFrameNode(
-        V2::TABS_SIDE_BAR_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<Pattern>());
-    ASSERT_NE(pattern_->sideBarNode_, nullptr);
-
-    auto renderContext = pattern_->sideBarNode_->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    auto colorBefore = renderContext->GetBackgroundColor();
-
-    pattern_->UpdateSideBarBackgroundColor();
-    auto colorAfter = renderContext->GetBackgroundColor();
-    EXPECT_EQ(colorBefore.has_value(), colorAfter.has_value());
 }
 
 /**
@@ -2047,7 +2015,7 @@ HWTEST_F(TabPatternTestNg, UpdateSideBarBackgroundColorTest002, TestSize.Level1)
 
     TabsModelNG modelNG;
     modelNG.SetBarBackgroundColor(AceType::RawPtr(frameNode_), Color::GREEN);
-    FlushUITasks();
+    modelNG.SetBarBackgroundColorByUser(AceType::RawPtr(frameNode_), true);
 
     pattern_->UpdateSideBarBackgroundColor();
     auto renderContext = pattern_->sideBarNode_->GetRenderContext();
@@ -2171,7 +2139,7 @@ HWTEST_F(TabPatternTestNg, GetRealSideBarWidthPxTest001, TestSize.Level1)
     ASSERT_NE(pattern_, nullptr);
 
     pattern_->realSideBarWidthPx_ = 250.0f;
-    EXPECT_FLOAT_EQ(pattern_->GetRealSideBarWidthPx(), 250.0f);
+    EXPECT_FLOAT_EQ(pattern_->GetRealSideBarWidthPx().value(), 250.0f);
 }
 
 } // namespace OHOS::Ace::NG

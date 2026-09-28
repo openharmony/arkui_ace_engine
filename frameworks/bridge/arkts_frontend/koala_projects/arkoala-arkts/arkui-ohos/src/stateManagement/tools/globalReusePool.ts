@@ -392,15 +392,6 @@ export class GlobalReusePool implements IGlobalReusePoolVariable {
         });
         relevantIds.sort();
 
-        // 5. Decide whether the default bucket should appear in results.
-        //    Include it only if the app has actually touched the default bucket:
-        //    either there are cached entries under it, or a maxCount override
-        //    has been set for it (per-bucket or class-wide).
-        const hasDefaultCache = (this.cached_.get(defaultKey)?.length ?? 0) > 0;
-        const hasDefaultMaxOverride = this.maxCounts_.has(defaultKey)
-            || this.maxCounts_.has(`${prefix}${SUFFIX_COMPLIMIT}`);
-        const includeDefault = hasDefaultCache || hasDefaultMaxOverride;
-
         // 6. No reuseIds touched at all — return a single info for the default bucket.
         if (relevantIds.length === 0) {
             return new ReusableInfo(this, defaultKey, classKey, undefined) as IReusableInfo;
@@ -408,9 +399,7 @@ export class GlobalReusePool implements IGlobalReusePoolVariable {
 
         // 7. Array form: only include the default bucket if it has actually been used.
         const result: Array<IReusableInfo> = new Array<IReusableInfo>();
-        if (includeDefault) {
-            result.push(new ReusableInfo(this, defaultKey, classKey, undefined) as IReusableInfo);
-        }
+        result.push(new ReusableInfo(this, defaultKey, classKey, undefined) as IReusableInfo);
         for (const id of relevantIds) {
             const k = `${prefix}${id}`;
             result.push(new ReusableInfo(this, k, classKey, id) as IReusableInfo);

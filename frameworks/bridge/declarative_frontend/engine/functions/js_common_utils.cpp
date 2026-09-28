@@ -41,7 +41,10 @@ JSRef<JSObject> CreateFingerInfo(const FingerInfo& fingerInfo)
         "globalDisplayY", PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetY()));
     fingerInfoObj->SetPropertyObject("getCurrentLocalPosition",
         JSRef<JSFunc>::New<FunctionCallback>(JsGetCurrentLocalPositionForFinger));
-    fingerInfoObj->Wrap<FingerInfo>(const_cast<FingerInfo*>(&fingerInfo));
+    auto* fingerInfoPtr = new FingerInfo(fingerInfo);
+    fingerInfoObj->Wrap<FingerInfo>(fingerInfoPtr, [](void* env, void* nativePtr, void* hint) {
+        delete static_cast<FingerInfo*>(nativePtr);
+    });
     return fingerInfoObj;
 }
 

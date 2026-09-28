@@ -1080,11 +1080,11 @@ let TabBarStyle;
   TabBarStyle[TabBarStyle.SIDEBAR_ADAPTABLE = 2] = 'SIDEBAR_ADAPTABLE';
 })(TabBarStyle || (TabBarStyle = {}));
 
-let SidebarDisplayStyle;
-(function (SidebarDisplayStyle) {
-  SidebarDisplayStyle[SidebarDisplayStyle.EMBED = 0] = 'EMBED';
-  SidebarDisplayStyle[SidebarDisplayStyle.DISPLACE = 1] = 'DISPLACE';
-})(SidebarDisplayStyle || (SidebarDisplayStyle = {}));
+let TabsSidebarDisplayStyle;
+(function (TabsSidebarDisplayStyle) {
+  TabsSidebarDisplayStyle[TabsSidebarDisplayStyle.EMBED = 0] = 'EMBED';
+  TabsSidebarDisplayStyle[TabsSidebarDisplayStyle.DISPLACE = 1] = 'DISPLACE';
+})(TabsSidebarDisplayStyle || (TabsSidebarDisplayStyle = {}));
 
 let TabBarDisplayMode;
 (function (TabBarDisplayMode) {

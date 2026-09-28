@@ -2131,9 +2131,7 @@ function __getResourceId__(params) {
     const rawParams = ObservedObject.GetRawObject(params);
     if (resId > 0 && Array.isArray(rawParams.params) && rawParams.params.length > 0) {
         Object.defineProperty(rawParams, 'id', { value: resId, writable: true, configurable: true, enumerable: true });
-        if (rawParams.params[0] === resName) {
-            rawParams.params.shift();
-        }
+        rawParams.params.shift();
         const matched = resName.match(/^(app|sys)\.([^.]+)\.(.+)$/);
         if (matched) {
             const mappedType = RESOURCE_TYPE.get(matched[2]);

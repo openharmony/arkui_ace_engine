@@ -24,6 +24,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/web/web_model_ng.h"
 #define protected public
+#include "core/components/web/resource/web_delegate.h"
 #include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
 #undef protected
@@ -33,6 +34,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "test/mock/frameworks/base/thread/mock_task_executor.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -199,6 +201,8 @@ HWTEST_F(WebModelTestNg, WebFrameNodeCreator003, TestSize.Level1)
     webModelNG.SetResourceLoadId(resourceLoadId);
     auto scaleChangeId = [](const BaseEventInfo* info) -> bool { return true; };
     webModelNG.SetScaleChangeId(scaleChangeId);
+    auto zoomChangeId = [](const BaseEventInfo* info) -> bool { return true; };
+    webModelNG.SetZoomChangeId(zoomChangeId);
     auto scrollId = [](const BaseEventInfo* info) -> bool { return true; };
     webModelNG.SetScrollId(scrollId);
     webModelNG.SetBackgroundColor(Color(200));
@@ -2875,6 +2879,149 @@ HWTEST_F(WebModelTestNg, SetOnScroll001, TestSize.Level1)
     webModelNG.SetOnContextMenuHide(AccessibilityManager::RawPtr(frameNode), jsCallback);
     webEventHub->FireOnContextMenuHideEvent(mockEventInfo);
     EXPECT_TRUE(callbackCalled);
+#endif
+}
+
+/**
+ * @tc.name: SetOnZoomChange001
+ * @tc.desc: Test WebModelNG zoom change callback registration and reset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnZoomChange001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, stack->ClaimNodeId(), []() {
+            return AceType::MakeRefPtr<WebPattern>();
+        });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+
+    WebModelNG webModelNG;
+    bool callbackCalled = false;
+    double oldZoomFactor = 0.0;
+    double newZoomFactor = 0.0;
+    auto zoomChangeCallback = [&callbackCalled, &oldZoomFactor, &newZoomFactor](const BaseEventInfo* info) {
+        callbackCalled = true;
+        auto* event = TypeInfoHelper::DynamicCast<ZoomChangeEvent>(info);
+        EXPECT_NE(event, nullptr);
+        if (!event) {
+            return;
+        }
+        oldZoomFactor = event->GetOnZoomChangeOldZoomFactor();
+        newZoomFactor = event->GetOnZoomChangeNewZoomFactor();
+    };
+    webModelNG.SetOnZoomChange(AccessibilityManager::RawPtr(frameNode), zoomChangeCallback);
+    webEventHub->FireOnZoomChangeEvent(std::make_shared<ZoomChangeEvent>(1.0, 1.5));
+    EXPECT_TRUE(callbackCalled);
+    EXPECT_DOUBLE_EQ(oldZoomFactor, 1.0);
+    EXPECT_DOUBLE_EQ(newZoomFactor, 1.5);
+
+    callbackCalled = false;
+    webModelNG.SetOnZoomChange(AccessibilityManager::RawPtr(frameNode), nullptr);
+    webEventHub->FireOnZoomChangeEvent(std::make_shared<ZoomChangeEvent>(1.5, 2.0));
+    EXPECT_FALSE(callbackCalled);
+#endif
+}
+
+/**
+ * @tc.name: SetOnZoomChange002
+ * @tc.desc: Test dynamic zoom change callback replacement and reset through WebDelegate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnZoomChange002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, stack->ClaimNodeId(), []() {
+            return AceType::MakeRefPtr<WebPattern>();
+        });
+    ASSERT_NE(frameNode, nullptr);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+
+    auto delegate = AceType::MakeRefPtr<WebDelegate>(WeakPtr<PipelineBase>(), nullptr, "web", 0);
+    ASSERT_NE(delegate, nullptr);
+    delegate->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    delegate->webPattern_ = webPattern;
+
+    WebModelNG webModelNG;
+    int callbackACount = 0;
+    int callbackBCount = 0;
+    int callbackCCount = 0;
+    webModelNG.SetOnZoomChange(AccessibilityManager::RawPtr(frameNode),
+        [&callbackACount](const BaseEventInfo* /*info*/) { callbackACount++; });
+    delegate->OnZoomChange(1.0, 1.25);
+    EXPECT_EQ(callbackACount, 1);
+
+    webModelNG.SetOnZoomChange(AccessibilityManager::RawPtr(frameNode),
+        [&callbackBCount](const BaseEventInfo* /*info*/) { callbackBCount++; });
+    delegate->OnZoomChange(1.25, 1.5);
+    EXPECT_EQ(callbackACount, 1);
+    EXPECT_EQ(callbackBCount, 1);
+
+    webModelNG.SetOnZoomChange(AccessibilityManager::RawPtr(frameNode), nullptr);
+    delegate->OnZoomChange(1.5, 1.75);
+    EXPECT_EQ(callbackBCount, 1);
+
+    webModelNG.SetOnZoomChange(AccessibilityManager::RawPtr(frameNode),
+        [&callbackCCount](const BaseEventInfo* /*info*/) { callbackCCount++; });
+    delegate->OnZoomChange(1.75, 2.0);
+    EXPECT_EQ(callbackCCount, 1);
+#endif
+}
+
+/**
+ * @tc.name: SetOnZoomChange003
+ * @tc.desc: Test zoom change callback does not retain the old WebPattern after reuse.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnZoomChange003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, stack->ClaimNodeId(), []() {
+            return AceType::MakeRefPtr<WebPattern>();
+        });
+    ASSERT_NE(frameNode, nullptr);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+
+    auto delegate = AceType::MakeRefPtr<WebDelegate>(WeakPtr<PipelineBase>(), nullptr, "web", 0);
+    ASSERT_NE(delegate, nullptr);
+    delegate->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    delegate->webPattern_ = webPattern;
+
+    WebModelNG webModelNG;
+    int oldCallbackCount = 0;
+    int reusedCallbackCount = 0;
+    webModelNG.SetOnZoomChange(AccessibilityManager::RawPtr(frameNode),
+        [&oldCallbackCount](const BaseEventInfo* /*info*/) { oldCallbackCount++; });
+    delegate->OnZoomChange(1.0, 1.25);
+    EXPECT_EQ(oldCallbackCount, 1);
+
+    delegate->webPattern_ = nullptr;
+    delegate->OnZoomChange(1.25, 1.5);
+    EXPECT_EQ(oldCallbackCount, 1);
+
+    auto reusedFrameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, stack->ClaimNodeId(), []() {
+            return AceType::MakeRefPtr<WebPattern>();
+        });
+    ASSERT_NE(reusedFrameNode, nullptr);
+    auto reusedWebPattern = reusedFrameNode->GetPattern<WebPattern>();
+    ASSERT_NE(reusedWebPattern, nullptr);
+    delegate->webPattern_ = reusedWebPattern;
+    webModelNG.SetOnZoomChange(AccessibilityManager::RawPtr(reusedFrameNode),
+        [&reusedCallbackCount](const BaseEventInfo* /*info*/) { reusedCallbackCount++; });
+    delegate->OnZoomChange(1.5, 1.75);
+    EXPECT_EQ(oldCallbackCount, 1);
+    EXPECT_EQ(reusedCallbackCount, 1);
 #endif
 }
 

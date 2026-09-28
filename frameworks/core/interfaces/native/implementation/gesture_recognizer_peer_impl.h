@@ -59,6 +59,7 @@ struct MultiFingerRecognizerPeer : public GestureRecognizerPeer {
 public:
     void Update(const OHOS::Ace::RefPtr<OHOS::Ace::NG::MultiFingersRecognizer>& recognizer)
     {
+        CHECK_NULL_VOID(recognizer);
         GestureRecognizerPeer::Update(recognizer);
         isLimitFingerCount = recognizer->GetLimitFingerCount();
         fingers_ = recognizer->GetFingers();

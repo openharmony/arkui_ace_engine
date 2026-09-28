@@ -24,6 +24,7 @@
 
 #include "base/error/error_code.h"
 #include "base/log/ace_scoring_log.h"
+#include "base/utils/napi_scope_raii.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/bindings.h"
@@ -499,8 +500,10 @@ void HandleDeferred(const shared_ptr<CanvasAsyncCxt>& asyncCtx, ImageAnalyzerSta
     auto deferred = asyncCtx->deferred;
     CHECK_NULL_VOID(deferred);
 
-    napi_handle_scope scope = nullptr;
-    NAPI_CALL_RETURN_VOID(env, napi_open_handle_scope(env, &scope));
+    ScopeRAII scope(env);
+    if (!scope) {
+        return;
+    }
 
     napi_value result = nullptr;
     switch (state) {
@@ -523,7 +526,6 @@ void HandleDeferred(const shared_ptr<CanvasAsyncCxt>& asyncCtx, ImageAnalyzerSta
         default:
             break;
     }
-    napi_close_handle_scope(env, scope);
 }
 
 void ReturnPromise(const JSCallbackInfo& info, napi_value result)
@@ -696,12 +698,10 @@ void JSRenderingContext::JsOn(const JSCallbackInfo& info)
     panda::Local<JsiValue> value = info[1].Get().GetLocalHandle();
     JSValueWrapper valueWrapper = value;
     napi_value cb = nativeEngine->ValueToNapiValue(valueWrapper);
-    napi_handle_scope napiScope = nullptr;
-    napi_open_handle_scope(env, &napiScope);
+    ScopeRAII napiScope(env);
     CHECK_NULL_VOID(napiScope);
 
     AddCallbackToList(env, cb, type, std::move(onFunc));
-    napi_close_handle_scope(env, napiScope);
 }
 
 void JSRenderingContext::JsOff(const JSCallbackInfo& info)

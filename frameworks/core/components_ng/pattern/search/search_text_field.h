@@ -27,6 +27,7 @@ public:
     ~SearchTextFieldPattern() override = default;
 
     RefPtr<FocusHub> GetFocusHub() const override;
+    bool HasStateStyle(UIState state) const override;
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = true) override;
     void FireSubmitAction(TextInputAction action, bool forceCloseKeyboard) override;
     TextInputAction GetDefaultTextInputAction() const override;

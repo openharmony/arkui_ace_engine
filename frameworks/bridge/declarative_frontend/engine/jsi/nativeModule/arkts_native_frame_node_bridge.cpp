@@ -261,7 +261,9 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateTouchInfo(EcmaVM* vm, const Touch
     touchInfoObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getCurrentLocalPosition"),
         panda::FunctionRef::New(vm, Framework::JsGetCurrentLocalPosition));
     touchInfoObj->SetNativePointerFieldCount(vm, 1);
-    touchInfoObj->SetNativePointerField(vm, 0, static_cast<void*>(const_cast<TouchLocationInfo*>(&touchInfo)));
+    auto* touchInfoPtr = new TouchLocationInfo(touchInfo);
+    touchInfoObj->SetNativePointerField(vm, 0, static_cast<void*>(touchInfoPtr),
+        &SyncDestructorInterceptor<TouchLocationInfo>);
     return touchInfoObj;
 }
 
@@ -3357,10 +3359,6 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnScrollVisibleContentChange(ArkUIRun
 
             auto startParam = SetListItemIndex(vm, start);
             auto endParam = SetListItemIndex(vm, end);
-            startParam->SetNativePointerFieldCount(vm, 1);
-            startParam->SetNativePointerField(vm, 0, static_cast<void*>(&startParam));
-            endParam->SetNativePointerFieldCount(vm, 1);
-            endParam->SetNativePointerField(vm, 0, static_cast<void*>(&endParam));
             // 2: Array length
             panda::Local<panda::JSValueRef> params[2] = { startParam, endParam };
             function->Call(vm, function.ToLocal(), params, 2); // 2: Array length

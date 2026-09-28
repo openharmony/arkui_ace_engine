@@ -27,6 +27,7 @@
 #include "interaction_manager.h"
 
 #include "base/log/log_wrapper.h"
+#include "base/utils/napi_scope_raii.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/ace_engine.h"
 #include "frameworks/core/components/common/properties/color.h"
@@ -48,8 +49,7 @@ public:
 
     static napi_value SetForegroundColor(napi_env env, napi_callback_info info)
     {
-        napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(env, &scope);
+        ScopeRAII scope(env);
         CHECK_NULL_RETURN(scope, nullptr);
         size_t argc = ARG_COUNT_1;
         napi_value argv[ARG_COUNT_1] = { 0 };
@@ -58,14 +58,12 @@ public:
         napi_get_cb_info(env, info, &argc, argv, &result, &data);
         if (argc != ARG_COUNT_1) {
             TAG_LOGE(AceLogTag::ACE_DRAG, "require 1 parameter");
-            napi_close_handle_scope(env, scope);
             return nullptr;
         }
 
         Color foregroundColor;
         if (!ParseColor(env, argv[0], foregroundColor)) {
             LOGE("Parse foregroundColor failed");
-            napi_close_handle_scope(env, scope);
             return nullptr;
         }
 
@@ -73,7 +71,6 @@ public:
         napi_unwrap(env, result, (void**)&dragPreview);
         if (dragPreview == nullptr) {
             LOGE("dragPreview is nullptr");
-            napi_close_handle_scope(env, scope);
             return nullptr;
         }
         dragPreview->SetColor(foregroundColor);
@@ -95,14 +92,12 @@ public:
                 TaskExecutor::TaskType::JS, "ArkUIDragUpdatePreviewStyle");
             dragPreview->previewStyle_.types.clear();
         }
-        napi_close_handle_scope(env, scope);
         return nullptr;
     }
 
     static napi_value Animate(napi_env env, napi_callback_info info)
     {
-        napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(env, &scope);
+        ScopeRAII scope(env);
         CHECK_NULL_RETURN(scope, nullptr);
         size_t argc = ARG_COUNT_2;
         napi_value argv[ARG_COUNT_2] = { 0 };
@@ -111,7 +106,6 @@ public:
         napi_get_cb_info(env, info, &argc, argv, &result, &data);
         if (argc != ARG_COUNT_2) {
             TAG_LOGE(AceLogTag::ACE_DRAG, "require 2 parameter");
-            napi_close_handle_scope(env, scope);
             return nullptr;
         }
 
@@ -119,7 +113,6 @@ public:
         napi_unwrap(env, result, (void**)&dragPreview);
         if (dragPreview == nullptr) {
             LOGE("dragPreview is nullptr");
-            napi_close_handle_scope(env, scope);
             return nullptr;
         }
         dragPreview->hasAnimation_ = true;
@@ -143,7 +136,6 @@ public:
             TaskExecutor::TaskType::JS, "ArkUIDragUpdatePreviewAnimationStyle");
         dragPreview->hasAnimation_ = false;
         dragPreview->previewStyle_.types.clear();
-        napi_close_handle_scope(env, scope);
         return nullptr;
     }
 

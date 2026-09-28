@@ -12,7 +12,47 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "test/mock/frameworks/base/log/mock_log_wrapper.h"
+
+#include <atomic>
+#include <cstdarg>
+#include <cstring>
+
 #include "base/log/log_wrapper.h"
+
+namespace {
+std::atomic<int> g_printLogCount { 0 };
+std::atomic<int> g_diagnosticLogCount { 0 };
+DiagnosticLog g_lastDiagnosticLog { nullptr, nullptr, nullptr };
+
+constexpr char DIAGNOSTIC_MARKER[] = "ArkUI runtime check hit";
+} // namespace
+
+void ResetPrintLogCount()
+{
+    g_printLogCount.store(0, std::memory_order_relaxed);
+}
+
+int GetPrintLogCount()
+{
+    return g_printLogCount.load(std::memory_order_relaxed);
+}
+
+int GetDiagnosticLogCount()
+{
+    return g_diagnosticLogCount.load(std::memory_order_relaxed);
+}
+
+void ResetDiagnosticLog()
+{
+    g_diagnosticLogCount.store(0, std::memory_order_relaxed);
+    g_lastDiagnosticLog = { nullptr, nullptr, nullptr };
+}
+
+const DiagnosticLog* GetLastDiagnosticLog()
+{
+    return &g_lastDiagnosticLog;
+}
 
 namespace OHOS::Ace {
 
@@ -55,6 +95,17 @@ void LogWrapper::PrintLog(LogDomain domain, LogLevel level, AceLogTag tag, const
     (void)domain;
     (void)level;
     (void)tag;
-    (void)fmt;
+    g_printLogCount.fetch_add(1, std::memory_order_relaxed);
+    if (fmt && std::strstr(fmt, DIAGNOSTIC_MARKER) != nullptr) {
+        va_list args;
+        va_start(args, fmt);
+        (void)va_arg(args, const char*); // skip: file name
+        (void)va_arg(args, int);         // skip: line number
+        g_lastDiagnosticLog.checkName = va_arg(args, const char*);
+        g_lastDiagnosticLog.apiName = va_arg(args, const char*);
+        g_lastDiagnosticLog.reason = va_arg(args, const char*);
+        va_end(args);
+        g_diagnosticLogCount.fetch_add(1, std::memory_order_relaxed);
+    }
 }
 } // namespace OHOS::Ace

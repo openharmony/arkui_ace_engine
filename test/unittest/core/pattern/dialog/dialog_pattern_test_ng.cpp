@@ -34,6 +34,7 @@
 #include "test/unittest/core/event/frame_node_on_tree.h"
 
 #include "base/log/dump_log.h"
+#include "base/ressched/ressched_report.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
 #include "core/common/multi_thread_build_manager.h"
@@ -164,7 +165,7 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgDump001, Te
      * @tc.expected: These Dump properties are matched.
      */
     pattern->DumpInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_.size(), 26);
+    EXPECT_EQ(DumpLog::GetInstance().description_.size(), 31);
 }
 
 /**
@@ -192,7 +193,110 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgDump002, Te
      * @tc.expected: These Dump properties are matched.
      */
     pattern->DumpInfo(jsonPtr);
-    EXPECT_EQ(jsonPtr->GetArraySize(), 12);
+    EXPECT_EQ(jsonPtr->GetArraySize(), 17);
+}
+
+/**
+ * @tc.name: DialogPatternToJsonValueSystemMaterial001
+ * @tc.desc: Test DialogPattern::ToJsonValue outputs systemMaterial(distortionMode/edgeLightMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternToJsonValueSystemMaterial001, TestSize.Level1)
+{
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    ASSERT_NE(json, nullptr);
+    InspectorFilter filter;
+    frameNode->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("hasSystemMaterial"), "false");
+    EXPECT_FALSE(json->GetString("distortionMode").empty());
+    EXPECT_FALSE(json->GetString("edgeLightMode").empty());
+}
+
+/**
+ * @tc.name: DialogPatternDumpInfoMaterial001
+ * @tc.desc: Test DialogPattern::DumpInfo(text) outputs SystemMaterial/DistortionMode/EdgeLightMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternDumpInfoMaterial001, TestSize.Level1)
+{
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->DumpInfo();
+    bool hasSystemMaterial = false;
+    bool hasDistortion = false;
+    bool hasEdgeLight = false;
+    for (const auto& desc : DumpLog::GetInstance().description_) {
+        if (desc.find("SystemMaterial") != std::string::npos) hasSystemMaterial = true;
+        if (desc.find("DistortionMode") != std::string::npos) hasDistortion = true;
+        if (desc.find("EdgeLightMode") != std::string::npos) hasEdgeLight = true;
+    }
+    EXPECT_TRUE(hasSystemMaterial);
+    EXPECT_TRUE(hasDistortion);
+    EXPECT_TRUE(hasEdgeLight);
+}
+
+/**
+ * @tc.name: DialogPatternToJsonValueSystemMaterial002
+ * @tc.desc: Test DialogPattern::ToJsonValue outputs systemMaterial "set" when material configured
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternToJsonValueSystemMaterial002, TestSize.Level1)
+{
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->dialogProperties_.systemMaterial = AceType::MakeRefPtr<UiMaterial>();
+
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    ASSERT_NE(json, nullptr);
+    InspectorFilter filter;
+    frameNode->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("hasSystemMaterial"), "true");
+}
+
+/**
+ * @tc.name: DialogPatternDumpInfoMaterial002
+ * @tc.desc: Test DialogPattern::DumpInfo(text) outputs "SystemMaterial: set" when material configured
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternDumpInfoMaterial002, TestSize.Level1)
+{
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->dialogProperties_.systemMaterial = AceType::MakeRefPtr<UiMaterial>();
+
+    pattern->DumpInfo();
+    bool hasSet = false;
+    for (const auto& desc : DumpLog::GetInstance().description_) {
+        if (desc.find("HasSystemMaterial: true") != std::string::npos) {
+            hasSet = true;
+            break;
+        }
+    }
+    EXPECT_TRUE(hasSet);
 }
 
 /**
@@ -235,7 +339,7 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgDump003, Te
      * @tc.expected: These Dump properties are matched.
      */
     pattern->DumpInfo(jsonPtr);
-    EXPECT_EQ(jsonPtr->GetArraySize(), 26);
+    EXPECT_EQ(jsonPtr->GetArraySize(), 31);
 }
 
 /**
@@ -1836,5 +1940,39 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternForceSplitRatioListenerCall
     ASSERT_TRUE(it != forceSplitMgr->forceSplitRatioListeners_.end());
     ASSERT_TRUE(it->second);
     it->second(0.6f);
+}
+namespace {
+struct DialogShowReportRecorder {
+    uint32_t lastResType = 0;
+    int32_t reportCount = 0;
+} g_dialogShowReportRecorder;
+
+void DialogShowReportCapture(uint32_t resType, int64_t value,
+    const std::unordered_map<std::string, std::string>& payload)
+{
+    g_dialogShowReportRecorder.lastResType = resType;
+    g_dialogShowReportRecorder.reportCount++;
+}
+} // namespace
+
+/**
+ * @tc.name: DialogPatternReportDialogShow001
+ * @tc.desc: test alert dialog did-appear reports RES_TYPE_DIALOG_EVENT
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternReportDialogShow001, TestSize.Level1)
+{
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    pattern->dialogProperties_.type = DialogType::ALERT_DIALOG;
+    g_dialogShowReportRecorder = {};
+    ResSchedReport::GetInstance().reportDataFunc_ = &DialogShowReportCapture;
+    pattern->CallDialogDidAppearCallback();
+    ResSchedReport::GetInstance().reportDataFunc_ = nullptr;
+    EXPECT_EQ(g_dialogShowReportRecorder.lastResType, 225u);
+    EXPECT_EQ(g_dialogShowReportRecorder.reportCount, 1);
+    EXPECT_EQ(pattern->GetState(), PromptActionCommonState::APPEARED);
 }
 } // namespace OHOS::Ace::NG

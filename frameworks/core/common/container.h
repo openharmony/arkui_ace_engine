@@ -621,6 +621,42 @@ public:
 
     static int32_t GetCurrentApiTargetVersion();
 
+    // Compare the full SDK version (major.minor.patch) of the application.
+    // Raw version int encoding: major * 10000000 + minor * 100000 + patch * 1000 + apiLevel
+    static bool LessThanAPITargetVersionFull(int32_t targetMajor, int32_t targetMinor, int32_t targetPatch)
+    {
+        int32_t rawVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+        return !GreatOrEqualFullVersion(rawVersion, targetMajor, targetMinor, targetPatch);
+    }
+
+    static bool GreatOrEqualAPITargetVersionFull(int32_t targetMajor, int32_t targetMinor, int32_t targetPatch)
+    {
+        int32_t rawVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+        return GreatOrEqualFullVersion(rawVersion, targetMajor, targetMinor, targetPatch);
+    }
+
+private:
+    static constexpr int32_t API_LEVEL_BASE = 1000;
+    static constexpr int32_t SUB_VERSION_BASE = 100;
+    static constexpr int32_t PATCH_BASE = API_LEVEL_BASE * SUB_VERSION_BASE;
+    static constexpr int32_t MINOR_BASE = PATCH_BASE * SUB_VERSION_BASE;
+
+    static bool GreatOrEqualFullVersion(
+        int32_t rawVersion, int32_t targetMajor, int32_t targetMinor, int32_t targetPatch)
+    {
+        int32_t major = rawVersion / MINOR_BASE;
+        int32_t minor = (rawVersion / PATCH_BASE) % SUB_VERSION_BASE;
+        int32_t patch = (rawVersion / API_LEVEL_BASE) % SUB_VERSION_BASE;
+        if (major != targetMajor) {
+            return major > targetMajor;
+        }
+        if (minor != targetMinor) {
+            return minor > targetMinor;
+        }
+        return patch >= targetPatch;
+    }
+
+public:
     void SetAppBar(const RefPtr<NG::AppBarView>& appBar);
 
     RefPtr<NG::AppBarView> GetAppBar() const;

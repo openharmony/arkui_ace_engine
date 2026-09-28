@@ -833,7 +833,7 @@ ACE_FORCE_EXPORT void AssignCast(std::optional<TextInputType>& dst, const Ark_In
         case ARK_INPUT_TYPE_NEW_PASSWORD: dst = TextInputType::NEW_PASSWORD; break;
         case ARK_INPUT_TYPE_NUMBER_DECIMAL: dst = TextInputType::NUMBER_DECIMAL; break;
         case ARK_INPUT_TYPE_URL: dst = TextInputType::URL; break;
-        case ARK_INPUT_TYPE_ONE_TIME_CODE: dst = TextInputType::JS_ONE_TIME_CODE; break;
+        case ARK_INPUT_TYPE_ONE_TIME_CODE: dst = TextInputType::ONE_TIME_CODE; break;
         default: LOGE("Unexpected enum value in Ark_InputType: %{public}d", src);
     }
 }

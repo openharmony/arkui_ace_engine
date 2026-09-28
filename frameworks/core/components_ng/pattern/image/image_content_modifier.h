@@ -40,6 +40,11 @@ public:
     void SetCanvasImageWrapper(const CanvasImageModifierWrapper& wrapper);
 
     ContentTransitionType GetContentTransitionParam() override;
+    RefPtr<CanvasImage> GetCanvasImage() const
+    {
+        CHECK_NULL_RETURN(canvasImageWrapper_, nullptr);
+        return canvasImageWrapper_->Get().GetCanvasImage();
+    }
 
 private:
     // The same svg resource has only one copy of SVGDOM in the object cache. Therefore

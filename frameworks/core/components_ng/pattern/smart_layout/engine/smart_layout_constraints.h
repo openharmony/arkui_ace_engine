@@ -67,8 +67,8 @@ public:
 
     /**
      * @brief Add scale-up constraints for underutilized containers: scale the
-     *        bounding box to fill the container inset by LayoutContext::contentPadding
-     *        on each edge, then center it.
+     *        bounding box to fill the container inset by LayoutContext::padding
+     *        on each edge, then center it inside the padded area.
      * @param parent Parent (root) node with bounding box set
      */
     void AddScaleUpConstraints(SmartLayoutNode& parent);

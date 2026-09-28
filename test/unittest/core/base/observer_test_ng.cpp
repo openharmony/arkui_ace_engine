@@ -23,6 +23,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_content_pattern.h"
@@ -32,6 +33,8 @@
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/interfaces/native/implementation/gesture_trigger_info_peer.h"
+#include "core/common/ace_application_info.h"
+#include "core/common/container.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 
 using namespace testing;
@@ -2225,5 +2228,284 @@ HWTEST_F(ObserverTestNg, NotifyDidClickWithHandleFunc001, TestSize.Level1)
     EXPECT_TRUE(g_didClickHandleFuncCalled);
     UIObserverHandler::GetInstance().didClickHandleFunc_ = nullptr;
     g_didClickHandleFuncCalled = false;
+}
+
+/**
+ * @tc.name: NotifyDidClickWithHandleFunc002
+ * @tc.desc: Test NotifyDidClick with didClickHandleFunc_ set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ObserverTestNg, NotifyDidClickWithHandleFunc002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::SCROLL_ETS_TAG, 4006, []() { return AceType::MakeRefPtr<ScrollPattern>(); });
+    GestureEvent gestureEventInfo;
+    ClickInfo clickInfo = ClickInfo(0);
+
+    g_didClickHandleFuncCalled = false;
+    UIObserverHandler::GetInstance().didClickHandleFunc_ =
+        [](AbilityContextInfo&, const GestureEvent&, const ClickInfo&,
+            const RefPtr<FrameNode>&) { g_didClickHandleFuncCalled = true; };
+
+    UIObserverHandler::GetInstance().NotifyDidClick(gestureEventInfo, clickInfo, frameNode);
+    EXPECT_TRUE(g_didClickHandleFuncCalled);
+    UIObserverHandler::GetInstance().didClickHandleFunc_ = nullptr;
+    g_didClickHandleFuncCalled = false;
+}
+
+/**
+ * @tc.name: NavDestinationStateEnum001
+ * @tc.desc: Test NavDestinationState enum values for ABOUT_TO_APPEAR and ABOUT_TO_DISAPPEAR
+ * @tc.type: FUNC
+ */
+HWTEST_F(ObserverTestNg, NavDestinationStateEnum001, TestSize.Level1)
+{
+    EXPECT_EQ(static_cast<int32_t>(NavDestinationState::ABOUT_TO_APPEAR), 10);
+    EXPECT_EQ(static_cast<int32_t>(NavDestinationState::ABOUT_TO_DISAPPEAR), 11);
+    EXPECT_NE(static_cast<int32_t>(NavDestinationState::ABOUT_TO_APPEAR),
+              static_cast<int32_t>(NavDestinationState::ON_BACKPRESS));
+    EXPECT_NE(static_cast<int32_t>(NavDestinationState::ABOUT_TO_DISAPPEAR),
+              static_cast<int32_t>(NavDestinationState::ON_BACKPRESS));
+}
+ 
+/**
+ * @tc.name: NotifyAboutToAppear001
+ * @tc.desc: Test NotifyNavigationStateChange dispatches ABOUT_TO_APPEAR to registered callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ObserverTestNg, NotifyAboutToAppear001, TestSize.Level1)
+{
+    // Raw version: major=26, minor=2, patch=0, apiLevel=26 → 26*10000000 + 2*100000 + 0*1000 + 26
+    constexpr int32_t API_26_2_0_RAW = 260200026;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(API_26_2_0_RAW);
+    Container::Current()->SetApiTargetVersion(API_26_2_0_RAW);
+    auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
+        "navigation", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    navigation->GetPattern<NavigationPattern>()->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    auto contentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto pathInfo = AceType::MakeRefPtr<NavPathInfo>();
+    auto context = AceType::MakeRefPtr<NavDestinationContext>();
+    context->SetNavPathInfo(pathInfo);
+    auto pattern = contentNode->GetPattern<NavDestinationPattern>();
+    pattern->SetNavDestinationContext(context);
+    pattern->name_ = "test_about_to_appear";
+    pattern->isOnShow_ = true;
+    pattern->navigationNode_ = AceType::WeakClaim(Referenced::RawPtr(navigation));
+ 
+    NavDestinationState receivedState = NavDestinationState::NONE;
+    UIObserverHandler::GetInstance().navigationHandleFuncForAni_ =
+        [&receivedState](const NavDestinationInfo& info) { receivedState = info.state; };
+ 
+    UIObserverHandler::GetInstance().NotifyNavigationStateChange(
+        AceType::WeakClaim(Referenced::RawPtr(pattern)), NavDestinationState::ABOUT_TO_APPEAR);
+    EXPECT_EQ(receivedState, NavDestinationState::ABOUT_TO_APPEAR);
+    UIObserverHandler::GetInstance().navigationHandleFuncForAni_ = nullptr;
+}
+ 
+/**
+ * @tc.name: NotifyAboutToDisappear001
+ * @tc.desc: Test NotifyNavigationStateChange dispatches ABOUT_TO_DISAPPEAR to registered callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ObserverTestNg, NotifyAboutToDisappear001, TestSize.Level1)
+{
+    // Raw version: major=26, minor=2, patch=0, apiLevel=26 → 26*10000000 + 2*100000 + 0*1000 + 26
+    constexpr int32_t API_26_2_0_RAW = 260200026;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(API_26_2_0_RAW);
+    Container::Current()->SetApiTargetVersion(API_26_2_0_RAW);
+    auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
+        "navigation", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    navigation->GetPattern<NavigationPattern>()->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    auto contentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto pathInfo = AceType::MakeRefPtr<NavPathInfo>();
+    auto context = AceType::MakeRefPtr<NavDestinationContext>();
+    context->SetNavPathInfo(pathInfo);
+    auto pattern = contentNode->GetPattern<NavDestinationPattern>();
+    pattern->SetNavDestinationContext(context);
+    pattern->name_ = "test_about_to_disappear";
+    pattern->isOnShow_ = true;
+    pattern->navigationNode_ = AceType::WeakClaim(Referenced::RawPtr(navigation));
+ 
+    NavDestinationState receivedState = NavDestinationState::NONE;
+    UIObserverHandler::GetInstance().navigationHandleFuncForAni_ =
+        [&receivedState](const NavDestinationInfo& info) { receivedState = info.state; };
+ 
+    UIObserverHandler::GetInstance().NotifyNavigationStateChange(
+        AceType::WeakClaim(Referenced::RawPtr(pattern)), NavDestinationState::ABOUT_TO_DISAPPEAR);
+    EXPECT_EQ(receivedState, NavDestinationState::ABOUT_TO_DISAPPEAR);
+    UIObserverHandler::GetInstance().navigationHandleFuncForAni_ = nullptr;
+}
+ 
+/**
+ * @tc.name: NotifyAboutToAppearNoListener001
+ * @tc.desc: Test NotifyNavigationStateChange with ABOUT_TO_APPEAR and no listener (AC-3.3)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ObserverTestNg, NotifyAboutToAppearNoListener001, TestSize.Level1)
+{
+    auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
+        "navigation", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    navigation->GetPattern<NavigationPattern>()->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    auto contentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto pathInfo = AceType::MakeRefPtr<NavPathInfo>();
+    auto context = AceType::MakeRefPtr<NavDestinationContext>();
+    context->SetNavPathInfo(pathInfo);
+    auto pattern = contentNode->GetPattern<NavDestinationPattern>();
+    pattern->SetNavDestinationContext(context);
+    pattern->name_ = "test_no_listener";
+    pattern->isOnShow_ = true;
+    pattern->navigationNode_ = AceType::WeakClaim(Referenced::RawPtr(navigation));
+ 
+    UIObserverHandler::GetInstance().navigationHandleFuncForAni_ = nullptr;
+    UIObserverHandler::GetInstance().NotifyNavigationStateChange(
+        AceType::WeakClaim(Referenced::RawPtr(pattern)), NavDestinationState::ABOUT_TO_APPEAR);
+}
+ 
+/**
+ * @tc.name: FireAboutToAppearNoCustomNode001
+ * @tc.desc: Test FireAboutToAppear with no customNode_ set (weak ref failure, AC-3.4)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ObserverTestNg, FireAboutToAppearNoCustomNode001, TestSize.Level1)
+{
+    auto contentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(contentNode, nullptr);
+    contentNode->FireAboutToAppear();
+    contentNode->FireAboutToDisappear();
+}
+ 
+/**
+ * @tc.name: NotifyAboutToAppearVersionGate001
+ * @tc.desc: Test that ABOUT_TO_APPEAR/ABOUT_TO_DISAPPEAR are not dispatched when API < 7.1 (AC-1.2, AC-2.2)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ObserverTestNg, NotifyAboutToAppearVersionGate001, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
+        "navigation", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    navigation->GetPattern<NavigationPattern>()->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    auto contentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto pathInfo = AceType::MakeRefPtr<NavPathInfo>();
+    auto context = AceType::MakeRefPtr<NavDestinationContext>();
+    context->SetNavPathInfo(pathInfo);
+    auto pattern = contentNode->GetPattern<NavDestinationPattern>();
+    pattern->SetNavDestinationContext(context);
+    pattern->name_ = "test_version_gate";
+    pattern->isOnShow_ = true;
+    pattern->navigationNode_ = AceType::WeakClaim(Referenced::RawPtr(navigation));
+ 
+    bool callbackCalled = false;
+    UIObserverHandler::GetInstance().navigationHandleFuncForAni_ =
+        [&callbackCalled](const NavDestinationInfo&) { callbackCalled = true; };
+ 
+    UIObserverHandler::GetInstance().NotifyNavigationStateChange(
+        AceType::WeakClaim(Referenced::RawPtr(pattern)), NavDestinationState::ABOUT_TO_APPEAR);
+    EXPECT_FALSE(callbackCalled);
+    UIObserverHandler::GetInstance().NotifyNavigationStateChange(
+        AceType::WeakClaim(Referenced::RawPtr(pattern)), NavDestinationState::ABOUT_TO_DISAPPEAR);
+    EXPECT_FALSE(callbackCalled);
+ 
+    // Also verify that at VERSION_SEVENTEEN (api 17, still < 7.1/API 26), new states are not dispatched
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SEVENTEEN));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SEVENTEEN));
+    callbackCalled = false;
+    UIObserverHandler::GetInstance().NotifyNavigationStateChange(
+        AceType::WeakClaim(Referenced::RawPtr(pattern)), NavDestinationState::ABOUT_TO_APPEAR);
+    EXPECT_FALSE(callbackCalled);
+    UIObserverHandler::GetInstance().NotifyNavigationStateChange(
+        AceType::WeakClaim(Referenced::RawPtr(pattern)), NavDestinationState::ABOUT_TO_DISAPPEAR);
+    EXPECT_FALSE(callbackCalled);
+ 
+    UIObserverHandler::GetInstance().navigationHandleFuncForAni_ = nullptr;
+}
+ 
+/**
+ * @tc.name: FireAboutToAppearWithCustomNode001
+ * @tc.desc: Test FireAboutToAppear dispatches observer notification with customNode set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ObserverTestNg, FireAboutToAppearWithCustomNode001, TestSize.Level1)
+{
+    // Raw version: major=26, minor=2, patch=0, apiLevel=26 → 26*10000000 + 2*100000 + 0*1000 + 26
+    constexpr int32_t API_26_2_0_RAW = 260200026;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(API_26_2_0_RAW);
+    Container::Current()->SetApiTargetVersion(API_26_2_0_RAW);
+    auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
+        "navigation", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    navigation->GetPattern<NavigationPattern>()->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    auto contentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto pathInfo = AceType::MakeRefPtr<NavPathInfo>();
+    auto context = AceType::MakeRefPtr<NavDestinationContext>();
+    context->SetNavPathInfo(pathInfo);
+    auto pattern = contentNode->GetPattern<NavDestinationPattern>();
+    pattern->SetNavDestinationContext(context);
+    pattern->name_ = "test_fire_about";
+    pattern->isOnShow_ = true;
+    pattern->navigationNode_ = AceType::WeakClaim(Referenced::RawPtr(navigation));
+ 
+    auto customNode = CustomNode::CreateCustomNode(33, "test_custom");
+    ASSERT_NE(customNode, nullptr);
+    auto customNodeBase = AceType::DynamicCast<CustomNodeBase>(customNode);
+    ASSERT_NE(customNodeBase, nullptr);
+    contentNode->SetNavDestinationCustomNode(AceType::WeakClaim(AceType::RawPtr(customNodeBase)));
+ 
+    NavDestinationState receivedState = NavDestinationState::NONE;
+    UIObserverHandler::GetInstance().navigationHandleFuncForAni_ =
+        [&receivedState](const NavDestinationInfo& info) { receivedState = info.state; };
+ 
+    contentNode->FireAboutToAppear();
+    EXPECT_EQ(receivedState, NavDestinationState::ABOUT_TO_APPEAR);
+ 
+    contentNode->FireAboutToDisappear();
+    EXPECT_EQ(receivedState, NavDestinationState::ABOUT_TO_DISAPPEAR);
+ 
+    UIObserverHandler::GetInstance().navigationHandleFuncForAni_ = nullptr;
+}
+ 
+/**
+ * @tc.name: FireAboutToAppearWithoutCustomNode001
+ * @tc.desc: Test FireAboutToAppear does NOT dispatch when customNode_ is not set (constraint: dispatch via customNode_)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ObserverTestNg, FireAboutToAppearWithoutCustomNode001, TestSize.Level1)
+{
+    // Raw version: major=26, minor=2, patch=0, apiLevel=26 → 26*10000000 + 2*100000 + 0*1000 + 26
+    constexpr int32_t API_26_2_0_RAW = 260200026;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(API_26_2_0_RAW);
+    Container::Current()->SetApiTargetVersion(API_26_2_0_RAW);
+    auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
+        "navigation", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    navigation->GetPattern<NavigationPattern>()->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    auto contentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto pathInfo = AceType::MakeRefPtr<NavPathInfo>();
+    auto context = AceType::MakeRefPtr<NavDestinationContext>();
+    context->SetNavPathInfo(pathInfo);
+    auto pattern = contentNode->GetPattern<NavDestinationPattern>();
+    pattern->SetNavDestinationContext(context);
+    pattern->name_ = "test_fire_about_no_custom";
+    pattern->isOnShow_ = true;
+    pattern->navigationNode_ = AceType::WeakClaim(Referenced::RawPtr(navigation));
+    // No SetNavDestinationCustomNode — customNode_ is null, dispatch should be skipped
+ 
+    NavDestinationState receivedState = NavDestinationState::NONE;
+    UIObserverHandler::GetInstance().navigationHandleFuncForAni_ =
+        [&receivedState](const NavDestinationInfo& info) { receivedState = info.state; };
+ 
+    contentNode->FireAboutToAppear();
+    EXPECT_EQ(receivedState, NavDestinationState::NONE);
+ 
+    contentNode->FireAboutToDisappear();
+    EXPECT_EQ(receivedState, NavDestinationState::NONE);
+ 
+    UIObserverHandler::GetInstance().navigationHandleFuncForAni_ = nullptr;
 }
 }

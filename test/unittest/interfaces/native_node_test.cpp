@@ -14969,8 +14969,8 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_CrossLanguageTreeOperating_InsertChildBefore_R
     ASSERT_EQ(nodeAPI->addChild(parentHandle, child2), OHOS::Ace::ERROR_CODE_NO_ERROR);
     ASSERT_EQ(nodeAPI->insertChildBefore(parentHandle, child2, child1), OHOS::Ace::ERROR_CODE_NO_ERROR);
 
-    auto child1Node = reinterpret_cast<NG::UINode*>(child1);
-    auto child2Node = reinterpret_cast<NG::UINode*>(child2);
+    auto child1Node = reinterpret_cast<NG::UINode*>(child1->uiNodeHandle);
+    auto child2Node = reinterpret_cast<NG::UINode*>(child2->uiNodeHandle);
     EXPECT_EQ(parentNode->GetChildAtIndex(0), AceType::Claim(child2Node));
     EXPECT_EQ(parentNode->GetChildAtIndex(1), AceType::Claim(child1Node));
 
@@ -15009,8 +15009,8 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_CrossLanguageTreeOperating_InsertChildBefore_R
     ASSERT_EQ(nodeAPI->addChild(parentHandle, child2), OHOS::Ace::ERROR_CODE_NO_ERROR);
     ASSERT_EQ(nodeAPI->insertChildBefore(parentHandle, child2, child1), OHOS::Ace::ERROR_CODE_NO_ERROR);
 
-    auto child1Node = reinterpret_cast<NG::UINode*>(child1);
-    auto child2Node = reinterpret_cast<NG::UINode*>(child2);
+    auto child1Node = reinterpret_cast<NG::UINode*>(child1->uiNodeHandle);
+    auto child2Node = reinterpret_cast<NG::UINode*>(child2->uiNodeHandle);
     EXPECT_EQ(parentFrameNode->GetChildAtIndex(0), AceType::Claim(child1Node));
     EXPECT_EQ(parentFrameNode->GetChildAtIndex(1), AceType::Claim(child2Node));
 

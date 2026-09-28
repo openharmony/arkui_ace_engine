@@ -1065,6 +1065,26 @@ void SetOnScaleChangeImpl(Ark_NativePointer node,
     WebModelStatic::SetScaleChangeId(frameNode, onScaleChange);
 #endif // WEB_SUPPORTED
 }
+void SetOnZoomChangeImpl(Ark_NativePointer node,
+                         const Opt_OnZoomChangeCallback* value)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        WebModelStatic::SetZoomChangeId(frameNode, nullptr);
+        return;
+    }
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onZoomChange = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) {
+        OnZoomChange(callback, weakNode, instanceId, info);
+    };
+    WebModelStatic::SetZoomChangeId(frameNode, onZoomChange);
+#endif // WEB_SUPPORTED
+}
 void SetOnHttpAuthRequestImpl(Ark_NativePointer node,
                               const Opt_Callback_OnHttpAuthRequestEvent_Boolean* value)
 {
@@ -3354,6 +3374,7 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetOnInputmethodAttachedImpl,
         WebAttributeModifier::SetEnableFullscreenVideoOverlayImpl,
         WebAttributeModifier::SetEnableMediaNetworkProxyImpl,
+        WebAttributeModifier::SetOnZoomChangeImpl,
         WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,
         WebAttributeModifier::SetBindSelectionMenuImpl,
         WebAttributeModifier::SetEnableScrollDirectionalLockImpl,

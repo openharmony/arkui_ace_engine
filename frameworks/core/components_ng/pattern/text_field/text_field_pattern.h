@@ -453,7 +453,6 @@ public:
     void HandleOnPageUp() override;
     void HandleOnPageDown() override;
     void CreateHandles() override;
-    void OnUiMaterialParamUpdate(const UiMaterialParam& params) override;
     void GetEmojiSubStringRange(int32_t& start, int32_t& end);
     EmojiRelation GetEmojiRelation(int index);
 
@@ -1137,6 +1136,7 @@ public:
     bool IsCloseKeyboard(const RefPtr<TextFieldManagerNG>& textFieldManager);
     void HandleFocusEvent();
     void CheckAndUpdateInputTypeForOTP();
+    void UpdateBackgroundColorForMaterial(const Color& color);
     void SetFocusStyle();
     void ClearFocusStyle();
     void ProcessFocusStyle();
@@ -2208,7 +2208,7 @@ private:
     void ShowSelectAfterDragEvent();
     void ClearDragDropEvent();
     std::function<void(Offset)> GetThumbnailCallback();
-    bool HasStateStyle(UIState state) const;
+    virtual bool HasStateStyle(UIState state) const;
     bool IsStyledPlaceholder() const;
 
     // PageTranslateNode override

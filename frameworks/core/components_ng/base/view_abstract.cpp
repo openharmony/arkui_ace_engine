@@ -6743,6 +6743,7 @@ void ViewAbstract::ResetSystemMaterialEffect(FrameNode* frameNode)
     }
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
+    renderContext->SetMaterialColorModeChangeCallback(nullptr);
     pattern->RemoveResObj("viewAbstract.uiMaterial");
     UnRegisterMaterialInteractionEvent(frameNode);
     if (preMaterial->GetType() == static_cast<int32_t>(MaterialType::IMMERSIVE)) {
@@ -6896,6 +6897,19 @@ void ViewAbstract::SetSystemMaterialImmediate(FrameNode* frameNode, const UiMate
 
     if (material != nullptr) {
         updateFunc(nullptr);
+        // When frameNode == stackFrameNode, the call originates from declarative ArkTs where
+        // ConfigChangePerform is not enabled; color mode switches re-execute the ArkTs code,
+        // so no callback registration is needed. When frameNode != stackFrameNode, the call
+        // may come from C-API or imperative ArkTs, which requires a registered callback to
+        // handle color mode changes.
+        auto stackFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        if (frameNode != stackFrameNode) {
+            auto renderContext = frameNode->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            renderContext->SetMaterialColorModeChangeCallback([updateFunc = std::move(updateFunc)]() {
+               updateFunc(nullptr); 
+            });
+        }
     } else {
         ResetSystemMaterialEffect(frameNode);
     }
@@ -10627,6 +10641,14 @@ Matrix4 ViewAbstract::GetTransform(FrameNode* frameNode)
     const auto& target = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(target, value);
     return target->GetTransformMatrixValue(value);
+}
+
+Matrix4 ViewAbstract::GetTransform3D(FrameNode* frameNode)
+{
+    Matrix4 value;
+    const auto& target = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(target, value);
+    return target->GetTransform3DMatrixValue(value);
 }
 
 HitTestMode ViewAbstract::GetHitTestBehavior(FrameNode* frameNode)

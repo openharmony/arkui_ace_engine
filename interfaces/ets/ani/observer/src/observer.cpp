@@ -1304,8 +1304,9 @@ public:
         ani_enum_item navDesStateItem;
         ani_size enumIndex = static_cast<ani_size>(info.state);
         if (info.state == NG::NavDestinationState::ON_BACKPRESS) {
-            // value of ON_BACKPRESS is 100, but index of ON_BACKPRESS is 10
-            enumIndex = 10;
+            // value of ON_BACKPRESS is 100, but index is 12
+            // (after ABOUT_TO_APPEAR at index 10 and ABOUT_TO_DISAPPEAR at index 11)
+            enumIndex = 12;
         }
         ani_status status;
         if ((status = env->Enum_GetEnumItemByIndex(navDesState, enumIndex, &navDesStateItem)) != ANI_OK) {

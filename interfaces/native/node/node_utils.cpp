@@ -32,6 +32,7 @@ extern "C" {
 
 int32_t OH_ArkUI_NodeUtils_GetLayoutSize(ArkUI_NodeHandle node, ArkUI_IntSize* size)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeUtils_GetLayoutSize");
     if (node == nullptr) {
         SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__,
             "node parameter is null");
@@ -48,6 +49,7 @@ int32_t OH_ArkUI_NodeUtils_GetLayoutSize(ArkUI_NodeHandle node, ArkUI_IntSize* s
 
 int32_t OH_ArkUI_NodeUtils_GetLayoutPosition(ArkUI_NodeHandle node, ArkUI_IntOffset* localOffset)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeUtils_GetLayoutPosition");
     if (node == nullptr) {
         SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__,
             "node parameter is null");
@@ -66,6 +68,7 @@ int32_t OH_ArkUI_NodeUtils_GetLayoutPosition(ArkUI_NodeHandle node, ArkUI_IntOff
 
 int32_t OH_ArkUI_NodeUtils_GetLayoutPositionInWindow(ArkUI_NodeHandle node, ArkUI_IntOffset* globalOffset)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeUtils_GetLayoutPositionInWindow");
     if (node == nullptr) {
         SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__,
             "node parameter is null");
@@ -83,6 +86,7 @@ int32_t OH_ArkUI_NodeUtils_GetLayoutPositionInWindow(ArkUI_NodeHandle node, ArkU
 
 int32_t OH_ArkUI_NodeUtils_GetLayoutPositionInScreen(ArkUI_NodeHandle node, ArkUI_IntOffset* screenOffset)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeUtils_GetLayoutPositionInScreen");
     if (node == nullptr) {
         SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__,
             "node parameter is null");
@@ -100,6 +104,7 @@ int32_t OH_ArkUI_NodeUtils_GetLayoutPositionInScreen(ArkUI_NodeHandle node, ArkU
 
 int32_t OH_ArkUI_NodeUtils_GetLayoutPositionInGlobalDisplay(ArkUI_NodeHandle node, ArkUI_IntOffset* offset)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeUtils_GetLayoutPositionInGlobalDisplay");
     CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(offset, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -115,6 +120,7 @@ int32_t OH_ArkUI_NodeUtils_GetLayoutPositionInGlobalDisplay(ArkUI_NodeHandle nod
 
 int32_t OH_ArkUI_NodeUtils_GetPositionWithTranslateInWindow(ArkUI_NodeHandle node, ArkUI_IntOffset* translateOffset)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeUtils_GetPositionWithTranslateInWindow");
     if (node == nullptr) {
         SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__,
             "node parameter is null");
@@ -133,6 +139,7 @@ int32_t OH_ArkUI_NodeUtils_GetPositionWithTranslateInWindow(ArkUI_NodeHandle nod
 
 int32_t OH_ArkUI_NodeUtils_GetPositionWithTranslateInScreen(ArkUI_NodeHandle node, ArkUI_IntOffset* translateOffset)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeUtils_GetPositionWithTranslateInScreen");
     if (node == nullptr) {
         SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__,
             "node parameter is null");
@@ -186,6 +193,7 @@ int32_t OH_ArkUI_RegisterDrawCallbackOnNodeHandle(
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR,
         __FUNCTION__, "Native module not initialized");
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     impl->getNodeModifiers()->getFrameNodeModifier()->setDrawCompleteEvent(
         node->uiNodeHandle, userData, reinterpret_cast<void*>(onDrawCompleted));
 
@@ -199,6 +207,7 @@ int32_t OH_ArkUI_UnregisterDrawCallbackOnNodeHandle(ArkUI_NodeHandle node)
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR,
         __FUNCTION__, "Native module not initialized");
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     impl->getNodeModifiers()->getFrameNodeModifier()->resetDrawCompleteEvent(node->uiNodeHandle);
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
@@ -210,6 +219,7 @@ int32_t OH_ArkUI_RegisterLayoutCallbackOnNodeHandle(
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR,
         __FUNCTION__, "Native module not initialized");
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     impl->getNodeModifiers()->getFrameNodeModifier()->setLayoutEvent(
         node->uiNodeHandle, userData, reinterpret_cast<void*>(onLayoutCompleted));
 
@@ -222,6 +232,7 @@ int32_t OH_ArkUI_UnregisterLayoutCallbackOnNodeHandle(ArkUI_NodeHandle node)
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN_WITH_MESSAGE(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR,
         __FUNCTION__, "Native module not initialized");
+    CHECK_NODE_DISPOSED(node, "Node has been disposed");
     impl->getNodeModifiers()->getFrameNodeModifier()->resetLayoutEvent(node->uiNodeHandle);
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
@@ -260,6 +271,7 @@ float OH_ArkUI_SystemFontStyleEvent_GetFontWeightScale(const ArkUI_SystemFontSty
 
 void OH_ArkUI_NodeUtils_AddCustomProperty(ArkUI_NodeHandle node, const char* name, const char* value)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeUtils_AddCustomProperty");
     if (node == nullptr) {
         return;
     }
@@ -276,6 +288,7 @@ void OH_ArkUI_NodeUtils_AddCustomProperty(ArkUI_NodeHandle node, const char* nam
 
 void OH_ArkUI_NodeUtils_RemoveCustomProperty(ArkUI_NodeHandle node, const char* name)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeUtils_RemoveCustomProperty");
     if (node == nullptr) {
         return;
     }
@@ -289,6 +302,7 @@ void OH_ArkUI_NodeUtils_RemoveCustomProperty(ArkUI_NodeHandle node, const char* 
 
 int32_t OH_ArkUI_NodeUtils_GetCustomProperty(ArkUI_NodeHandle node, const char* name, ArkUI_CustomProperty** handle)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeUtils_GetCustomProperty");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
     CHECK_NULL_RETURN_WITH_MESSAGE(
@@ -304,6 +318,7 @@ int32_t OH_ArkUI_NodeUtils_GetCustomProperty(ArkUI_NodeHandle node, const char* 
 
 int32_t OH_ArkUI_NodeUtils_GetActiveChildrenInfo(ArkUI_NodeHandle head, ArkUI_ActiveChildrenInfo** handle)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeUtils_GetActiveChildrenInfo");
     CHECK_NULL_RETURN_WITH_MESSAGE(head, ARKUI_ERROR_CODE_PARAM_INVALID,
         __FUNCTION__, "Head node parameter is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -328,6 +343,7 @@ int32_t OH_ArkUI_NodeUtils_GetActiveChildrenInfo(ArkUI_NodeHandle head, ArkUI_Ac
 
 ArkUI_NodeHandle OH_ArkUI_NodeUtils_GetParentInPageTree(ArkUI_NodeHandle node)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeUtils_GetParentInPageTree");
     if (node == nullptr) {
         return nullptr;
     }
@@ -339,6 +355,7 @@ ArkUI_NodeHandle OH_ArkUI_NodeUtils_GetParentInPageTree(ArkUI_NodeHandle node)
 
 ArkUI_NodeHandle OH_ArkUI_NodeUtils_GetCurrentPageRootNode(ArkUI_NodeHandle node)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeUtils_GetCurrentPageRootNode");
     if (node == nullptr) {
         return nullptr;
     }
@@ -350,6 +367,7 @@ ArkUI_NodeHandle OH_ArkUI_NodeUtils_GetCurrentPageRootNode(ArkUI_NodeHandle node
 
 bool OH_ArkUI_NodeUtils_IsCreatedByNDK(ArkUI_NodeHandle node)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeUtils_IsCreatedByNDK");
     if (node == nullptr) {
         return 0;
     }
@@ -360,6 +378,7 @@ bool OH_ArkUI_NodeUtils_IsCreatedByNDK(ArkUI_NodeHandle node)
 
 int32_t OH_ArkUI_NodeUtils_GetNodeType(ArkUI_NodeHandle node)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeUtils_GetNodeType");
     if (node == nullptr) {
         return -1;
     }
@@ -373,6 +392,7 @@ int32_t OH_ArkUI_NodeUtils_GetNodeType(ArkUI_NodeHandle node)
 
 int32_t OH_ArkUI_NodeUtils_GetWindowInfo(ArkUI_NodeHandle node, ArkUI_HostWindowInfo** info)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeUtils_GetWindowInfo");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
     CHECK_NULL_RETURN_WITH_MESSAGE(
@@ -452,6 +472,7 @@ int32_t OH_ArkUI_ActiveChildrenInfo_GetCount(ArkUI_ActiveChildrenInfo* handle)
 
 int32_t OH_ArkUI_NodeUtils_GetAttachedNodeHandleById(const char* id, ArkUI_NodeHandle* node)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeUtils_GetAttachedNodeHandleById");
     CHECK_NULL_RETURN_WITH_MESSAGE(id, ARKUI_ERROR_CODE_PARAM_INVALID,
         __FUNCTION__, "Id parameter is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -466,6 +487,7 @@ int32_t OH_ArkUI_NodeUtils_GetAttachedNodeHandleById(const char* id, ArkUI_NodeH
 
 int32_t OH_ArkUI_NodeUtils_GetNodeHandleByUniqueId(const uint32_t uniqueId, ArkUI_NodeHandle* node)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeUtils_GetNodeHandleByUniqueId");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -480,6 +502,7 @@ int32_t OH_ArkUI_NodeUtils_GetNodeHandleByUniqueId(const uint32_t uniqueId, ArkU
 
 int32_t OH_ArkUI_NodeUtils_GetNodeUniqueId(ArkUI_NodeHandle node, int32_t* uniqueId)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeUtils_GetNodeUniqueId");
     if (node == nullptr) {
         *uniqueId = -1;
         SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
@@ -500,6 +523,7 @@ int32_t OH_ArkUI_NodeUtils_GetNodeUniqueId(ArkUI_NodeHandle node, int32_t* uniqu
 
 int32_t OH_ArkUI_NativeModule_AdoptChild(ArkUI_NodeHandle node, ArkUI_NodeHandle child)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NativeModule_AdoptChild");
     CHECK_NULL_RETURN_WITH_MESSAGE(node, ARKUI_ERROR_CODE_NODE_CAN_NOT_ADOPT_TO,
         __FUNCTION__, "Parent node parameter is null");
     CHECK_NODE_DISPOSED(node, "Parent node has been disposed");
@@ -529,6 +553,7 @@ int32_t OH_ArkUI_NativeModule_AdoptChild(ArkUI_NodeHandle node, ArkUI_NodeHandle
 
 int32_t OH_ArkUI_NativeModule_RemoveAdoptedChild(ArkUI_NodeHandle node, ArkUI_NodeHandle child)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NativeModule_RemoveAdoptedChild");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node && child, OHOS::Ace::ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN,
         __FUNCTION__, "Parent node or child node parameter is null");
@@ -557,6 +582,7 @@ int32_t OH_ArkUI_NativeModule_RemoveAdoptedChild(ArkUI_NodeHandle node, ArkUI_No
 
 int32_t OH_ArkUI_NativeModule_IsInRenderState(ArkUI_NodeHandle node, bool* isOnRenderTree)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NativeModule_IsInRenderState");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
     CHECK_NULL_RETURN_WITH_MESSAGE(
@@ -572,6 +598,7 @@ int32_t OH_ArkUI_NativeModule_IsInRenderState(ArkUI_NodeHandle node, bool* isOnR
 
 int32_t OH_ArkUI_NodeUtils_MoveTo(ArkUI_NodeHandle node, ArkUI_NodeHandle target_parent, int32_t index)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeUtils_MoveTo");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
     CHECK_NULL_RETURN_WITH_MESSAGE(
@@ -595,6 +622,7 @@ int32_t OH_ArkUI_NodeUtils_MoveTo(ArkUI_NodeHandle node, ArkUI_NodeHandle target
 
 int32_t OH_ArkUI_NodeUtils_SetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_CrossLanguageOption* option)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeUtils_SetCrossLanguageOption");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
     CHECK_NULL_RETURN_WITH_MESSAGE(
@@ -622,6 +650,7 @@ int32_t OH_ArkUI_NodeUtils_SetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_C
 
 int32_t OH_ArkUI_NodeUtils_GetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_CrossLanguageOption* option)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeUtils_GetCrossLanguageOption");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
     CHECK_NULL_RETURN_WITH_MESSAGE(
@@ -698,6 +727,7 @@ OH_ArkUI_CrossLanguageOperatingStatus OH_ArkUI_CrossLanguageOption_GetTreeOperat
 
 int32_t OH_ArkUI_NativeModule_InvalidateAttributes(ArkUI_NodeHandle node)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NativeModule_InvalidateAttributes");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
     CHECK_NODE_DISPOSED(node, "Node has been disposed");
@@ -714,6 +744,7 @@ int32_t OH_ArkUI_NativeModule_InvalidateAttributes(ArkUI_NodeHandle node)
 
 int32_t OH_ArkUI_NodeUtils_GetFirstChildIndexWithoutExpand(ArkUI_NodeHandle node, uint32_t* index)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeUtils_GetFirstChildIndexWithoutExpand");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -730,6 +761,7 @@ int32_t OH_ArkUI_NodeUtils_GetFirstChildIndexWithoutExpand(ArkUI_NodeHandle node
 
 int32_t OH_ArkUI_NodeUtils_GetLastChildIndexWithoutExpand(ArkUI_NodeHandle node, uint32_t* index)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeUtils_GetLastChildIndexWithoutExpand");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -747,6 +779,7 @@ int32_t OH_ArkUI_NodeUtils_GetLastChildIndexWithoutExpand(ArkUI_NodeHandle node,
 int32_t OH_ArkUI_NodeUtils_GetChildWithExpandMode(ArkUI_NodeHandle node, int32_t position,
     ArkUI_NodeHandle* subnode, uint32_t expandMode)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeUtils_GetChildWithExpandMode");
     CHECK_NULL_RETURN_WITH_MESSAGE(
         node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -762,6 +795,7 @@ int32_t OH_ArkUI_NodeUtils_GetChildWithExpandMode(ArkUI_NodeHandle node, int32_t
 
 ArkUI_ErrorCode OH_ArkUI_NativeModule_SetChildMountPolicy(ArkUI_NodeHandle node, OH_ArkUI_NodeMountPolicy policy)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NativeModule_SetChildMountPolicy");
     CHECK_NULL_RETURN_WITH_MESSAGE(node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
     CHECK_NODE_DISPOSED(node, "Node has been disposed");
     if (node->type != ArkUI_NodeType::ARKUI_NODE_CUSTOM) {
@@ -785,6 +819,7 @@ ArkUI_ErrorCode OH_ArkUI_NativeModule_SetChildMountPolicy(ArkUI_NodeHandle node,
 
 ArkUI_ErrorCode OH_ArkUI_NativeModule_GetChildMountPolicy(ArkUI_NodeHandle node, OH_ArkUI_NodeMountPolicy* policy)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NativeModule_GetChildMountPolicy");
     CHECK_NULL_RETURN_WITH_MESSAGE(node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node parameter is null");
     CHECK_NULL_RETURN_WITH_MESSAGE(policy, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Policy parameter is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -804,6 +839,7 @@ ArkUI_ErrorCode OH_ArkUI_NativeModule_GetChildMountPolicy(ArkUI_NodeHandle node,
 
 int32_t OH_ArkUI_NodeUtils_GetPositionToParent(ArkUI_NodeHandle node, ArkUI_IntOffset* globalOffset)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NodeUtils_GetPositionToParent");
     if (node == nullptr) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
@@ -838,6 +874,7 @@ ArkUI_ErrorCode OH_ArkUI_RemoveSupportedUIStates(ArkUI_NodeHandle node, int32_t 
 
 int32_t OH_ArkUI_RunTaskInScope(ArkUI_ContextHandle uiContext, void* userData, void(*callback)(void* userData))
 {
+    CHECK_UI_THREAD("OH_ArkUI_RunTaskInScope");
     CHECK_NULL_RETURN_WITH_MESSAGE(uiContext, ARKUI_ERROR_CODE_UI_CONTEXT_INVALID,
         __FUNCTION__, "UI context parameter is null");
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -881,6 +918,7 @@ static std::set<uint32_t> NDKCommonEventList = {
 int32_t OH_ArkUI_NativeModule_RegisterCommonEvent(ArkUI_NodeHandle node, ArkUI_NodeEventType eventType,
     void* userData, void (*callback)(ArkUI_NodeEvent* event))
 {
+    CHECK_UI_THREAD("OH_ArkUI_NativeModule_RegisterCommonEvent");
     if (!node || !callback) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
@@ -933,6 +971,7 @@ int32_t OH_ArkUI_NativeModule_RegisterCommonEvent(ArkUI_NodeHandle node, ArkUI_N
 
 int32_t OH_ArkUI_NativeModule_UnregisterCommonEvent(ArkUI_NodeHandle node, ArkUI_NodeEventType eventType)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NativeModule_UnregisterCommonEvent");
     CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
@@ -984,6 +1023,7 @@ int32_t OH_ArkUI_NativeModule_UnregisterCommonEvent(ArkUI_NodeHandle node, ArkUI
 int32_t OH_ArkUI_NativeModule_RegisterCommonVisibleAreaApproximateChangeEvent(ArkUI_NodeHandle node, float* ratios,
     int32_t size, float expectedUpdateInterval, void* userData, void (*callback)(ArkUI_NodeEvent* event))
 {
+    CHECK_UI_THREAD("OH_ArkUI_NativeModule_RegisterCommonVisibleAreaApproximateChangeEvent");
     if (!node || !callback || !ratios || size <= 0) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
@@ -1009,6 +1049,7 @@ int32_t OH_ArkUI_NativeModule_RegisterCommonVisibleAreaApproximateChangeEvent(Ar
 
 int32_t OH_ArkUI_NativeModule_UnregisterCommonVisibleAreaApproximateChangeEvent(ArkUI_NodeHandle node)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NativeModule_UnregisterCommonVisibleAreaApproximateChangeEvent");
     CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
@@ -1024,6 +1065,7 @@ int32_t OH_ArkUI_NativeModule_UnregisterCommonVisibleAreaApproximateChangeEvent(
 int32_t OH_ArkUI_NativeModule_RegisterCommonAreaApproximateChangeEvent(ArkUI_NodeHandle node,
     float expectedUpdateInterval, void* userData, void (*callback)(ArkUI_NodeEvent* event))
 {
+    CHECK_UI_THREAD("OH_ArkUI_NativeModule_RegisterCommonAreaApproximateChangeEvent");
     if (!node || !callback) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
@@ -1040,6 +1082,7 @@ int32_t OH_ArkUI_NativeModule_RegisterCommonAreaApproximateChangeEvent(ArkUI_Nod
 
 int32_t OH_ArkUI_NativeModule_UnregisterCommonAreaApproximateChangeEvent(ArkUI_NodeHandle node)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NativeModule_UnregisterCommonAreaApproximateChangeEvent");
     CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
@@ -1076,6 +1119,7 @@ int32_t OH_ArkUI_NativeModule_AtomicServiceMenuBarSetVisible(ArkUI_ContextHandle
 int32_t OH_ArkUI_NativeModule_ConvertPositionToWindow(
     ArkUI_NodeHandle targetNode, ArkUI_IntOffset position, ArkUI_IntOffset* windowPosition)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NativeModule_ConvertPositionToWindow");
     CHECK_NULL_RETURN_WITH_MESSAGE(targetNode, ARKUI_ERROR_CODE_PARAM_INVALID,
         __FUNCTION__, "Target node parameter is null");
     CHECK_NULL_RETURN_WITH_MESSAGE(windowPosition, ARKUI_ERROR_CODE_PARAM_INVALID,
@@ -1099,6 +1143,7 @@ int32_t OH_ArkUI_NativeModule_ConvertPositionToWindow(
 int32_t OH_ArkUI_NativeModule_ConvertPositionFromWindow(
     ArkUI_NodeHandle targetNode, ArkUI_IntOffset windowPosition, ArkUI_IntOffset* position)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NativeModule_ConvertPositionFromWindow");
     CHECK_NULL_RETURN_WITH_MESSAGE(targetNode, ARKUI_ERROR_CODE_PARAM_INVALID,
         __FUNCTION__, "Target node parameter is null");
     CHECK_NULL_RETURN_WITH_MESSAGE(position, ARKUI_ERROR_CODE_PARAM_INVALID,
@@ -1121,6 +1166,7 @@ int32_t OH_ArkUI_NativeModule_ConvertPositionFromWindow(
 
 int32_t OH_ArkUI_NativeModule_GetPageRootNodeHandleByContext(ArkUI_ContextHandle uiContext, ArkUI_NodeHandle* rootNode)
 {
+    CHECK_UI_THREAD("OH_ArkUI_NativeModule_GetPageRootNodeHandleByContext");
     CHECK_NULL_RETURN_WITH_MESSAGE(rootNode, ARKUI_ERROR_CODE_PARAM_INVALID,
         __FUNCTION__, "Root node parameter is null");
     CHECK_NULL_RETURN_WITH_MESSAGE(uiContext, ARKUI_ERROR_CODE_UI_CONTEXT_INVALID,

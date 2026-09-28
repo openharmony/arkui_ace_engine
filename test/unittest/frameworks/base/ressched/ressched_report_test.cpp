@@ -260,4 +260,62 @@ HWTEST_F(ResSchedReportTest, ResSchedReportTest015, TestSize.Level1)
     ResSchedReport::GetInstance().HandlePageTransition(pageTransitionInfo, 0);
     EXPECT_FALSE(pageTransitionInfo.fromPage.empty());
 }
+
+namespace {
+struct DialogShowReportRecorder {
+    uint32_t lastResType = 0;
+    int32_t reportCount = 0;
+} g_dialogShowRecorder;
+
+void DialogShowReportCapture(uint32_t resType, int64_t value,
+    const std::unordered_map<std::string, std::string>& payload)
+{
+    g_dialogShowRecorder.lastResType = resType;
+    g_dialogShowRecorder.reportCount++;
+}
+} // namespace
+
+/**
+ * @tc.name: ResSchedReportDialogShow001
+ * @tc.desc: test ReportDialogShow reports RES_TYPE_DIALOG_EVENT
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedReportTest, ResSchedReportDialogShow001, TestSize.Level1)
+{
+    g_dialogShowRecorder = {};
+    ResSchedReport::GetInstance().reportDataFunc_ = &DialogShowReportCapture;
+    ResSchedReport::GetInstance().ReportDialogShow();
+    ResSchedReport::GetInstance().reportDataFunc_ = nullptr;
+    EXPECT_EQ(g_dialogShowRecorder.lastResType, 225u);
+    EXPECT_EQ(g_dialogShowRecorder.reportCount, 1);
+}
+
+/**
+ * @tc.name: ResSchedReportDialogShow002
+ * @tc.desc: test ReportDialogShow twice reports twice without miss or duplicate
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedReportTest, ResSchedReportDialogShow002, TestSize.Level1)
+{
+    g_dialogShowRecorder = {};
+    ResSchedReport::GetInstance().reportDataFunc_ = &DialogShowReportCapture;
+    ResSchedReport::GetInstance().ReportDialogShow();
+    ResSchedReport::GetInstance().ReportDialogShow();
+    ResSchedReport::GetInstance().reportDataFunc_ = nullptr;
+    EXPECT_EQ(g_dialogShowRecorder.lastResType, 225u);
+    EXPECT_EQ(g_dialogShowRecorder.reportCount, 2);
+}
+
+/**
+ * @tc.name: ResSchedReportDialogShow003
+ * @tc.desc: test ReportDialogShow when report channel is null, silent skip without crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedReportTest, ResSchedReportDialogShow003, TestSize.Level1)
+{
+    g_dialogShowRecorder = {};
+    ResSchedReport::GetInstance().reportDataFunc_ = nullptr;
+    ResSchedReport::GetInstance().ReportDialogShow();
+    EXPECT_EQ(g_dialogShowRecorder.reportCount, 0);
+}
 } // namespace OHOS::Ace

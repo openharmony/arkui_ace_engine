@@ -263,6 +263,7 @@ private:
 #ifdef OHOS_STANDARD_SYSTEM
     void OnRouterActionEvent(const std::string& action);
     void OnCallActionEvent(const std::string& action, bool isManuallyClick);
+    void OnInsightIntentActionEvent(const std::string& action);
     int64_t runningCardId_ = -1;
     std::string runningCompId_;
     std::mutex wantCacheMutex_;

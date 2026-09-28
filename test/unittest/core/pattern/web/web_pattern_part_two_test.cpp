@@ -813,6 +813,70 @@ HWTEST_F(WebPatternPartTwoTest, ParseNWebViewDataNode002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ParseNWebViewDataNode003
+ * @tc.desc: ParseNWebViewDataNode with autocomplete off attribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternPartTwoTest, ParseNWebViewDataNode003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    MockPipelineContext::SetUp();
+    cJSON* jsObj = cJSON_CreateObject();
+    cJSON* fields = cJSON_Parse("[{\"value\":\"names\"}]");
+    cJSON_AddItemToObject(jsObj, "off", fields);
+    auto child = std::make_unique<JsonValue>(jsObj->child);
+    std::vector<RefPtr<PageNodeInfoWrap>> nodeInfos;
+    int32_t nId = 1;
+    webPattern->ParseNWebViewDataNode(std::move(child), nodeInfos, nId);
+    EXPECT_EQ(nodeInfos.size(), 1);
+    EXPECT_FALSE(nodeInfos[0]->GetEnableAutoFill());
+    MockPipelineContext::TearDown();
+#endif
+}
+
+/**
+ * @tc.name: ParseNWebViewDataNode004
+ * @tc.desc: ParseNWebViewDataNode with normal attribute keeps autofill enabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternPartTwoTest, ParseNWebViewDataNode004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    MockPipelineContext::SetUp();
+    cJSON* jsObj = cJSON_CreateObject();
+    cJSON* fields = cJSON_Parse("[{\"value\":\"names\"}]");
+    cJSON_AddItemToObject(jsObj, "username", fields);
+    auto child = std::make_unique<JsonValue>(jsObj->child);
+    std::vector<RefPtr<PageNodeInfoWrap>> nodeInfos;
+    int32_t nId = 1;
+    webPattern->ParseNWebViewDataNode(std::move(child), nodeInfos, nId);
+    EXPECT_EQ(nodeInfos.size(), 1);
+    EXPECT_TRUE(nodeInfos[0]->GetEnableAutoFill());
+    MockPipelineContext::TearDown();
+#endif
+}
+
+/**
  * @tc.name: GetFocusedType001
  * @tc.desc: GetFocusedType.
  * @tc.type: FUNC

@@ -805,6 +805,100 @@ HWTEST_F(ToggleSwitchPatternTestNg, SwitchPaintProperty_ToJsonValue_IsOnFalse, T
 }
 
 /**
+ * @tc.name: SwitchPattern_ToJsonValue_HasSystemMaterial_001
+ * @tc.desc: Test SwitchPattern::ToJsonValue outputs hasSystemMaterial "false" by default
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchPatternTestNg, SwitchPattern_ToJsonValue_HasSystemMaterial_001, TestSize.Level1)
+{
+    auto switchNode = CreateSwitchNode(IS_ON);
+    ASSERT_NE(switchNode, nullptr);
+    auto pattern = GetPattern(switchNode);
+    ASSERT_NE(pattern, nullptr);
+    SetupThemeManager();
+
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    ASSERT_NE(json, nullptr);
+    InspectorFilter filter;
+    pattern->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("hasSystemMaterial"), "false");
+}
+
+/**
+ * @tc.name: SwitchPattern_DumpInfo_HasSystemMaterial_001
+ * @tc.desc: Test SwitchPattern::DumpInfo outputs HasSystemMaterial and does not crash (AC-4.1)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchPatternTestNg, SwitchPattern_DumpInfo_HasSystemMaterial_001, TestSize.Level1)
+{
+    auto switchNode = CreateSwitchNode(IS_ON);
+    ASSERT_NE(switchNode, nullptr);
+    auto pattern = GetPattern(switchNode);
+    ASSERT_NE(pattern, nullptr);
+    SetupThemeManager();
+
+    pattern->DumpInfo();
+    bool hasHasSystemMaterial = false;
+    for (const auto& desc : DumpLog::GetInstance().description_) {
+        if (desc.find("HasSystemMaterial") != std::string::npos) {
+            hasHasSystemMaterial = true;
+            break;
+        }
+    }
+    EXPECT_TRUE(hasHasSystemMaterial);
+}
+
+/**
+ * @tc.name: SwitchPattern_ToJsonValue_HasSystemMaterial_002
+ * @tc.desc: Test SwitchPattern::ToJsonValue outputs hasSystemMaterial "true" when material set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchPatternTestNg, SwitchPattern_ToJsonValue_HasSystemMaterial_002, TestSize.Level1)
+{
+    auto switchNode = CreateSwitchNode(IS_ON);
+    ASSERT_NE(switchNode, nullptr);
+    auto pattern = GetPattern(switchNode);
+    ASSERT_NE(pattern, nullptr);
+    SetupThemeManager();
+    auto renderContext = switchNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->SetSystemMaterial(AceType::MakeRefPtr<UiMaterial>());
+
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    ASSERT_NE(json, nullptr);
+    InspectorFilter filter;
+    pattern->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("hasSystemMaterial"), "true");
+}
+
+/**
+ * @tc.name: SwitchPattern_DumpInfo_HasSystemMaterial_002
+ * @tc.desc: Test SwitchPattern::DumpInfo outputs "HasSystemMaterial: true" when material set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleSwitchPatternTestNg, SwitchPattern_DumpInfo_HasSystemMaterial_002, TestSize.Level1)
+{
+    auto switchNode = CreateSwitchNode(IS_ON);
+    ASSERT_NE(switchNode, nullptr);
+    auto pattern = GetPattern(switchNode);
+    ASSERT_NE(pattern, nullptr);
+    SetupThemeManager();
+    auto renderContext = switchNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->SetSystemMaterial(AceType::MakeRefPtr<UiMaterial>());
+
+    pattern->DumpInfo();
+    bool hasTrue = false;
+    for (const auto& desc : DumpLog::GetInstance().description_) {
+        if (desc.find("HasSystemMaterial: true") != std::string::npos) {
+            hasTrue = true;
+            break;
+        }
+    }
+    EXPECT_TRUE(hasTrue);
+}
+
+/**
  * @tc.name: SwitchPaintProperty_ToJsonValue_PointRadiusSet
  * @tc.desc: Test ToJsonValue emits the user-configured pointRadius when it is set.
  * @tc.type: FUNC

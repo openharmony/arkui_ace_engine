@@ -168,9 +168,6 @@ void TokenThemeStorage::ResetThemeColor(int32_t themeId, RefPtr<TokenTheme>& the
 
 void TokenThemeStorage::CacheResetColor()
 {
-    if (themeCache_.size() == 0) {
-        return;
-    }
     auto colorMode = CheckLocalAndSystemColorMode();
     auto defaultTheme = GetDefaultTheme();
     if (!defaultTheme) {
@@ -179,6 +176,9 @@ void TokenThemeStorage::CacheResetColor()
         CacheSet(defaultTheme);
     }
     std::lock_guard<std::mutex> lock(themeCacheMutex_);
+    if (themeCache_.empty()) {
+        return;
+    }
     for (auto& [themeId, theme] : themeCache_) {
         LOGD("Theme reset colors with id %{public}d", themeId);
         if (!theme || (theme->GetColorMode() != ColorMode::COLOR_MODE_UNDEFINED)) {

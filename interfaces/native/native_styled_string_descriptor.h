@@ -3181,19 +3181,19 @@ ArkUI_ErrorCode OH_ArkUI_ImageAttachment_SetResizableLattice(
     OH_ArkUI_ImageAttachment* imageAttachment, const OH_Drawing_Lattice* lattice);
 
 /**
- * @brief Get the resizable lattice of the image attachment.
+ * @brief Obtains the resizable image lattice in the image style.
  *
- * @param imageAttachment Pointer to the <b>OH_ArkUI_ImageAttachment</b> object.
- * @param lattice Pointer to a pointer that receives the lattice handle previously set by
- *                <b>OH_ArkUI_ImageAttachment_SetResizableLattice</b>. The caller does not take
- *                ownership of the returned handle; its lifetime is bound to the source attachment.
- * @return Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if successful,
- *         {@link ARKUI_ERROR_CODE_GET_INFO_FAILED} if not set,
- *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} if parameter is invalid.
- * @since 26
+ * @note All input pointer parameters must be allocated, managed, and released by the caller.
+ * @param imageAttachment [in] Pointer to the {@link OH_ArkUI_ImageAttachment} object.
+ * @param lattice [out] Output parameter. Pointer to the image resizable lattice.
+ *     The type is {@link OH_Drawing_Lattice}.
+ * @return Returns the result code.
+ *     <br>Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *     <br>Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 26.1.0
  */
 ArkUI_ErrorCode OH_ArkUI_ImageAttachment_GetResizableLattice(const OH_ArkUI_ImageAttachment* imageAttachment,
-    OH_Drawing_Lattice** lattice);
+    OH_Drawing_Lattice* lattice);
 
 /**
  * @brief Obtains the range of content that will be replaced.

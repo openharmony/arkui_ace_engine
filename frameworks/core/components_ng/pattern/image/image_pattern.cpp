@@ -48,6 +48,7 @@
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/adapter/pixelmap_image.h"
 #include "core/drawable/animated_drawable_descriptor.h"
 #include "core/drawable/picture_drawable_descriptor.h"
 #include "core/gestures/drag_event.h"
@@ -62,6 +63,59 @@ constexpr int32_t NEED_MASK_INDEX = 3;
 constexpr int32_t KERNEL_MAX_LENGTH_EXCEPT_OTHER = 245;
 constexpr size_t NEED_MASK_START_OFFSET = 2;
 constexpr int32_t INVALID_ID = -1;
+constexpr char DMA_RELEASE_ASYNC_TRACE_NAME[] = "RecycledDmaPixelMapsRelease";
+using DmaPixelMapList = std::vector<std::shared_ptr<Media::PixelMap>>;
+
+void CollectDmaPixelMap(const RefPtr<CanvasImage>& canvasImage, DmaPixelMapList& pixelMaps)
+{
+    auto pixelMapImage = AceType::DynamicCast<PixelMapImage>(canvasImage);
+    CHECK_NULL_VOID(pixelMapImage);
+    auto pixelMap = pixelMapImage->GetPixelMap();
+    if (!pixelMap || pixelMap->GetAllocatorType() != AllocatorType::DMA_ALLOC) {
+        return;
+    }
+    auto mediaPixelMap = pixelMap->GetPixelMapSharedPtr();
+    CHECK_NULL_VOID(mediaPixelMap);
+    auto iter = std::find_if(pixelMaps.begin(), pixelMaps.end(), [&mediaPixelMap](const auto& item) {
+        return item.get() == mediaPixelMap.get();
+    });
+    if (iter == pixelMaps.end()) {
+        pixelMaps.emplace_back(std::move(mediaPixelMap));
+    }
+}
+
+template<typename T>
+RefPtr<CanvasImage> GetCanvasImageFromHolder(const RefPtr<T>& holder)
+{
+    return holder ? holder->GetCanvasImage() : nullptr;
+}
+
+DmaPixelMapList CollectDmaPixelMaps(std::initializer_list<RefPtr<CanvasImage>> canvasImages)
+{
+    DmaPixelMapList pixelMaps;
+    for (const auto& canvasImage : canvasImages) {
+        CollectDmaPixelMap(canvasImage, pixelMaps);
+    }
+    return pixelMaps;
+}
+
+void ReleaseDmaPixelMapsOnBackground(DmaPixelMapList&& pixelMaps)
+{
+    if (pixelMaps.empty()) {
+        return;
+    }
+    static std::atomic<int32_t> releaseIdGenerator = 0;
+    auto releaseId = releaseIdGenerator.fetch_add(1, std::memory_order_relaxed);
+    ACE_SCOPED_TRACE("PostRecycledDmaPixelMaps releaseId:%d count:%zu", releaseId, pixelMaps.size());
+    AceAsyncTraceBegin(releaseId, DMA_RELEASE_ASYNC_TRACE_NAME);
+    ImageUtils::PostToBg(
+        [releaseId, pixelMaps = std::move(pixelMaps)]() mutable {
+            ACE_SCOPED_TRACE("RunRecycledDmaPixelMaps releaseId:%d count:%zu", releaseId, pixelMaps.size());
+            pixelMaps.clear();
+            AceAsyncTraceEnd(releaseId, DMA_RELEASE_ASYNC_TRACE_NAME);
+        },
+        "ArkUIImageReleaseRecycledDmaPixelMaps", Container::CurrentId(), PriorityType::LOW);
+}
 
 std::string GetImageInterpolation(ImageInterpolation interpolation)
 {
@@ -1145,7 +1199,6 @@ ImageDfxConfig ImagePattern::CreateImageDfxConfig(const ImageSourceInfo& src)
         { host->GetId(), host->GetAccessibilityId(), renderContext->GetNodeId() },
         static_cast<int32_t>(src.GetSrcType()),
         src.ToString().substr(0, MAX_SRC_LENGTH),
-        host->IsTrimMemRecycle(),
     };
 }
 
@@ -1643,75 +1696,38 @@ void ImagePattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
     }
 }
 
-bool ImagePattern::RecycleImageData()
-{
-    auto frameNode = GetHost();
-    if (!frameNode) {
-        return false; 
-    }
-    auto pipeline = frameNode->GetContext();
-    if (!pipeline) {
-        return false;
-    }
-    // Use app-level recycle setting if provided; otherwise fall back to system default.
-    std::optional<bool> isAppRecycleEnabled = pipeline->GetIsRecycleInvisibleImageMemory();
-    bool enableImageRecycle = isAppRecycleEnabled.value_or(SystemProperties::GetRecycleImageEnabled());
-    if (!enableImageRecycle) {
-        return false;
-    }
-    // For network images, only recycle image data when cache is available to avoid re-download.
-    if (loadingCtx_ && !loadingCtx_->IsNetworkImageSafeToRecycle()) {
-        return false;
-    }
-    loadingCtx_ = nullptr;
-    auto rsRenderContext = frameNode->GetRenderContext();
-    if (!rsRenderContext) {
-        return false;
-    }
-    TAG_LOGD(AceLogTag::ACE_IMAGE, "%{public}s, %{private}s recycleImageData.",
-        imageDfxConfig_.ToStringWithoutSrc().c_str(), imageDfxConfig_.GetImageSrc().c_str());
-    rsRenderContext->RemoveContentModifier(contentMod_);
-    contentMod_ = nullptr;
-    imagePaintMethod_ = nullptr;
-    imagePaintMethod_ = nullptr;
-    image_ = nullptr;
-    altLoadingCtx_ = nullptr;
-    altImage_ = nullptr;
-    altErrorCtx_ = nullptr;
-    altErrorImage_ = nullptr;
-    isRecycledImage_ = true;
-    ACE_SCOPED_TRACE("OnRecycleImageData imageInfo: [%s]", imageDfxConfig_.ToStringWithSrc().c_str());
-    return true;
-}
-
-bool ImagePattern::RecycleImageDataForNav()
+bool ImagePattern::DoRecycleImageData(const std::string& logSuffix, const std::string& traceTag, bool checkNetworkImage)
 {
     auto frameNode = GetHost();
     if (!frameNode) {
         return false;
     }
-    // For network images, only recycle image data when cache is available to avoid re-download.
-    if (loadingCtx_ && !loadingCtx_->IsNetworkImageSafeToRecycle()) {
+    if (checkNetworkImage && loadingCtx_ && !loadingCtx_->IsNetworkImageSafeToRecycle()) {
         return false;
     }
     loadingCtx_ = nullptr;
-    auto rsRenderContext = frameNode->GetRenderContext();
-    if (!rsRenderContext) {
-        return false;
-    }
-    TAG_LOGD(AceLogTag::ACE_IMAGE, "%{public}s, %{private}s recycleImageData for Nav.",
-        imageDfxConfig_.ToStringWithoutSrc().c_str(), imageDfxConfig_.GetImageSrc().c_str());
-    rsRenderContext->RemoveContentModifier(contentMod_);
-    contentMod_ = nullptr;
-    imagePaintMethod_ = nullptr;
-    imagePaintMethod_ = nullptr;
     image_ = nullptr;
     altLoadingCtx_ = nullptr;
     altImage_ = nullptr;
     altErrorCtx_ = nullptr;
     altErrorImage_ = nullptr;
+    srcRect_.Reset();
+    dstRect_.Reset();
+    altDstRect_.reset();
+    altSrcRect_.reset();
+    altErrorDstRect_.reset();
+    altErrorSrcRect_.reset();
     isRecycledImage_ = true;
-    ACE_SCOPED_TRACE("OnRecycleImageDataForNav imageInfo: [%s]", imageDfxConfig_.ToStringWithSrc().c_str());
+    imagePaintMethod_ = nullptr;
+    auto rsRenderContext = frameNode->GetRenderContext();
+    if (!rsRenderContext) {
+        return false;
+    }
+    ACE_SCOPED_TRACE("%s imageInfo: [%s]", traceTag.c_str(), imageDfxConfig_.ToStringWithSrc().c_str());
+    TAG_LOGD(AceLogTag::ACE_IMAGE, "%{public}s, %{private}s %{public}s.",
+        imageDfxConfig_.ToStringWithoutSrc().c_str(), imageDfxConfig_.GetImageSrc().c_str(), logSuffix.c_str());
+    rsRenderContext->RemoveContentModifier(contentMod_);
+    contentMod_ = nullptr;
     return true;
 }
 
@@ -1736,22 +1752,15 @@ void ImagePattern::OnRecycle()
 {
     TAG_LOGD(AceLogTag::ACE_IMAGE, "OnRecycle. %{public}s", imageDfxConfig_.ToStringWithoutSrc().c_str());
     ACE_SCOPED_TRACE("OnRecycle %s", imageDfxConfig_.ToStringWithSrc().c_str());
-    loadingCtx_ = nullptr;
-    image_ = nullptr;
-    altLoadingCtx_ = nullptr;
-    altImage_ = nullptr;
-    altErrorCtx_ = nullptr;
-    altErrorImage_ = nullptr;
+    auto dmaPixelMaps = CollectDmaPixelMaps({ image_, altImage_, altErrorImage_,
+        GetCanvasImageFromHolder(loadingCtx_), GetCanvasImageFromHolder(altLoadingCtx_),
+        GetCanvasImageFromHolder(altErrorCtx_), GetCanvasImageFromHolder(imagePaintMethod_),
+        GetCanvasImageFromHolder(contentMod_) });
 
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    auto rsRenderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(rsRenderContext);
-    rsRenderContext->RemoveContentModifier(contentMod_);
-    contentMod_ = nullptr;
-    imagePaintMethod_ = nullptr;
+    DoRecycleImageData("OnRecycle", "OnRecycle", false);
     UnregisterWindowStateChangedCallback();
-    frameNode->SetTrimMemRecycle(false);
+
+    ReleaseDmaPixelMapsOnBackground(std::move(dmaPixelMaps));
 }
 
 void ImagePattern::OnReuse()
@@ -1792,7 +1801,17 @@ void ImagePattern::OnWindowHide()
     if (!isRecycledImage_ && renderContext && !renderContext->IsOnRenderTree()) {
         TAG_LOGD(AceLogTag::ACE_IMAGE, "OnWindowHide recycle ImageData: %{public}s-%{private}s",
             imageDfxConfig_.ToStringWithoutSrc().c_str(), imageDfxConfig_.GetImageSrc().c_str());
-        RecycleImageData();
+        auto pipeline = host->GetContext();
+        if (!pipeline) {
+            return;
+        }
+        // Use app-level recycle setting if provided; otherwise fall back to system default.
+        std::optional<bool> isAppRecycleEnabled = pipeline->GetIsRecycleInvisibleImageMemory();
+        bool enableImageRecycle = isAppRecycleEnabled.value_or(SystemProperties::GetRecycleImageEnabled());
+        if (!enableImageRecycle) {
+            return;
+        }
+        DoRecycleImageData("recycleImageData", "OnRecycleImageData");
     }
 }
 
@@ -2001,7 +2020,7 @@ void ImagePattern::CancelNavDestRecycleTask()
 void ImagePattern::ExecuteNavDestRecycle()
 {
     navDestRecycleCallback_.reset();
-    RecycleImageDataForNav();
+    DoRecycleImageData("recycleImageData for Nav", "OnRecycleImageDataForNav");
 }
 
 void ImagePattern::EnableDrag()
@@ -2947,7 +2966,6 @@ void ImagePattern::ResetImage()
         contentMod_ = nullptr;
         imagePaintMethod_ = nullptr;
     }
-    host->SetTrimMemRecycle(false);
 }
 
 void ImagePattern::ResetAltImage()
@@ -2977,29 +2995,12 @@ void ImagePattern::ResetImageAndAlt()
         isNeedReset_ = true;
         return;
     }
-    image_ = nullptr;
-    loadingCtx_ = nullptr;
-    srcRect_.Reset();
-    dstRect_.Reset();
-    altLoadingCtx_ = nullptr;
-    altImage_ = nullptr;
-    altDstRect_.reset();
-    altSrcRect_.reset();
-    altErrorCtx_ = nullptr;
-    altErrorImage_ = nullptr;
-    altErrorDstRect_.reset();
-    altErrorSrcRect_.reset();
-    auto rsRenderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(rsRenderContext);
-    rsRenderContext->RemoveContentModifier(contentMod_);
-    contentMod_ = nullptr;
-    imagePaintMethod_ = nullptr;
+    DoRecycleImageData("ResetImageAndAlt", "ResetImageAndAlt", false);
     CloseSelectOverlay();
 #ifdef SUPPORT_IMAGE_ANALYZER
     DestroyAnalyzerOverlay();
 #endif
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    frameNode->SetTrimMemRecycle(false);
 }
 
 void ImagePattern::TriggerVisibleAreaChangeForChild(const RefPtr<UINode>& node, bool visible, double ratio)

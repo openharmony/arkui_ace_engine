@@ -168,10 +168,10 @@ public:
         }
     }
 
-    void SetEscapeModeForScroll(const std::unordered_set<int32_t>& fingerIds)
+    void SetEscapeModeForScroll(const std::unordered_set<int32_t>& fingerIds, bool toEntityManager = false)
     {
         CHECK_NULL_VOID(panRecognizerNG_);
-        panRecognizerNG_->SetEscapeModeForPan(fingerIds);
+        panRecognizerNG_->SetEscapeModeForPan(fingerIds, toEntityManager);
     }
 
     void SetScrollEndCallback(const ScrollEventCallback& scrollEndCallback)

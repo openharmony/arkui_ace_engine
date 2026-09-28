@@ -223,10 +223,8 @@ void ImageProvider::CreateImageObjHelper(ImageSourceInfo& src, bool sync, bool i
     // ImageObject cache is only for saving image size info, clear data to save memory
     cloneImageObj->ClearData();
 
-    // Skip caching when the image is SVG and svg cache skip is enabled
-    if (!SystemProperties::GetSvgCacheSkipEnabled() && (!src.IsSvg() || !isSceneBoardWindow)) {
-        CacheImageObject(cloneImageObj);
-    } else if (!src.IsSvg()) {
+    // Only skip caching when the image is SVG and it's SceneBoard
+    if (!src.IsSvg() || !isSceneBoardWindow) {
         CacheImageObject(cloneImageObj);
     }
 

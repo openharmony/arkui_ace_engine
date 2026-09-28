@@ -626,7 +626,7 @@ void TextFieldPattern::ProcessDefaultStyleAndBehaviorsMultiThread()
     textfieldPaintProperty->UpdateHoverBgColor(textFieldTheme->GetHoverColor());
     auto renderContext = frameNode->GetRenderContext();
     if (!textfieldPaintProperty->HasBackgroundColor()) {
-        renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
+        UpdateBackgroundColorForMaterial(textFieldTheme->GetBgColor());
     }
     if (!textfieldPaintProperty->HasCaretColorFlagByUser()) {
         textfieldPaintProperty->UpdateCursorColor(textFieldTheme->GetCursorColor());

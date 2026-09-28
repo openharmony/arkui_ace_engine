@@ -60,6 +60,12 @@ RSRecordingPath SvgUse::AsPath(const Size& viewPort) const
         LOGE("href is empty");
         return {};
     }
+    if (!svgContext->IncrementAsPathDepth()) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "SvgUse::AsPath(Size) depth exceeded limit for href=%{public}s",
+            attributes_.href.c_str());
+        return RSRecordingPath();
+    }
+    AsPathDepthGuard depthGuard(svgContext);
     if (!svgContext->IncrementHrefResolveCount()) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "SvgUse::AsPath href resolve count exceeded limit for href=%{public}s",
             attributes_.href.c_str());
@@ -87,6 +93,12 @@ RSRecordingPath SvgUse::AsPath(const SvgLengthScaleRule& lengthRule)
         LOGE("href is empty");
         return {};
     }
+    if (!svgContext->IncrementAsPathDepth()) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "SvgUse::AsPath(lengthRule) depth exceeded limit for href=%{public}s",
+            attributes_.href.c_str());
+        return RSRecordingPath();
+    }
+    AsPathDepthGuard depthGuard(svgContext);
     if (!svgContext->IncrementHrefResolveCount()) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "SvgUse::AsPath href resolve count exceeded limit for href=%{public}s",
             attributes_.href.c_str());
@@ -111,6 +123,11 @@ void SvgUse::OnDraw(RSCanvas& canvas, const Size& layout, const std::optional<Co
     auto svgContext = svgContext_.Upgrade();
     CHECK_NULL_VOID(svgContext);
     if (attributes_.href.empty()) {
+        return;
+    }
+    if (svgContext->IsDrawDepthExceededUseLimit()) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "SvgUse::OnDraw(Size) draw depth exceeded limit for href=%{public}s",
+            attributes_.href.c_str());
         return;
     }
     if (!svgContext->IncrementHrefResolveCount()) {
@@ -160,6 +177,11 @@ void SvgUse::OnDraw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
     auto svgContext = svgContext_.Upgrade();
     CHECK_NULL_VOID(svgContext);
     if (attributes_.href.empty()) {
+        return;
+    }
+    if (svgContext->IsDrawDepthExceededUseLimit()) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "SvgUse::OnDraw(lengthRule) draw depth exceeded limit for href=%{public}s",
+            attributes_.href.c_str());
         return;
     }
     if (!svgContext->IncrementHrefResolveCount()) {

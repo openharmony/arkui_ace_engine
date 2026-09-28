@@ -1085,6 +1085,79 @@ TEST_F(FreeScrollTest, Scroller003)
 }
 
 /**
+ * @tc.name: ScrollerPageCapiFree001
+ * @tc.desc: Test CAPI NODE_SCROLL_PAGE on a free-scroll routes through ScrollableController::
+ *           ScrollPage -> FreeScrollPage and advances exactly one viewport height per page.
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, ScrollerPageCapiFree001)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
+    CreateScrollDone();
+    auto scroller = AceType::MakeRefPtr<ScrollableController>();
+    scroller->SetScrollPattern(pattern_);
+
+    // CAPI SetScrollPage (next=0) is forwarded to the scroll controller, which for an
+    // Axis::FREE scroll calls FreeScrollPage and shifts the free offset by one viewport.
+    scroller->ScrollPage(false, false);
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(0, -HEIGHT).ToString());
+
+    scroller->ScrollPage(false, false);
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(0, -HEIGHT * 2).ToString());
+}
+
+/**
+ * @tc.name: ScrollerPageCapiFreeReverse001
+ * @tc.desc: Test CAPI NODE_SCROLL_PAGE previous (next=1) on a free-scroll goes back one page.
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, ScrollerPageCapiFreeReverse001)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
+    CreateScrollDone();
+    auto scroller = AceType::MakeRefPtr<ScrollableController>();
+    scroller->SetScrollPattern(pattern_);
+
+    scroller->ScrollPage(false, false);
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(0, -HEIGHT).ToString());
+
+    // previous page returns to the start
+    scroller->ScrollPage(true, false);
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(0, 0).ToString());
+}
+
+/**
+ * @tc.name: ScrollerPageCapiFreeNonBound001
+ * @tc.desc: Test ScrollableController::ScrollPage is a safe no-op when not bound to a pattern
+ *           (scroll_.Upgrade() returns null), covering the guard branch.
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, ScrollerPageCapiFreeNonBound001)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
+    CreateScrollDone();
+
+    // controller never bound via SetScrollPattern -> internal scroll_ is null -> no-op, no crash
+    auto scroller = AceType::MakeRefPtr<ScrollableController>();
+    scroller->ScrollPage(false, false);
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(0, 0).ToString());
+}
+
+/**
  * @tc.name: ScrollerNullCurve001
  * @tc.desc: Test that FreeScrollTo with a null curve hits the default InterpolatingSpring branch
  *           in FreeScrollController::ScrollTo (if (!curve))

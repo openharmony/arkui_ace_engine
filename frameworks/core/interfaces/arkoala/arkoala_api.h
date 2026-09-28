@@ -3636,6 +3636,7 @@ struct ArkUICommonModifier {
     ArkUI_Int32 (*getClip)(ArkUINodeHandle node);
     void (*getClipShape)(ArkUINodeHandle node, ArkUIClipShapeOptions* options, ArkUI_Int32 unit);
     void (*getTransform)(ArkUINodeHandle node, ArkUI_Float32 (*values)[16]);
+    void (*getTransform3D)(ArkUINodeHandle node, ArkUI_Float32 (*values)[16]);
     ArkUI_Int32 (*getHitTestBehavior)(ArkUINodeHandle node);
     void (*getPosition)(ArkUINodeHandle node, ArkUIPositionOptions* options, ArkUI_Int32 unit);
     ArkUI_Int32 (*getShadow)(ArkUINodeHandle node);
@@ -5662,19 +5663,14 @@ struct ArkUITabsModifier {
     void (*setBarBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*setBarBackgroundColorByUser)(ArkUINodeHandle node, ArkUI_Bool colorByUser);
     void (*setTabsSidebarSelectedIconColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
-    void (*createTabsSidebarSelectedIconWithResourceObj)(ArkUINodeHandle node, void* iconColorRawPtr);
     void (*resetTabsSidebarSelectedIconColor)(ArkUINodeHandle node);
     void (*setTabsSidebarSelectedTextColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
-    void (*createTabsSidebarSelectedTextWithResourceObj)(ArkUINodeHandle node, void* iconColorRawPtr);
     void (*resetTabsSidebarSelectedTextColor)(ArkUINodeHandle node);
     void (*setTabsSidebarUnselectedIconColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
-    void (*createTabsSidebarUnselectedIconWithResourceObj)(ArkUINodeHandle node, void* iconColorRawPtr);
     void (*resetTabsSidebarUnselectedIconColor)(ArkUINodeHandle node);
     void (*setTabsSidebarUnselectedTextColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
-    void (*createTabsSidebarUnselectedTextWithResourceObj)(ArkUINodeHandle node, void* iconColorRawPtr);
     void (*resetTabsSidebarUnselectedTextColor)(ArkUINodeHandle node);
     void (*setTabsSidebarSelectedBoardColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
-    void (*createTabsSidebarSelectedBoardWithResourceObj)(ArkUINodeHandle node, void* iconColorRawPtr);
     void (*resetTabsSidebarSelectedBoardColor)(ArkUINodeHandle node);
     void (*setBarBackgroundBlurStyle)(ArkUINodeHandle node, ArkUITabBarBackgroundBlurStyle* styleOption);
     void (*setBarBackgroundBlurStyleWithStyleOption)(ArkUINodeHandle node, void* styleOption);
@@ -5779,6 +5775,24 @@ struct ArkUITabsModifier {
     void (*resetSidebarDisplayStyle)(ArkUINodeHandle node);
     void (*setTabsIndex)(ArkUINodeHandle node, ArkUI_Int32 indexVal);
     void (*setTabsOnChangeEvent)(ArkUINodeHandle node, void* callback);
+    void (*setTabSidebarWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetTabSidebarWidth)(ArkUINodeHandle node);
+    void (*setTabMinSidebarWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetTabMinSidebarWidth)(ArkUINodeHandle node);
+    void (*setTabMaxSidebarWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetTabMaxSidebarWidth)(ArkUINodeHandle node);
+    void (*setTabMinContentWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetTabMinContentWidth)(ArkUINodeHandle node);
+    void (*setTabSidebarBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*setTabSidebarBackgroundColorByUser)(ArkUINodeHandle node, ArkUI_Bool colorByUser);
+    void (*resetTabSidebarBackgroundColor)(ArkUINodeHandle node);
+    void (*setTabSidebarBackgroundBlurStyle)(ArkUINodeHandle node, ArkUI_Uint32 blurStyle);
+    void (*resetTabSidebarBackgroundBlurStyle)(ArkUINodeHandle node);
+    void (*setSidebarDivider)(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
+        const ArkUI_Int32* units, ArkUI_Int32 length);
+    void (*setSidebarDividerColorByUser)(ArkUINodeHandle node, ArkUI_Bool colorByUser);
+    void (*resetSidebarDivider)(ArkUINodeHandle node);
+    void (*createWithSidebarResourceObj)(ArkUINodeHandle node, void* paramRawPtr);
 };
 
 struct ArkUIStepperItemModifier {
@@ -7196,6 +7210,8 @@ struct ArkUIWebModifier {
     void (*resetKeyboardAppearance)(ArkUINodeHandle node);
     void (*setEnableFullscreenVideoOverlay)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetEnableFullscreenVideoOverlay)(ArkUINodeHandle node);
+    void (*setOnZoomChangeCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetOnZoomChangeCallBack)(ArkUINodeHandle node);
 };
 
 struct ArkUIBlankModifier {
@@ -10537,11 +10553,9 @@ struct ArkUIBasicAPI {
     void (*setErrorCodeAndMessage)(ArkUI_Int32 errorCode, ArkUI_CharPtr errorMessage);
     void (*setErrorFunctionName)(ArkUI_CharPtr functionName);
     const char* (*getErrorMessage)();
-    // Returns whether the current application package is a debug build.
-    ArkUI_Bool (*isDebugVersion)();
-    // Returns whether the current thread is the UI thread of the current pipeline context.
-    // No container/pipeline, no task executor and form render are all treated as safe.
     ArkUI_Bool (*isCurrentThreadSafe)();
+    ArkUI_Bool (*isDebugForParallel)();
+    ArkUI_Bool (*isDebugForParallelSet)();
 };
 
 struct ArkUIMultiThreadManagerAPI {

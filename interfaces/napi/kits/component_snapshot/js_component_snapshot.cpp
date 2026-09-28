@@ -15,6 +15,8 @@
 
 #include "js_component_snapshot.h"
 
+#include "base/utils/napi_scope_raii.h"
+
 #include "interfaces/napi/kits/utils/napi_utils.h"
 #ifdef PIXEL_MAP_SUPPORTED
 #include "pixel_map.h"
@@ -63,8 +65,7 @@ void OnComplete(SnapshotAsyncCtx* asyncCtx, std::function<void()> finishCallback
     taskExecutor->PostTask(
         [asyncCtx, finishCallback]() {
             std::unique_ptr<SnapshotAsyncCtx> ctx(asyncCtx);
-            napi_handle_scope scope = nullptr;
-            napi_open_handle_scope(ctx->env, &scope);
+            ScopeRAII scope(ctx->env);
 
             // callback result format: [Error, PixelMap]
             napi_value result[2] = { nullptr };
@@ -95,7 +96,6 @@ void OnComplete(SnapshotAsyncCtx* asyncCtx, std::function<void()> finishCallback
                 napi_delete_reference(ctx->env, ctx->callbackRef);
             }
 
-            napi_close_handle_scope(ctx->env, scope);
             if (finishCallback) {
                 finishCallback();
             }
@@ -492,8 +492,7 @@ static void HandleSyncSnapshotResult(
 
 static napi_value JSSnapshotGet(napi_env env, napi_callback_info info)
 {
-    napi_escapable_handle_scope scope = nullptr;
-    napi_open_escapable_handle_scope(env, &scope);
+    EscapableScopeRAII scope(env);
 
     JsComponentSnapshot helper(env, info);
 
@@ -501,7 +500,6 @@ static napi_value JSSnapshotGet(napi_env env, napi_callback_info info)
 
     if (!helper.CheckArgs(napi_valuetype::napi_string)) {
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Parsing the first argument failed, not of string type.");
-        napi_close_escapable_handle_scope(env, scope);
         return result;
     }
 
@@ -517,7 +515,6 @@ static napi_value JSSnapshotGet(napi_env env, napi_callback_info info)
             SEC_PARAM(componentId.c_str()));
         auto callback = helper.CreateCallback(&result);
         callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
-        napi_close_escapable_handle_scope(env, scope);
         return result;
     }
 
@@ -526,20 +523,17 @@ static napi_value JSSnapshotGet(napi_env env, napi_callback_info info)
 
     delegate->GetSnapshot(componentId, helper.CreateCallback(&result), options);
 
-    napi_escape_handle(env, scope, result, &result);
-    napi_close_escapable_handle_scope(env, scope);
+    scope.Escape(result, &result);
     return result;
 }
 
 static napi_value JSSnapshotFromBuilder(napi_env env, napi_callback_info info)
 {
-    napi_escapable_handle_scope scope = nullptr;
-    napi_open_escapable_handle_scope(env, &scope);
+    EscapableScopeRAII scope(env);
 
     JsComponentSnapshot helper(env, info);
     if (!helper.CheckArgs(napi_valuetype::napi_function)) {
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Parsing the first argument failed, not of function type.");
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
 
@@ -549,7 +543,6 @@ static napi_value JSSnapshotFromBuilder(napi_env env, napi_callback_info info)
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Can't get delegate of ace_engine. ");
         auto callback = helper.CreateCallback(&result);
         callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
 
@@ -565,21 +558,18 @@ static napi_value JSSnapshotFromBuilder(napi_env env, napi_callback_info info)
             "isAuto(true) is not supported for offscreen node snapshots.");
         auto callback = helper.CreateCallback(&result);
         callback(nullptr, ERROR_CODE_COMPONENT_SNAPSHOT_AUTO_NOT_SUPPORTED, nullptr);
-        napi_close_escapable_handle_scope(env, scope);
         return result;
     }
 
     delegate->CreateSnapshot(builder, helper.CreateCallback(&result), true, param);
 
-    napi_escape_handle(env, scope, result, &result);
-    napi_close_escapable_handle_scope(env, scope);
+    scope.Escape(result, &result);
     return result;
 }
 
 static napi_value JSSnapshotGetSync(napi_env env, napi_callback_info info)
 {
-    napi_escapable_handle_scope scope = nullptr;
-    napi_open_escapable_handle_scope(env, &scope);
+    EscapableScopeRAII scope(env);
 
     JsComponentSnapshot helper(env, info);
 
@@ -587,7 +577,6 @@ static napi_value JSSnapshotGetSync(napi_env env, napi_callback_info info)
 
     if (!helper.CheckArgs(napi_valuetype::napi_string)) {
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Parsing the first argument failed, not of string type.");
-        napi_close_escapable_handle_scope(env, scope);
         return result;
     }
 
@@ -604,7 +593,6 @@ static napi_value JSSnapshotGetSync(napi_env env, napi_callback_info info)
         std::string message = AceEngine::GetEnhancedContextBNotFoundMessage(
             reason, instanceId);
         NapiThrow(env, "Delegate is null. " + message, ERROR_CODE_INTERNAL_ERROR);
-        napi_close_escapable_handle_scope(env, scope);
         return result;
     }
 
@@ -613,15 +601,13 @@ static napi_value JSSnapshotGetSync(napi_env env, napi_callback_info info)
 
     auto pair = delegate->GetSyncSnapshot(componentId,  options);
     HandleSyncSnapshotResult(env, pair, result);
-    napi_escape_handle(env, scope, result, &result);
-    napi_close_escapable_handle_scope(env, scope);
+    scope.Escape(result, &result);
     return result;
 }
 
 static napi_value JSSnapshotGetWithUniqueId(napi_env env, napi_callback_info info)
 {
-    napi_escapable_handle_scope scope = nullptr;
-    napi_open_escapable_handle_scope(env, &scope);
+    EscapableScopeRAII scope(env);
 
     JsComponentSnapshot helper(env, info);
 
@@ -632,7 +618,6 @@ static napi_value JSSnapshotGetWithUniqueId(napi_env env, napi_callback_info inf
     if (type != napi_valuetype::napi_number) {
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Parsing the first argument failed, not of number type.");
         NapiThrow(env, "parameter uniqueId is not of type number", ERROR_CODE_PARAM_INVALID);
-        napi_close_escapable_handle_scope(env, scope);
         return result;
     }
     // parse uniqueId
@@ -646,7 +631,6 @@ static napi_value JSSnapshotGetWithUniqueId(napi_env env, napi_callback_info inf
             uniqueId);
         auto callback = helper.CreateCallback(&result);
         callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
-        napi_close_escapable_handle_scope(env, scope);
         return result;
     }
 
@@ -655,15 +639,13 @@ static napi_value JSSnapshotGetWithUniqueId(napi_env env, napi_callback_info inf
 
     delegate->GetSnapshotByUniqueId(uniqueId, helper.CreateCallback(&result), options);
 
-    napi_escape_handle(env, scope, result, &result);
-    napi_close_escapable_handle_scope(env, scope);
+    scope.Escape(result, &result);
     return result;
 }
 
 static napi_value JSSnapshotGetSyncWithUniqueId(napi_env env, napi_callback_info info)
 {
-    napi_escapable_handle_scope scope = nullptr;
-    napi_open_escapable_handle_scope(env, &scope);
+    EscapableScopeRAII scope(env);
 
     JsComponentSnapshot helper(env, info);
 
@@ -674,7 +656,6 @@ static napi_value JSSnapshotGetSyncWithUniqueId(napi_env env, napi_callback_info
     if (type != napi_valuetype::napi_number) {
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Parsing the first argument failed, not of number type.");
         NapiThrow(env, "parameter uniqueId is not of type number", ERROR_CODE_PARAM_INVALID);
-        napi_close_escapable_handle_scope(env, scope);
         return result;
     }
     // parse uniqueId
@@ -690,7 +671,6 @@ static napi_value JSSnapshotGetSyncWithUniqueId(napi_env env, napi_callback_info
         std::string message = AceEngine::GetEnhancedContextBNotFoundMessage(
             reason, instanceId);
         NapiThrow(env, "Delegate is null. " + message, ERROR_CODE_INTERNAL_ERROR);
-        napi_close_escapable_handle_scope(env, scope);
         return result;
     }
 
@@ -699,20 +679,17 @@ static napi_value JSSnapshotGetSyncWithUniqueId(napi_env env, napi_callback_info
 
     auto pair = delegate->GetSyncSnapshotByUniqueId(uniqueId,  options);
     HandleSyncSnapshotResult(env, pair, result);
-    napi_escape_handle(env, scope, result, &result);
-    napi_close_escapable_handle_scope(env, scope);
+    scope.Escape(result, &result);
     return result;
 }
 
 static napi_value JSSnapshotFromComponent(napi_env env, napi_callback_info info)
 {
-    napi_escapable_handle_scope scope = nullptr;
-    napi_open_escapable_handle_scope(env, &scope);
+    EscapableScopeRAII scope(env);
 
     JsComponentSnapshot helper(env, info);
     if (!helper.CheckArgs(napi_valuetype::napi_object)) {
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Parsing the first argument failed, not of object type.");
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
 
@@ -725,7 +702,6 @@ static napi_value JSSnapshotFromComponent(napi_env env, napi_callback_info info)
         std::string message = AceEngine::GetEnhancedContextBNotFoundMessage(
             reason, instanceId);
         NapiThrow(env, "Delegate is null. " + message, ERROR_CODE_INTERNAL_ERROR);
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
 
@@ -733,19 +709,16 @@ static napi_value JSSnapshotFromComponent(napi_env env, napi_callback_info info)
     auto componentResult = napi_get_named_property(env, helper.GetArgv(0), "nodePtr_", &frameNodePtr);
     if (componentResult != napi_ok) {
         NapiThrow(env, "The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     void* nativePtr = nullptr;
     componentResult = napi_get_value_external(env, frameNodePtr, &nativePtr);
     if (componentResult != napi_ok) {
         NapiThrow(env, "The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     if (!nativePtr) {
         NapiThrow(env, "The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
-        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     WeakPtr<NG::UINode> nodeWk;
@@ -761,52 +734,44 @@ static napi_value JSSnapshotFromComponent(napi_env env, napi_callback_info info)
             "isAuto(true) is not supported for offscreen node snapshots.");
         auto callback = helper.CreateCallback(&result);
         callback(nullptr, ERROR_CODE_COMPONENT_SNAPSHOT_AUTO_NOT_SUPPORTED, nullptr);
-        napi_close_escapable_handle_scope(env, scope);
         return result;
     }
 
     delegate->CreateSnapshotFromComponent(nodeWk.Upgrade(), helper.CreateCallback(&result), false, param);
 
-    napi_escape_handle(env, scope, result, &result);
-    napi_close_escapable_handle_scope(env, scope);
+    scope.Escape(result, &result);
     return result;
 }
 
 bool JudgeRangeType(napi_env env, napi_callback_info info, int32_t argNum)
 {
-    napi_escapable_handle_scope scope = nullptr;
-    napi_open_escapable_handle_scope(env, &scope);
+    EscapableScopeRAII scope(env);
 
     JsComponentSnapshot helper(env, info);
 
     napi_valuetype type = napi_undefined;
     napi_value argv = helper.GetArgv(argNum);
     if (argv == nullptr) {
-        napi_close_escapable_handle_scope(env, scope);
         return false;
     }
     napi_typeof(env, argv, &type);
     if (type != napi_valuetype::napi_number && type != napi_valuetype::napi_string) {
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Parsing argument failed, not of number or string type.");
         NapiThrow(env, "parameter uniqueId is not of type number or string", ERROR_CODE_PARAM_INVALID);
-        napi_close_escapable_handle_scope(env, scope);
         return false;
     }
-    napi_close_escapable_handle_scope(env, scope);
     return true;
 }
 
 bool JudgeRectValue(napi_env env, napi_callback_info info)
 {
-    napi_escapable_handle_scope scope = nullptr;
-    napi_open_escapable_handle_scope(env, &scope);
+    EscapableScopeRAII scope(env);
 
     JsComponentSnapshot helper(env, info);
 
     napi_valuetype type = napi_undefined;
     napi_value argv = helper.GetArgv(GETWITHRANGE_ISSTARTRECT_NUMBER);
     if (argv == nullptr) {
-        napi_close_escapable_handle_scope(env, scope);
         return true;
     }
     napi_typeof(env, argv, &type);
@@ -814,14 +779,12 @@ bool JudgeRectValue(napi_env env, napi_callback_info info)
     if (type == napi_valuetype::napi_boolean) {
         napi_get_value_bool(env, argv, &isRect);
     }
-    napi_close_escapable_handle_scope(env, scope);
     return isRect;
 }
 
 NG::NodeIdentity GetNodeIdentity(napi_env env, napi_callback_info info, int32_t index)
 {
-    napi_escapable_handle_scope scope = nullptr;
-    napi_open_escapable_handle_scope(env, &scope);
+    EscapableScopeRAII scope(env);
 
     JsComponentSnapshot helper(env, info);
 
@@ -829,7 +792,6 @@ NG::NodeIdentity GetNodeIdentity(napi_env env, napi_callback_info info, int32_t 
     napi_valuetype type = napi_undefined;
     napi_value argv = helper.GetArgv(index);
     if (argv == nullptr) {
-        napi_close_escapable_handle_scope(env, scope);
         return nodeIdentity;
     }
     napi_typeof(env, argv, &type);
@@ -839,7 +801,6 @@ NG::NodeIdentity GetNodeIdentity(napi_env env, napi_callback_info info, int32_t 
         napi_valuetype valueType = napi_null;
         GetNapiString(env, argv, nodeIdentity.first, valueType);
     }
-    napi_close_escapable_handle_scope(env, scope);
     return nodeIdentity;
 }
 
@@ -876,14 +837,12 @@ static napi_value JSSnapshotGetSizeLimitation(napi_env env, napi_callback_info i
 
 static napi_value JSSnapshotGetWithRange(napi_env env, napi_callback_info info)
 {
-    napi_escapable_handle_scope scope = nullptr;
-    napi_open_escapable_handle_scope(env, &scope);
+    EscapableScopeRAII scope(env);
     JsComponentSnapshot helper(env, info);
     napi_value result = nullptr;
 
     if (!JudgeRangeType(env, info, 0) || !JudgeRangeType(env, info, 1)) {
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Parsing argument failed, not of number or string type.");
-        napi_close_escapable_handle_scope(env, scope);
         return result;
     }
 
@@ -899,15 +858,13 @@ static napi_value JSSnapshotGetWithRange(napi_env env, napi_callback_info info)
         std::string message = AceEngine::GetEnhancedContextBNotFoundMessage(
             reason, instanceId);
         NapiThrow(env, "Delegate is null. " + message, ERROR_CODE_INTERNAL_ERROR);
-        napi_close_escapable_handle_scope(env, scope);
         return result;
     }
     NG::SnapshotOptions options;
     helper.ParseParamForGet(options);
     delegate->GetSnapshotWithRange(startID, endID, isStartRect, helper.CreateCallback(&result), options);
 
-    napi_escape_handle(env, scope, result, &result);
-    napi_close_escapable_handle_scope(env, scope);
+    scope.Escape(result, &result);
     return result;
 }
 

@@ -22,6 +22,7 @@ build_component_ng("base_ng") {
     "frame_node_multi_thread.cpp",
     "geometry_node.cpp",
     "inspector.cpp",
+    "page_text_collector.cpp",
     "inspector_filter.cpp",
     "interop/view_stack_processor_interop.cpp",
     "xbar_proxy_wrapper.cpp",

@@ -22,6 +22,8 @@
 
 #include "interfaces/napi/kits/utils/napi_utils.h"
 
+#include "base/utils/napi_scope_raii.h"
+
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
@@ -148,32 +150,6 @@ void LogMonitorFailure(const char* message, const std::string& detail = "")
     }
     TAG_LOGW(AceLogTag::ACE_GESTURE, "%{public}s %{public}s", message, detail.c_str());
 }
-
-class ScopedHandleScope final {
-public:
-    explicit ScopedHandleScope(napi_env env) : env_(env)
-    {
-        if (env_ != nullptr && napi_open_handle_scope(env_, &scope_) != napi_ok) {
-            scope_ = nullptr;
-        }
-    }
-
-    ~ScopedHandleScope()
-    {
-        if (scope_ != nullptr) {
-            napi_close_handle_scope(env_, scope_);
-        }
-    }
-
-    bool IsValid() const
-    {
-        return scope_ != nullptr;
-    }
-
-private:
-    napi_env env_ = nullptr;
-    napi_handle_scope scope_ = nullptr;
-};
 
 class SmartGestureCodec final {
 public:
@@ -472,8 +448,10 @@ public:
         CHECK_NULL_RETURN(env_, resolution);
 
         ContainerScope scope(instanceId_);
-        ScopedHandleScope handleScope(env_);
-        CHECK_NULL_RETURN(handleScope.IsValid(), resolution);
+        ScopeRAII handleScope(env_);
+        if (!handleScope) {
+            return resolution;
+        }
 
         auto callback = GetCallback();
         CHECK_NULL_RETURN(callback != nullptr, resolution);

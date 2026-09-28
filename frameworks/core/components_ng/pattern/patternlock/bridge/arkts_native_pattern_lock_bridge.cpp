@@ -576,10 +576,11 @@ ArkUINativeModuleValue PatternLockBridge::SetPatternLockOnPatternComplete(ArkUIR
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     std::function<void(const BaseEventInfo* event)> callback =
-        [vm, isJsView, frameNode, func = panda::CopyableGlobal(vm, func)](const BaseEventInfo* event) {
+        [vm, isJsView, node = AceType::WeakClaim(frameNode),
+            func = panda::CopyableGlobal(vm, func)](const BaseEventInfo* event) {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            PipelineContext::SetCallBackNode(node);
             const auto* eventInfo = TypeInfoHelper::DynamicCast<V2::PatternCompleteEvent>(event);
             CHECK_NULL_VOID(eventInfo);
             panda::Local<panda::JSValueRef> params[] = { ArkTSUtils::ChoosePointToJSValue(vm, eventInfo->GetInput()) };

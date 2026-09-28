@@ -26,6 +26,7 @@
 #include "js_component_test_matcher.h"
 
 #include "base/log/log.h"
+#include "base/utils/napi_scope_raii.h"
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace::Napi {
@@ -245,15 +246,13 @@ napi_value ComponentTestTester::JSFindComponents(napi_env env, napi_callback_inf
             napi_create_array(asyncContext->env, &(asyncContext->asyncResult));
             int32_t index = 0;
             for (const auto componentImpl : *componentImpls) {
-                napi_handle_scope scope;
-                napi_open_handle_scope(asyncContext->env, &scope);
-                if (scope == nullptr) {
+                ScopeRAII scope(asyncContext->env);
+                if (!scope) {
                     return;
                 }
                 napi_value instance = nullptr;
                 ComponentTestComponent::CreateJsComponent(asyncContext->env, &instance, componentImpl);
                 napi_set_element(asyncContext->env, asyncContext->asyncResult, index++, instance);
-                napi_close_handle_scope(asyncContext->env, scope);
             }
         },
         AsyncCompleteWork, (void*)asyncContext);
@@ -289,8 +288,7 @@ napi_value ComponentTestTester::JSAssertComponentExist(napi_env env, napi_callba
         },
         [](void* data) {
             ComponentTestAsyncCtx* asyncContext = reinterpret_cast<ComponentTestAsyncCtx*>(data);
-            napi_handle_scope scope = nullptr;
-            napi_open_handle_scope(asyncContext->env, &scope);
+            ScopeRAII scope(asyncContext->env);
             if (asyncContext->ret.errCode != ErrCode::RET_OK) {
                 napi_value err = CreateBusinessError(asyncContext->env, asyncContext->ret);
                 ComponentTest::ComponentTestManagerProxy::Record(
@@ -301,7 +299,6 @@ napi_value ComponentTestTester::JSAssertComponentExist(napi_env env, napi_callba
                     "assert component exist PASS", "js_assert", ComponentTest::Result::PASS);
                 napi_resolve_deferred(asyncContext->env, asyncContext->deferred, asyncContext->asyncResult);
             }
-            napi_close_handle_scope(asyncContext->env, scope);
             delete asyncContext;
             asyncContext = nullptr;
         },
@@ -338,8 +335,7 @@ void PostScrollUntilExist(ComponentTestAsyncCtx* asyncContext)
             asyncContext->componentImpl->SetEffective();
             ComponentTestComponent::CreateJsComponent(
                 asyncContext->env, &asyncContext->asyncResult, asyncContext->componentImpl);
-            napi_handle_scope scope = nullptr;
-            napi_open_handle_scope(asyncContext->env, &scope);
+            ScopeRAII scope(asyncContext->env);
 
             if (asyncContext->ret.errCode != ErrCode::RET_OK) {
                 ComponentTest::ComponentTestManagerProxy::Record(
@@ -349,7 +345,6 @@ void PostScrollUntilExist(ComponentTestAsyncCtx* asyncContext)
             } else {
                 napi_resolve_deferred(asyncContext->env, asyncContext->deferred, asyncContext->asyncResult);
             }
-            napi_close_handle_scope(asyncContext->env, scope);
             delete asyncContext;
             asyncContext = nullptr;
         },
@@ -428,9 +423,8 @@ napi_value ComponentTestTester::JSTriggerCombineKeys(napi_env env, napi_callback
         ErrCode::RET_ERROR_PARAM_INVALID, "The number of combination keys cannot exceed 10.", NapiGetUndefined(env));
     std::string errMsg;
     for (uint32_t i = 0; i < length; ++i) {
-        napi_handle_scope scope;
-        napi_open_handle_scope(env, &scope);
-        if (scope == nullptr) {
+        ScopeRAII scope(env);
+        if (!scope) {
             return NapiGetUndefined(env);
         }
         napi_value element;
@@ -439,7 +433,6 @@ napi_value ComponentTestTester::JSTriggerCombineKeys(napi_env env, napi_callback
         COMPONENT_TEST_NAPI_ASSERT_CUSTOM(env, CheckAndParseUInt32(env, element, keyCode, errMsg),
             ErrCode::RET_ERROR_PARAM_INVALID, errMsg, NapiGetUndefined(env));
         keyCodes.emplace_back(static_cast<OHOS::MMI::KeyCode>(keyCode));
-        napi_close_handle_scope(env, scope);
     }
     ComponentTestAsyncCtx* asyncContext = CreateTesterAsyncContext(env, thisVar);
     CHECK_NULL_RETURN(asyncContext, NapiGetUndefined(env));
@@ -745,8 +738,7 @@ napi_value ComponentTestTester::JSFling(napi_env env, napi_callback_info info)
 void ComponentTestTester::AsyncCompleteWork(void* data)
 {
     ComponentTestAsyncCtx* asyncContext = reinterpret_cast<ComponentTestAsyncCtx*>(data);
-    napi_handle_scope scope = nullptr;
-    napi_open_handle_scope(asyncContext->env, &scope);
+    ScopeRAII scope(asyncContext->env);
 
     if (asyncContext->ret.errCode != ErrCode::RET_OK) {
         ComponentTest::ComponentTestManagerProxy::Record(
@@ -756,7 +748,6 @@ void ComponentTestTester::AsyncCompleteWork(void* data)
     } else {
         napi_resolve_deferred(asyncContext->env, asyncContext->deferred, asyncContext->asyncResult);
     }
-    napi_close_handle_scope(asyncContext->env, scope);
     delete asyncContext;
     asyncContext = nullptr;
 }

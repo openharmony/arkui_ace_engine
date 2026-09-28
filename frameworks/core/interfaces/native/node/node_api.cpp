@@ -13,12 +13,16 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/page_text_collector.h"
+#include "core/interfaces/native/node/page_text_api.h"
+
 #include "core/interfaces/native/node/node_api.h"
 
 #include <securec.h>
 #include <vector>
 
 #include "interfaces/native/native_type.h"
+#include "interfaces/native/node/config_manager.h"
 
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
@@ -2176,16 +2180,20 @@ const char* GetErrorMessage()
     return OHOS::Ace::ErrorMessageManager::GetInstance().GetErrorMessage();
 }
 
-ArkUI_Bool IsDebugVersion()
+ArkUI_Bool IsCurrentThreadSafe()
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    return (pipeline == nullptr || pipeline->IsCurrentThreadSafe()) ? 1 : 0;
+}
+
+ArkUI_Bool IsDebugForParallel()
 {
     return AceApplicationInfo::GetInstance().IsDebugForParallel() ? 1 : 0;
 }
 
-ArkUI_Bool IsCurrentThreadSafe()
+ArkUI_Bool IsDebugForParallelSet()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
-    CHECK_NULL_RETURN(pipeline, true);
-    return pipeline->IsCurrentThreadSafe() ? 1 : 0;
+    return AceApplicationInfo::GetInstance().IsDebugForParallelSet() ? 1 : 0;
 }
 
 const ArkUIBasicAPI* GetBasicAPI()
@@ -2227,8 +2235,9 @@ const ArkUIBasicAPI* GetBasicAPI()
         .setErrorCodeAndMessage = SetErrorCodeAndMessage,
         .setErrorFunctionName = SetErrorFunctionName,
         .getErrorMessage = GetErrorMessage,
-        .isDebugVersion = IsDebugVersion,
         .isCurrentThreadSafe = IsCurrentThreadSafe,
+        .isDebugForParallel = IsDebugForParallel,
+        .isDebugForParallelSet = IsDebugForParallelSet,
     };
     CHECK_INITIALIZED_FIELDS_END(basicImpl, 0, 0, 0); // don't move this line
     return &basicImpl;
@@ -2811,6 +2820,12 @@ extern "C" {
 ACE_FORCE_EXPORT CJUIFullNodeAPI* GetCJUIFullNodeAPI()
 {
     return &OHOS::Ace::NG::fullCJUIApi;
+}
+
+ACE_FORCE_EXPORT const ArkUIPageTextAPI* GetArkUIPageTextAPI(int32_t version)
+{
+    static const ArkUIPageTextAPI api { OHOS::Ace::NG::CollectPageText, [](char* data) { std::free(data); } };
+    return version == 1 ? &api : nullptr;
 }
 
 ACE_FORCE_EXPORT ArkUIAnyAPI* GetArkUIAnyFullNodeAPI(int version)

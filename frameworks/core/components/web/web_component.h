@@ -334,6 +334,17 @@ public:
         return declaration_->GetScaleChangeId();
     }
 
+    void SetZoomChangeId(const EventMarker& zoomChangeId)
+    {
+        CHECK_NULL_VOID(declaration_);
+        declaration_->SetZoomChangeId(zoomChangeId);
+    }
+
+    const EventMarker& GetZoomChangeId() const
+    {
+        return declaration_->GetZoomChangeId();
+    }
+
     void SetScrollId(const EventMarker& scrollId)
     {
         CHECK_NULL_VOID(declaration_);

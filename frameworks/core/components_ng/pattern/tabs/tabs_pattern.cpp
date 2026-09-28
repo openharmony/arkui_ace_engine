@@ -74,7 +74,6 @@ constexpr char APP_TABS_NO_ANIMATION_SWITCH[] = "APP_TABS_NO_ANIMATION_SWITCH";
 
 // Sidebar divider drag constants
 constexpr Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 240.0_vp;
-constexpr Dimension DEFAULT_MAX_SIDE_BAR_WIDTH = 280.0_vp;
 constexpr Dimension TABS_DEFAULT_DRAG_REGION = 12.0_vp;
 constexpr float TABS_DEFAULT_HALF = 2.0f;
 constexpr Dimension TABS_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING = 2.0_vp;
@@ -585,6 +584,22 @@ TabBarDisplayMode TabsPattern::CalculateTabBarDisplayMode(float width)
     }
     if (barLayoutStyle == TabBarLayoutStyle::BOTTOM) {
         return TabBarDisplayMode::BOTTOMTABBAR;
+    }
+    // minSidebarWidth and minContentWidth constraints only apply when a visible
+    // divider exists (i.e., the sidebar is draggable). Without a divider, these
+    // range properties should have no effect on display mode determination.
+    auto dividerWidthPx = GetEffectiveSidebarDividerWidthPx();
+    if (dividerWidthPx > 0.0f) {
+        auto minSidebarWidth = property->GetMinSidebarWidthValue(Dimension(0, DimensionUnit::VP));
+        auto minContentWidth = property->GetMinContentWidthValue(Dimension(0, DimensionUnit::VP));
+        auto minSidebarWidthPx = minSidebarWidth.ConvertToPxWithSize(width);
+        auto minContentWidthPx = minContentWidth.ConvertToPxWithSize(width);
+        if (width < minSidebarWidthPx + minContentWidthPx + dividerWidthPx) {
+            TAG_LOGD(AceLogTag::ACE_TABS, "CalculateTabBarDisplayMode switch to BOTTOM: width:%{public}f < "
+                "minSidebar:%{public}f + minContent:%{public}f + divider:%{public}f",
+                width, minSidebarWidthPx, minContentWidthPx, dividerWidthPx);
+            return TabBarDisplayMode::BOTTOMTABBAR;
+        }
     }
     // adaptable
     auto context = host->GetContext();
@@ -1903,6 +1918,9 @@ RefPtr<FrameNode> TabsPattern::CreateSideBarNode()
     auto sideBarPattern = sideBarNode->GetPattern<TabsSideBarPattern>();
     CHECK_NULL_RETURN(sideBarPattern, nullptr);
     sideBarPattern->CreateChildNodeIfNeeded(tabsNode);
+    auto renderContext = sideBarNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, nullptr);
+    renderContext->UpdateClipEdge(true);
     return sideBarNode;
 }
 
@@ -2038,18 +2056,74 @@ void TabsPattern::ResetSideBarTabListItemIds()
 void TabsPattern::UpdateSideBarAttributes()
 {
     UpdateSideBarDivider();
+    UpdateSidebarDividerColor();
     UpdateSideBarBackgroundColor();
     UpdateSideBarBackgroundBlurStyle();
+}
+
+TabsItemDivider TabsPattern::GetEffectiveSidebarDividerConfig() const
+{
+    auto property = GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_RETURN(property, TabsItemDivider());
+    if (property->HasSidebarDivider()) {
+        auto divider = property->GetSidebarDividerValue();
+        return divider;
+    }
+    if (property->HasDivider()) {
+        auto divider = property->GetDividerValue();
+        return divider;
+    }
+    return TabsItemDivider();
+}
+
+float TabsPattern::GetEffectiveSidebarDividerWidthPx() const
+{
+    auto divider = GetEffectiveSidebarDividerConfig();
+    if (divider.isNull || divider.strokeWidth.Value() < 0.0f ||
+        divider.strokeWidth.Unit() == DimensionUnit::PERCENT) {
+        return 0.0f;
+    }
+    return divider.strokeWidth.ConvertToPx();
+}
+
+void TabsPattern::UpdateSidebarDividerColor()
+{
+    CHECK_NULL_VOID(sideBarDividerNode_);
+    auto host = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    auto tabsProperty = host->GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_VOID(tabsProperty);
+    auto theme = host->GetTheme<TabTheme>(true);
+    bool hasColor = false;
+    Color color;
+    if (theme) {
+        color = theme->GetSideBarDividerColor();
+        hasColor = true;
+    }
+    if (tabsProperty->HasSidebarDivider()) {
+        if (tabsProperty->HasSidebarDividerColorSetByUser() && tabsProperty->GetSidebarDividerColorSetByUserValue()) {
+            auto currentDivider = tabsProperty->GetSidebarDividerValue();
+            color = currentDivider.color;
+            hasColor = true;
+        }
+    } else if (tabsProperty->HasDivider()) {
+        if (tabsProperty->HasDividerColorSetByUser() && tabsProperty->GetDividerColorSetByUserValue()) {
+            auto currentDivider = tabsProperty->GetDividerValue();
+            color = currentDivider.color;
+            hasColor = true;
+        }
+    }
+    if (hasColor) {
+        auto renderProp = sideBarDividerNode_->GetPaintProperty<DividerRenderProperty>();
+        CHECK_NULL_VOID(renderProp);
+        renderProp->UpdateDividerColor(color);
+    }
 }
 
 void TabsPattern::UpdateSideBarDivider()
 {
     CHECK_NULL_VOID(sideBarDividerNode_);
-    auto host = AceType::DynamicCast<TabsNode>(GetHost());
-    CHECK_NULL_VOID(host);
-    auto layoutProperty = host->GetLayoutProperty<TabsLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto divider = layoutProperty->GetDivider().value_or(TabsItemDivider());
+    auto divider = GetEffectiveSidebarDividerConfig();
     if (!divider.isNull) {
         // Use DividerPattern's own properties for both line width and color,
         // so DividerPaintMethod renders the full divider without needing RenderContext background.
@@ -2062,10 +2136,6 @@ void TabsPattern::UpdateSideBarDivider()
             }
             dividerLayoutProp->UpdateStrokeWidth(effectiveStrokeWidth);
         }
-        auto dividerRenderProp = sideBarDividerNode_->GetPaintProperty<DividerRenderProperty>();
-        if (dividerRenderProp) {
-            dividerRenderProp->UpdateDividerColor(divider.color);
-        }
     }
     if (IsDividerDraggable()) {
         if (!dividerPanEvent_) {
@@ -2077,20 +2147,46 @@ void TabsPattern::UpdateSideBarDivider()
     sideBarDividerNode_->MarkDirtyNode();
 }
 
+std::optional<Color> TabsPattern::GetEffectiveSidebarBackgroundColor() const
+{
+    auto property = GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_RETURN(property, std::nullopt);
+    if (property->HasSidebarBackgroundColor()) {
+        return property->GetSidebarBackgroundColor();
+    }
+    return property->GetBarBackgroundColor();
+}
+
 void TabsPattern::UpdateSideBarBackgroundColor()
 {
     CHECK_NULL_VOID(sideBarNode_);
     auto host = AceType::DynamicCast<TabsNode>(GetHost());
     CHECK_NULL_VOID(host);
-    auto layoutProperty = host->GetLayoutProperty<TabsLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
+    auto tabsProperty = host->GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_VOID(tabsProperty);
+    auto theme = host->GetTheme<TabTheme>(true);
     auto renderContext = sideBarNode_->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    // Only apply when barBackgroundColor was explicitly set or reset (which writes a value).
-    // When never set, don't touch the sidebar background — let barModifier's value persist,
-    // consistent with tabBar behavior where SetBarBackgroundColor is simply never called.
-    if (layoutProperty->HasBarBackgroundColor()) {
-        renderContext->UpdateBackgroundColor(layoutProperty->GetBarBackgroundColorValue());
+    bool hasColor = false;
+    Color color;
+    if (theme) {
+        color = theme->GetSideBarBackgroundColor();
+        hasColor = true;
+    }
+    if (tabsProperty->HasSidebarBackgroundColor()) {
+        if (tabsProperty->HasSidebarBackgroundColorSetByUser() &&
+            tabsProperty->GetSidebarBackgroundColorSetByUserValue()) {
+            color = tabsProperty->GetSidebarBackgroundColorValue();
+            hasColor = true;
+        }
+    } else if (tabsProperty->HasBarBackgroundColor()) {
+        if (tabsProperty->HasBarBackgroundColorSetByUser() && tabsProperty->GetBarBackgroundColorSetByUserValue()) {
+            color = tabsProperty->GetBarBackgroundColorValue();
+            hasColor = true;
+        }
+    }
+    if (hasColor) {
+        renderContext->UpdateBackgroundColor(color);
     }
 }
 
@@ -2099,10 +2195,10 @@ void TabsPattern::UpdateSideBarBackgroundBlurStyle()
     CHECK_NULL_VOID(sideBarNode_);
     auto renderContext = sideBarNode_->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    if (!hasBarBlurStyle_) {
+    if (!hasBarBlurStyle_ && !hasSidebarBlurStyle_) {
         return;
     }
-    auto styleOption = barBlurStyleOption_;
+    const auto& styleOption = GetEffectiveSidebarBlurStyleOptions();
     auto pipeline = sideBarNode_->GetContext();
     if (pipeline) {
         if (styleOption.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
@@ -2153,6 +2249,22 @@ void TabsPattern::SyncPropertiesToSideBar()
     // 5. Sync bar* attributes (divider, background color, background blur style) to the sidebar.
     // Applied after modifier so that bar* properties take precedence, consistent with tabBar.
     UpdateSideBarAttributes();
+
+    // 6. Refresh sidebar tab item colors (selectedIconColor, selectedTextColor,
+    // unselectedIconColor, unselectedTextColor, selectedBoardColor) so that
+    // state variable updates to these properties take effect immediately.
+    auto tabListNode = sideBarPattern->GetTabListNode();
+    if (tabListNode) {
+        auto tabListPattern = tabListNode->GetPattern<TabsSideBarTabListPattern>();
+        if (tabListPattern) {
+            tabListPattern->RefreshAllTabItemColors();
+        }
+    }
+
+    // 7. Re-clamp realSideBarWidthPx_ to current drag range so that dynamic
+    // changes to minSidebarWidth/maxSidebarWidth/minContentWidth immediately
+    // constrain the sidebar width even if it was previously dragged.
+    ClampSideBarWidthToRange();
 
     // After all properties are synced, explicitly trigger SideBar Pattern's OnModifyDone
     sideBarNode_->MarkModifyDone();
@@ -2339,30 +2451,177 @@ void TabsPattern::InitDividerPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     gestureHub->AddPanEvent(dividerPanEvent_, panDirection, DEFAULT_PAN_FINGER, distanceMap);
 }
 
-bool TabsPattern::IsDividerDraggable() const
+std::optional<Dimension> TabsPattern::GetEffectiveSidebarWidth() const
 {
-    auto host = AceType::DynamicCast<TabsNode>(GetHost());
-    CHECK_NULL_RETURN(host, false);
-    auto layoutProperty = host->GetLayoutProperty<TabsLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, false);
-    // Fixed barWidth disables drag. Negative barWidth (default -1vp set by JS bridge
-    // even when user didn't set it) is treated as "not set" and allows drag.
-    if (layoutProperty->HasBarWidth()) {
-        auto barWidth = layoutProperty->GetBarWidthValue();
-        if (barWidth.IsNonNegative()) {
-            return false;
+    auto property = GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_RETURN(property, std::nullopt);
+    // sidebarWidth overrides barWidth: if the sidebarWidth API was called (even with
+    // undefined), use sidebarWidth's value exclusively. Only when sidebarWidth was
+    // never called do we fall back to barWidth.
+    if (hasSidebarWidth_) {
+        if (!property->HasSidebarWidth()) {
+            return std::nullopt;
+        }
+        auto width = property->GetSidebarWidthValue();
+        if (width.IsNonNegative()) {
+            return width;
+        }
+        return std::nullopt;
+    }
+    // sidebarWidth API was never called: fall back to barWidth
+    if (property->HasBarWidth()) {
+        auto width = property->GetBarWidthValue();
+        if (width.IsNonNegative()) {
+            return width;
         }
     }
-    // Divider must be visible (non-null, strokeWidth > 0, not percent).
-    if (!layoutProperty->HasDivider()) {
-        return false;
+    TAG_LOGD(AceLogTag::ACE_TABS, "No valid sidebarWidth/barWidth, use default width");
+    return std::nullopt;
+}
+
+TabsPattern::SideBarDragRange TabsPattern::CalcSideBarDragRange(float tabsWidth)
+{
+    SideBarDragRange range;
+    auto property = GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_RETURN(property, range);
+
+    // Range properties (minSidebarWidth, maxSidebarWidth, minContentWidth) only take
+    // effect when a visible divider exists. Without a divider, the sidebar is not
+    // draggable, so these constraints should not apply.
+    float dividerWidth = GetEffectiveSidebarDividerWidthPx();
+    if (dividerWidth <= 0.0f) {
+        range.draggable = false;
+        return range;
     }
-    auto divider = layoutProperty->GetDividerValue();
+    auto minSidebarOpt = property->GetMinSidebarWidth();
+    auto maxSidebarOpt = property->GetMaxSidebarWidth();
+    auto minContentOpt = property->GetMinContentWidth();
+    bool hasMin = minSidebarOpt.has_value() && minSidebarOpt->IsNonNegative();
+    bool hasMax = maxSidebarOpt.has_value() && maxSidebarOpt->IsNonNegative();
+    bool hasContent = minContentOpt.has_value() && minContentOpt->IsNonNegative();
+    // Not draggable: all three range properties unset
+    if (!hasMin && !hasMax && !hasContent) {
+        range.draggable = false;
+        return range;
+    }
+    // Not draggable: min >= max (when both set)
+    if (hasMin && hasMax) {
+        float minPx = minSidebarOpt->ConvertToPxWithSize(tabsWidth);
+        float maxPx = maxSidebarOpt->ConvertToPxWithSize(tabsWidth);
+        if (GreatOrEqual(minPx, maxPx)) {
+            range.draggable = false;
+            return range;
+        }
+    }
+    range.draggable = true;
+    // Calculate minRange
+    if (hasMin) {
+        range.minPx = minSidebarOpt->ConvertToPxWithSize(tabsWidth);
+    } else {
+        range.minPx = 0.0f;
+    }
+    // Calculate maxRange
+    float maxFromContent = tabsWidth - dividerWidth;
+    if (hasContent) {
+        maxFromContent = tabsWidth - minContentOpt->ConvertToPxWithSize(tabsWidth) - dividerWidth;
+    }
+    float maxFromMax = tabsWidth - dividerWidth;
+    if (hasMax) {
+        maxFromMax = maxSidebarOpt->ConvertToPxWithSize(tabsWidth);
+    }
+    range.maxPx = std::min(maxFromMax, maxFromContent);
+    // Ensure max >= min
+    range.maxPx = std::max(range.maxPx, range.minPx);
+    // Calculate initial position
+    auto effectiveWidth = GetEffectiveSidebarWidth();
+    float initialPx = DEFAULT_MIN_SIDE_BAR_WIDTH.ConvertToPx();
+    if (effectiveWidth.has_value()) {
+        initialPx = effectiveWidth->ConvertToPxWithSize(tabsWidth);
+    } else if (realSideBarWidthPx_.has_value()) {
+        initialPx = realSideBarWidthPx_.value();
+    }
+    range.initialWidthPx = std::clamp(initialPx, range.minPx, range.maxPx);
+    return range;
+}
+
+bool TabsPattern::IsDividerDraggable() const
+{
+    // Divider must be visible (non-null, strokeWidth > 0, not percent).
+    auto divider = GetEffectiveSidebarDividerConfig();
     if (divider.isNull || divider.strokeWidth.Value() <= 0.0f ||
         divider.strokeWidth.Unit() == DimensionUnit::PERCENT) {
         return false;
     }
+    auto host = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_RETURN(host, false);
+    auto property = host->GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_RETURN(property, false);
+    auto minSidebarWidth = property->GetMinSidebarWidth();
+    auto maxSidebarWidth = property->GetMaxSidebarWidth();
+    auto minContentWidth = property->GetMinContentWidth();
+    bool hasMin = minSidebarWidth.has_value() && minSidebarWidth->IsNonNegative();
+    bool hasMax = maxSidebarWidth.has_value() && maxSidebarWidth->IsNonNegative();
+    bool hasContent = minContentWidth.has_value() && minContentWidth->IsNonNegative();
+    if (!hasMin && !hasMax && !hasContent) {
+        return false;
+    }
+    // px-level min >= max check is deferred to CalcSideBarDragRange (called in HandleDividerDragStart),
+    // because it requires tabsWidth from geometry which may not be available at this point.
     return true;
+}
+
+void TabsPattern::ClampSideBarWidthToRange()
+{
+    auto host = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    // Only clamp when in SIDEBAR display mode. When the display mode is BOTTOMTABBAR
+    // (e.g., portrait after rotation), the geometry width reflects the portrait
+    // dimensions, not the sidebar mode dimensions. Clamping here would incorrectly
+    // shrink realSideBarWidthPx_ based on the wrong container width, and the
+    // shrunk value would persist when rotating back to landscape (sidebar mode).
+    if (currentBarDisplayMode_.value_or(TabBarDisplayMode::BOTTOMTABBAR) != TabBarDisplayMode::SIDEBAR) {
+        return;
+    }
+    float tabsWidth = geometryNode->GetFrameSize().Width();
+
+    auto range = CalcSideBarDragRange(tabsWidth);
+    if (!range.draggable) {
+        // Not draggable: reset realSideBarWidthPx_ so MeasureSideBar falls back
+        // to property-based width (sidebarWidth → barWidth → 240vp default).
+        if (realSideBarWidthPx_.has_value()) {
+            realSideBarWidthPx_ = std::nullopt;
+            preSideBarWidthPx_ = 0.0f;
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+        return;
+    }
+
+    // Draggable: determine the current sidebar width to clamp.
+    // If realSideBarWidthPx_ has a value, use it (post-drag or previously clamped).
+    // Otherwise, compute from effective sidebarWidth/barWidth, or fall back to 240vp default.
+    float currentWidthPx = 0.0f;
+    if (realSideBarWidthPx_.has_value()) {
+        currentWidthPx = realSideBarWidthPx_.value();
+    } else {
+        auto effectiveWidth = GetEffectiveSidebarWidth();
+        if (effectiveWidth.has_value()) {
+            currentWidthPx = effectiveWidth->ConvertToPxWithSize(tabsWidth);
+        } else {
+            currentWidthPx = DEFAULT_MIN_SIDE_BAR_WIDTH.ConvertToPx();
+        }
+    }
+
+    float clamped = std::clamp(currentWidthPx, range.minPx, range.maxPx);
+    if (realSideBarWidthPx_.has_value() && NearEqual(clamped, realSideBarWidthPx_.value())) {
+        return;
+    }
+    TAG_LOGD(AceLogTag::ACE_TABS, "ClampSideBarWidthToRange %{public}f -> %{public}f (min:%{public}f, max:%{public}f)",
+        currentWidthPx, clamped, range.minPx, range.maxPx);
+    realSideBarWidthPx_ = clamped;
+    preSideBarWidthPx_ = clamped;
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void TabsPattern::HandleDividerDragStart()
@@ -2370,19 +2629,36 @@ void TabsPattern::HandleDividerDragStart()
     if (!IsDividerDraggable()) {
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_TABS, "tabsSidebar dragStart, width:%{public}f", realSideBarWidthPx_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    float tabsWidth = geometryNode->GetFrameSize().Width();
+
+    auto range = CalcSideBarDragRange(tabsWidth);
+    if (!range.draggable) {
+        isInDividerDrag_ = false;
+        return;
+    }
+    // Use the actual sidebar geometry width as the drag starting point,
+    // not the computed initialWidthPx (which may differ from what's rendered,
+    // causing a jump and a persistent finger-to-divider offset).
+    float currentWidthPx = range.initialWidthPx;
+    if (sideBarNode_) {
+        auto sideBarGeo = sideBarNode_->GetGeometryNode();
+        if (sideBarGeo) {
+            currentWidthPx = sideBarGeo->GetFrameSize().Width();
+        }
+    }
+    currentWidthPx = std::clamp(currentWidthPx, range.minPx, range.maxPx);
+    TAG_LOGI(AceLogTag::ACE_TABS, "Divider dragStart min:%{public}f max:%{public}f current:%{public}f",
+        range.minPx, range.maxPx, currentWidthPx);
     isInDividerDrag_ = true;
     SetMouseStyle(MouseFormat::RESIZE_LEFT_RIGHT);
-    if (LessNotEqual(minSideBarWidth_, 0.0f)) {
-        minSideBarWidth_ = DEFAULT_MIN_SIDE_BAR_WIDTH.ConvertToPx();
-    }
-    if (LessNotEqual(maxSideBarWidth_, 0.0f)) {
-        maxSideBarWidth_ = DEFAULT_MAX_SIDE_BAR_WIDTH.ConvertToPx();
-    }
-    if (LessOrEqual(realSideBarWidthPx_, 0.0f)) {
-        realSideBarWidthPx_ = DEFAULT_MIN_SIDE_BAR_WIDTH.ConvertToPx();
-    }
-    preSideBarWidthPx_ = realSideBarWidthPx_;
+    minSideBarWidth_ = range.minPx;
+    maxSideBarWidth_ = range.maxPx;
+    realSideBarWidthPx_ = currentWidthPx;
+    preSideBarWidthPx_ = currentWidthPx;
 }
 
 void TabsPattern::HandleDividerDragUpdate(float xOffset)
@@ -2394,7 +2670,7 @@ void TabsPattern::HandleDividerDragUpdate(float xOffset)
     CHECK_NULL_VOID(host);
     auto newWidth = preSideBarWidthPx_ + xOffset;
     newWidth = std::max(minSideBarWidth_, std::min(newWidth, maxSideBarWidth_));
-    if (NearEqual(realSideBarWidthPx_, newWidth)) {
+    if (realSideBarWidthPx_.has_value() && NearEqual(realSideBarWidthPx_.value(), newWidth)) {
         return;
     }
     realSideBarWidthPx_ = newWidth;
@@ -2403,15 +2679,15 @@ void TabsPattern::HandleDividerDragUpdate(float xOffset)
 
 void TabsPattern::HandleDividerDragEnd()
 {
-    TAG_LOGI(AceLogTag::ACE_TABS, "tabsSidebar dragEnd, width:%{public}f", realSideBarWidthPx_);
+    TAG_LOGI(AceLogTag::ACE_TABS, "Divider dragEnd width:%{public}f", realSideBarWidthPx_.value_or(-1.0f));
     isInDividerDrag_ = false;
     SetMouseStyle(MouseFormat::DEFAULT);
-    preSideBarWidthPx_ = realSideBarWidthPx_;
+    preSideBarWidthPx_ = realSideBarWidthPx_.value_or(preSideBarWidthPx_);
 }
 
 void TabsPattern::HandleDividerDragCancel()
 {
-    TAG_LOGI(AceLogTag::ACE_TABS, "tabsSidebar dragCancel, width:%{public}f", preSideBarWidthPx_);
+    TAG_LOGI(AceLogTag::ACE_TABS, "Divider dragCancel restore width:%{public}f", preSideBarWidthPx_);
     isInDividerDrag_ = false;
     SetMouseStyle(MouseFormat::DEFAULT);
     // Restore to the width before drag started.

@@ -222,6 +222,20 @@ class WebOnScaleChangeModifier extends ModifierWithKey<(result: { oldScale: numb
   }
 }
 
+class WebOnZoomChangeModifier extends ModifierWithKey<(result: { oldZoomFactor: number; newZoomFactor: number }) => void> {
+  constructor (value: (event: { oldZoomFactor: number; newZoomFactor: number }) => void) {
+    super(value)
+  }
+  static identity: Symbol = Symbol('webOnZoomChangeModifier')
+  applyPeer (node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetOnZoomChange(node);
+    } else {
+      getUINativeModule().web.setOnZoomChange(node, this.value);
+    }
+  }
+}
+
 class WebOverviewModeAccessModifier extends ModifierWithKey<boolean> {
   constructor (value: boolean) {
     super(value);
@@ -2020,6 +2034,10 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
   }
   onScaleChange(callback: (event: { oldScale: number; newScale: number; }) => void): this {
     modifierWithKey(this._modifiersWithKeys, WebOnScaleChangeModifier.identity, WebOnScaleChangeModifier, callback);
+    return this;
+  }
+  onZoomChange(callback: (event: { oldZoomFactor: number; newZoomFactor: number; }) => void): this {
+    modifierWithKey(this._modifiersWithKeys, WebOnZoomChangeModifier.identity, WebOnZoomChangeModifier, callback);
     return this;
   }
   onHttpAuthRequest(callback: (event?: { handler: HttpAuthHandler; host: string; realm: string; } | undefined) => boolean): this {

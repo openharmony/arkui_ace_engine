@@ -35,7 +35,7 @@ struct ImageNodeId {
 class ImageDfxConfig {
 public:
     ImageDfxConfig(
-        const ImageNodeId& nodeInfo, int32_t srcType, std::string imageSrc, bool isTrimMemRecycle = false);
+        const ImageNodeId& nodeInfo, int32_t srcType, std::string imageSrc);
     ImageDfxConfig() = default;
 
     // Used in tracing functions, does not include image source information (sensitive data)
@@ -43,8 +43,6 @@ public:
 
     // Includes image source, but as the image source may be sensitive, use with caution
     std::string ToStringWithSrc() const;
-
-    bool GetIsTrimMemRecycle() const;
 
     void SetAutoResize(bool autoResize);
     bool GetAutoResize() const;
@@ -64,7 +62,6 @@ private:
     ImageNodeId nodeInfo_ = ImageNodeId();
     int32_t srcType_ = -1;
     std::string imageSrc_;
-    bool isTrimMemRecycle_ = false;
     std::string withoutSrcInfo_;
     std::string withSrcInfo_;
     float frameSizeWidth_ = 0.0f;

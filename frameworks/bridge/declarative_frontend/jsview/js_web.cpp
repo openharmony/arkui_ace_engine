@@ -1324,6 +1324,7 @@ public:
         JSClass<JSWebResourceResponse>::CustomMethod("getResponseCode", &JSWebResourceResponse::GetResponseCode);
         JSClass<JSWebResourceResponse>::CustomMethod("getResponseHeader", &JSWebResourceResponse::GetResponseHeader);
         JSClass<JSWebResourceResponse>::CustomMethod("setResponseData", &JSWebResourceResponse::SetResponseData);
+        JSClass<JSWebResourceResponse>::CustomMethod("setResponseBody", &JSWebResourceResponse::SetResponseBody);
         JSClass<JSWebResourceResponse>::CustomMethod(
             "setResponseEncoding", &JSWebResourceResponse::SetResponseEncoding);
         JSClass<JSWebResourceResponse>::CustomMethod(
@@ -1414,6 +1415,16 @@ public:
 
     void SetResponseData(const JSCallbackInfo& args)
     {
+        DoSetResponseData(args, false);
+    }
+
+    void SetResponseBody(const JSCallbackInfo& args)
+    {
+        DoSetResponseData(args, true);
+    }
+
+    void DoSetResponseData(const JSCallbackInfo& args, bool parseRawfile)
+    {
         if (args.Length() <= 0) {
             return;
         }
@@ -1451,7 +1462,9 @@ public:
             if (!JSViewAbstract::ParseJsMedia(args[0], resourceUrl)) {
                 return;
             }
-            JSWeb::ParseRawfileWebSrc(args[0], resourceUrl);
+            if (parseRawfile) {
+                JSWeb::ParseRawfileWebSrc(args[0], resourceUrl);
+            }
             auto np = resourceUrl.find_first_of("/");
             url = (np == std::string::npos) ? resourceUrl : resourceUrl.erase(np, 1);
             response_->SetResourceUrl(url);
@@ -2535,6 +2548,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onMouse", &JSWeb::OnMouse);
     JSClass<JSWeb>::StaticMethod("onResourceLoad", &JSWeb::OnResourceLoad);
     JSClass<JSWeb>::StaticMethod("onScaleChange", &JSWeb::OnScaleChange);
+    JSClass<JSWeb>::StaticMethod("onZoomChange", &JSWeb::OnZoomChange);
     JSClass<JSWeb>::StaticMethod("password", &JSWeb::Password);
     JSClass<JSWeb>::StaticMethod("tableData", &JSWeb::TableData);
     JSClass<JSWeb>::StaticMethod("onFileSelectorShow", &JSWeb::OnFileSelectorShowAbandoned);
@@ -5297,6 +5311,14 @@ JSRef<JSVal> ScaleChangeEventToJSValue(const ScaleChangeEvent& eventInfo)
     return JSRef<JSVal>::Cast(obj);
 }
 
+JSRef<JSVal> ZoomChangeEventToJSValue(const ZoomChangeEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("oldZoomFactor", eventInfo.GetOnZoomChangeOldZoomFactor());
+    obj->SetProperty("newZoomFactor", eventInfo.GetOnZoomChangeNewZoomFactor());
+    return JSRef<JSVal>::Cast(obj);
+}
+
 void JSWeb::OnScaleChange(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsFunction()) {
@@ -5319,6 +5341,31 @@ void JSWeb::OnScaleChange(const JSCallbackInfo& args)
         func->Execute(*eventInfo);
     };
     WebModel::GetInstance()->SetScaleChangeId(jsCallback);
+}
+
+void JSWeb::OnZoomChange(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        return;
+    }
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<ZoomChangeEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), ZoomChangeEventToJSValue);
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
+                          const BaseEventInfo* info) {
+        auto webNode = node.Upgrade();
+        CHECK_NULL_VOID(webNode);
+        ContainerScope scope(webNode->GetInstanceId());
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        if (pipelineContext) {
+            pipelineContext->UpdateCurrentActiveNode(node);
+        }
+        auto* eventInfo = TypeInfoHelper::DynamicCast<ZoomChangeEvent>(info);
+        CHECK_NULL_VOID(eventInfo);
+        func->Execute(*eventInfo);
+    };
+    WebModel::GetInstance()->SetZoomChangeId(jsCallback);
 }
 
 JSRef<JSVal> ScrollEventToJSValue(const WebOnScrollEvent& eventInfo)

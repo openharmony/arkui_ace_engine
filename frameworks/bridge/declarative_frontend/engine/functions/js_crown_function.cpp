@@ -36,15 +36,20 @@ JSRef<JSObject> JsCrownFunction::createCrownEvent(CrownEventInfo& event)
 
 void JsCrownFunction::Execute(OHOS::Ace::CrownEventInfo& event)
 {
-    JSRef<JSVal> param = JSRef<JSVal>::Cast(createCrownEvent(event));
+    JSRef<JSObject> crownEventObj = createCrownEvent(event);
+    JSRef<JSVal> param = JSRef<JSVal>::Cast(crownEventObj);
     ACE_BENCH_MARK_TRACE("OnCrownEvent_end type:%d", event.GetAction());
     JsFunction::ExecuteJS(1, &param);
+    crownEventObj->Wrap<CrownEventInfo>(nullptr);
 }
 
 JSRef<JSVal> JsCrownFunction::ExecuteWithValue(OHOS::Ace::CrownEventInfo& event)
 {
-    JSRef<JSVal> param = JSRef<JSVal>::Cast(createCrownEvent(event));
-    return JsFunction::ExecuteJS(1, &param);
+    JSRef<JSObject> crownEventObj = createCrownEvent(event);
+    JSRef<JSVal> param = JSRef<JSVal>::Cast(crownEventObj);
+    auto result = JsFunction::ExecuteJS(1, &param);
+    crownEventObj->Wrap<CrownEventInfo>(nullptr);
+    return result;
 }
 
 } // namespace OHOS::Ace::Framework

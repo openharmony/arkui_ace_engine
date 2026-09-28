@@ -4823,6 +4823,10 @@ void TextPattern::RegisterTranslateListener()
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
+    auto previousPipeline = translatePipeline_.Upgrade();
+    if (previousPipeline && previousPipeline != pipeline) {
+        previousPipeline->UnRegisterListenerForTranslate(host->GetId());
+    }
     translatePipeline_ = pipeline;
     pipeline->RegisterListenerForTranslate(WeakPtr<FrameNode>(host));
 }

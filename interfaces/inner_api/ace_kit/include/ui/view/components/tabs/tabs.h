@@ -30,6 +30,7 @@
 #include "ui/view/components/tabs/tabs_constants.h"
 #include "ui/view/components/tabs/tabs_data.h"
 #include "ui/view/view.h"
+#include "ui/view/components/tabs/tabs_declaration.h"
 
 namespace OHOS::Ace::Kit {
 
@@ -100,6 +101,7 @@ public:
     void SetBarBackgroundBlurStyle(const BlurStyleOption& styleOption, const RefPtr<ResourceObject>& resObj);
     void SetBarBackgroundColor(const Color& backgroundColor, const RefPtr<ResourceObject>& resObj);
     void SetBarBackgroundEffect(const EffectOption& effectOption, const RefPtr<ResourceObject>& resObj);
+    NG::TabBarDisplayMode GetBarDisplayMode() const;
 };
 
 } // namespace OHOS::Ace::Kit

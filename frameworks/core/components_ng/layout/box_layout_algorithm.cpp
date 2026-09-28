@@ -33,10 +33,13 @@ void BoxLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(host);
     auto pattern = host->GetPattern();
     CHECK_NULL_VOID(pattern);
+    layoutPolicyChildren_.clear();
+    measureInNextFrame_ = false;
     bool isEnableChildrenMatchParent = pattern->IsEnableChildrenMatchParent();
     bool isAsyncLoadAvailable = IsAsyncLoadAvailable(layoutWrapper);
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
         if (isAsyncLoadAvailable && layoutWrapper->ReachResponseDeadline()) {
+            ACE_SCOPED_TRACE("isAsyncLoadAvailable&&ReachResponseDeadline");
             measureInNextFrame_ = true;
             break;
         }

@@ -493,6 +493,14 @@ public:
     {
         return sideBarTextFontSize_;
     }
+    const Color& GetSideBarDividerColor() const
+    {
+        return sideBarDividerColor_;
+    }
+    const Color& GetSideBarBackgroundColor() const
+    {
+        return sideBarBackgroundColor_;
+    }
 
 protected:
     TabTheme() = default;
@@ -593,6 +601,8 @@ protected:
     Dimension sideBarPaddingLevel8_ = 16.0_vp;
     Dimension sideBarPaddingLevel10_ = 20.0_vp;
     Dimension sideBarTextFontSize_ = 16.0_fp;
+    Color sideBarDividerColor_;
+    Color sideBarBackgroundColor_;
 };
 
 } // namespace OHOS::Ace

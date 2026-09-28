@@ -106,23 +106,17 @@ static constexpr LinearMapNode<CreateElementFunc> CREATE_ELEMENT_MAP[] = {
         [](const std::string& id) {
             return MakeInspectorElement<V2::ButtonComposedElement>(id);
         } },
-    { CALENDAR_COMPONENT_TAG,
+    { CHECK_BOX_COMPONENT_TAG,
         [](const std::string& id) {
-            return MakeInspectorElement<V2::CalendarComposedElement>(id);
-        } },
-    { CANVAS_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
-    { CHECKBOXGROUP_COMPONENT_TAG,
-        [](const std::string& id) {
-            return MakeInspectorElement<V2::CheckboxGroupComposedElement>(id);
+            return MakeInspectorElement<V2::CheckboxComposedElement>(id);
         } },
     { CHECKBOX_COMPONENT_TAG,
         [](const std::string& id) {
             return MakeInspectorElement<V2::CheckboxComposedElement>(id);
         } },
-    { CHECK_BOX_COMPONENT_TAG,
+    { CHECKBOXGROUP_COMPONENT_TAG,
         [](const std::string& id) {
-            return MakeInspectorElement<V2::CheckboxComposedElement>(id);
+            return MakeInspectorElement<V2::CheckboxGroupComposedElement>(id);
         } },
     { COLUMN_COMPONENT_TAG,
         [](const std::string& id) {
@@ -140,12 +134,8 @@ static constexpr LinearMapNode<CreateElementFunc> CREATE_ELEMENT_MAP[] = {
         [](const std::string& id) {
             return MakeInspectorElement<V2::CustomDialogComposedElement>(id);
         } },
-    { DATA_PANEL_COMPONENT_TAG,
-        [](const std::string& id) {
-            return MakeInspectorElement<V2::DataPanelComposedElement>(id);
-        } },
-    { DATE_PICKER_COMPONENT_TAG,
-        [](const std::string& id) { return DynamicCreateInspectorElement(DATE_PICKER_COMPONENT_LOADER_TAG, id); } },
+    { CANVAS_COMPONENT_TAG,
+        [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
     { DATE_PICKER_DIALOG_COMPONENT_TAG,
         [](const std::string& id) {
             return DynamicCreateInspectorElement(DATE_PICKER_DIALOG_COMPONENT_LOADER_TAG, id);
@@ -160,19 +150,15 @@ static constexpr LinearMapNode<CreateElementFunc> CREATE_ELEMENT_MAP[] = {
         [](const std::string& id) {
             return MakeInspectorElement<V2::FlexComposedElement>(id);
         } },
-    { FLOW_ITEM_COMPONENT_TAG,
-        [](const std::string& id) {
-            return MakeInspectorElement<V2::WaterFlowItemComposedElement>(id);
-        } },
     { FORM_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
     { GAUGE_COMPONENT_TAG,
         [](const std::string& id) {
             return MakeInspectorElement<V2::GaugeComposedElement>(id);
         } },
-    { GRIDCONTAINER_COMPONENT_TAG,
-        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_GRID_CONTAINER, id); } },
     { GRID_COL_COMPONENT_TAG,
         [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_GRID_COLUMN, id); } },
+    { GRIDCONTAINER_COMPONENT_TAG,
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_GRID_CONTAINER, id); } },
     { GRID_COMPONENT_TAG,
         [](const std::string& id) {
             return MakeInspectorElement<V2::GridComposedElement>(id);
@@ -197,55 +183,50 @@ static constexpr LinearMapNode<CreateElementFunc> CREATE_ELEMENT_MAP[] = {
         [](const std::string& id) {
             return MakeInspectorElement<V2::IndexerComposedElement>(id);
         } },
-    { JS_VIEW_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
-    { LIST_COMPONENT_TAG, [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_LIST, id); } },
-    { LIST_ITEM_COMPONENT_TAG,
-        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_LIST_ITEM, id); } },
-    { LIST_ITEM_GROUP_COMPONENT_TAG,
-        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_LIST_ITEM_GROUP, id); } },
     { LOADING_PROGRESS_COMPONENT_TAG,
         [](const std::string& id) {
             return MakeInspectorElement<V2::LoadingProgressComposedElement>(id);
         } },
     { MARQUEE_COMPONENT_TAG,
         [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_MARQUEE, id); } },
-    { MENU_TAG,
-        [](const std::string& id) {
-            return MakeInspectorElement<V2::MenuComposedElement>(id);
-        } },
     { MOVING_PHOTO_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
+    { NAVIGATION_VIEW_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::NavigationComposedElement>(id);
+        } },
     { NAVIGATION_MENUS_COMPONENT_TAG,
         [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_NAVIGATION_MENU, id); } },
     { NAVIGATION_TITLE_COMPONENT_TAG,
         [](const std::string& id) {
             return MakeInspectorElement<V2::NavigationTitleComposedElement>(id);
         } },
-    { NAVIGATION_VIEW_COMPONENT_TAG,
-        [](const std::string& id) {
-            return MakeInspectorElement<V2::NavigationComposedElement>(id);
-        } },
     { NAVIGATOR_COMPONENT_TAG,
         [](const std::string& id) {
             return MakeInspectorElement<V2::NavigatorComposedElement>(id);
-        } },
-    { PANEL_COMPONENT_TAG,
-        [](const std::string& id) {
-            return MakeInspectorElement<V2::PanelComposedElement>(id);
         } },
     { PATTERN_LOCK_COMPONENT_TAG,
         [](const std::string& id) {
             return MakeInspectorElement<V2::PatternLockComposedElement>(id);
         } },
-    { PICKER_TEXT_DIALOG_COMPONENT_TAG,
-        [](const std::string& id) { return DynamicCreateInspectorElement(PICKER_TEXT_DIALOG_COMPONENT_LOADER_TAG, id); } },
+    { DATA_PANEL_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::DataPanelComposedElement>(id);
+        } },
+    { DATE_PICKER_COMPONENT_TAG,
+        [](const std::string& id) { return DynamicCreateInspectorElement(DATE_PICKER_COMPONENT_LOADER_TAG, id); } },
+    { TEXT_PICKER_COMPONENT_TAG,
+        [](const std::string& id) { return DynamicCreateInspectorElement(TEXT_PICKER_COMPONENT_LOADER_TAG, id); } },
+    { TIME_PICKER_COMPONENT_TAG,
+        [](const std::string& id) { return DynamicCreateInspectorElement(TIME_PICKER_COMPONENT_LOADER_TAG, id); } },
     { PLUGIN_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
     { PROGRESS_COMPONENT_TAG,
         [](const std::string& id) {
             return MakeInspectorElement<V2::ProgressComposedElement>(id);
         } },
+    { JS_VIEW_COMPONENT_TAG,
+        [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
     { QRCODE_COMPONENT_TAG,
         [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_QRCODE, id); } },
     { RADIO_COMPONENT_TAG,
@@ -304,9 +285,9 @@ static constexpr LinearMapNode<CreateElementFunc> CREATE_ELEMENT_MAP[] = {
         [](const std::string& id) {
             return MakeInspectorElement<V2::SliderComposedElement>(id);
         } },
-    { SPAN_COMPONENT_TAG,
+    { PANEL_COMPONENT_TAG,
         [](const std::string& id) {
-            return MakeInspectorElement<V2::SpanComposedElement>(id);
+            return MakeInspectorElement<V2::PanelComposedElement>(id);
         } },
     { STACK_COMPONENT_TAG,
         [](const std::string& id) {
@@ -320,38 +301,47 @@ static constexpr LinearMapNode<CreateElementFunc> CREATE_ELEMENT_MAP[] = {
         [](const std::string& id) { return DynamicCreateInspectorElement(SWIPER_ETS_TAG, id); } },
     { SWITCH_COMPONENT_TAG,
         [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_SWITCH, id); } },
-    { TABS_COMPONENT_TAG, [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_TABS, id); } },
     { TAB_CONTENT_ITEM_COMPONENT_TAG,
         [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_TAB_CONTENT, id); } },
-    { TEXTAREA_COMPONENT_TAG,
-        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_TEXTAREA, id); } },
+    { TABS_COMPONENT_TAG, [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_TABS, id); } },
     { TEXTCLOCK_COMPONENT_TAG,
         [](const std::string& id) {
             return MakeInspectorElement<V2::TextClockComposedElement>(id);
-        } },
-    { TEXTINPUT_COMPONENT_TAG,
-        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_INPUT, id); } },
-    { TEXTTIMER_COMPONENT_TAG,
-        [](const std::string& id) {
-            return MakeInspectorElement<V2::TextTimerComposedElement>(id);
         } },
     { TEXT_COMPONENT_TAG,
         [](const std::string& id) {
             return MakeInspectorElement<V2::TextComposedElement>(id);
         } },
-    { TEXT_PICKER_COMPONENT_TAG,
-        [](const std::string& id) { return DynamicCreateInspectorElement(TEXT_PICKER_COMPONENT_LOADER_TAG, id); } },
-    { TIME_PICKER_COMPONENT_TAG,
-        [](const std::string& id) { return DynamicCreateInspectorElement(TIME_PICKER_COMPONENT_LOADER_TAG, id); } },
+    { TEXTAREA_COMPONENT_TAG,
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_TEXTAREA, id); } },
+    { TEXTINPUT_COMPONENT_TAG,
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_INPUT, id); } },
+    { SPAN_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::SpanComposedElement>(id);
+        } },
+    { TEXTTIMER_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::TextTimerComposedElement>(id);
+        } },
     { TIME_PICKER_DIALOG_COMPONENT_TAG,
         [](const std::string& id) { return DynamicCreateInspectorElement(TIME_PICKER_DIALOG_COMPONENT_LOADER_TAG, id); } },
     { TOGGLE_COMPONENT_TAG,
         [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_TOGGLE, id); } },
+    { LIST_COMPONENT_TAG, [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_LIST, id); } },
+    { LIST_ITEM_COMPONENT_TAG,
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_LIST_ITEM, id); } },
+    { LIST_ITEM_GROUP_COMPONENT_TAG,
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_LIST_ITEM_GROUP, id); } },
     { VIDEO_COMPONENT_TAG,
         [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_VIDEO, id); } },
     { WATERFLOW_COMPONENT_TAG,
         [](const std::string& id) {
             return MakeInspectorElement<V2::WaterFlowComposedElement>(id);
+        } },
+    { FLOW_ITEM_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::WaterFlowItemComposedElement>(id);
         } },
     { WEB_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
@@ -361,6 +351,16 @@ static constexpr LinearMapNode<CreateElementFunc> CREATE_ELEMENT_MAP[] = {
         } },
     { XCOMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
+    { CALENDAR_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::CalendarComposedElement>(id);
+        } },
+    { MENU_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::MenuComposedElement>(id);
+        } },
+    { PICKER_TEXT_DIALOG_COMPONENT_TAG,
+        [](const std::string& id) { return DynamicCreateInspectorElement(PICKER_TEXT_DIALOG_COMPONENT_LOADER_TAG, id); } },
 };
 
 } // namespace

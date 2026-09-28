@@ -40,9 +40,8 @@ public:
     SmartLayoutAlign crossAxisAlign = SmartLayoutAlign::CENTER;
     SmartLayoutSize size = SmartLayoutSize(0.0, 0.0);
     bool avoidSafeArea = false;
+    // Container padding in px, used for constraints and scale-up available area
     EdgesSpaces padding = {0.0, 0.0, 0.0, 0.0};
-    // Content-to-edge padding for scale-up, in px
-    double contentPadding = 0.0;
 };
 
 } // namespace OHOS::Ace::NG

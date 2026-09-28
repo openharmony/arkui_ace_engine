@@ -23,7 +23,7 @@
 | id 查找与注册 | `frameworks/core/pipeline/base/element_register.h` | ElementRegister inspectorIdMap_ 存储 id → FrameNode 映射 |
 | FrameNode 属性存储 | `frameworks/core/components_ng/base/frame_node.h`、`frameworks/core/components_ng/base/frame_node.cpp` | renderGroup/reuseId/id/uniqueId/restoreId 存储；overlayNode_/background(CustomBuilder) 子节点挂载 |
 | 焦点属性 | `frameworks/core/components_ng/event/focus_hub.h`、`frameworks/core/components_ng/event/focus_hub.cpp` | FocusHub：focusable/tabIndex/defaultFocus/focusScopeId 等存储与判断；nextFocus/onFocus/onBlur/onKeyEvent 焦点导航与事件分发 |
-| reuseId 组件复用 | `frameworks/core/components_ng/base/inspector/filter_declaration.cpp` | 回收池匹配 |
+| reuseId 组件复用 | `frameworks/core/components_ng/pattern/recycle_view/recycle_manager.h`、`frameworks/core/components_ng/pattern/recycle_view/recycle_manager.cpp` | 回收池匹配 |
 | Rosen 渲染适配 | `frameworks/core/components_ng/render/adapter/rosen_render_context.cpp` | 基础属性到 RSNode 的适配入口 |
 | Dynamic JSView 解析 | `frameworks/bridge/declarative_frontend/jsview/js_view_abstract.cpp` | Common 属性的声明式 JS/ArkTS 动态参数解析入口 |
 | ArkTS Common Bridge | `frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.cpp` | AttributeModifier 和 FrameNode 动态属性解析入口 |
@@ -94,7 +94,7 @@
 | freeze 与 SetNodeFreeze 区别 | `render_context.h` — UpdateFreeze vs `frame_node.cpp` — SetNodeFreeze |
 | renderGroup 子树脏聚合 | `frame_node.cpp` |
 | excludeFromRenderGroup 排除子树 | `view_abstract.cpp` |
-| reuseId 组件复用 | `filter_declaration.cpp` |
+| reuseId 组件复用 | `recycle_manager.cpp` |
 | overlay 多次调用或重置 | `view_abstract.cpp` — SetOverlay |
 | focusable 默认值因组件类型不同 | `focus_hub.h` — 各 Pattern 的 GetDefaultFocusable() |
 | Dynamic 与 Static 行为不一致 | 分别核对 Dynamic JSView/Common Bridge、Static Common modifier/Static Model 和对应 SDK 声明，不从另一范式推断 |

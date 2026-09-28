@@ -1261,10 +1261,6 @@ ArkUINativeModuleValue ListBridge::SetOnScrollVisibleContentChange(ArkUIRuntimeC
 
         auto startParam = SetListItemIndex(vm, start);
         auto endParam = SetListItemIndex(vm, end);
-        startParam->SetNativePointerFieldCount(vm, 1);
-        startParam->SetNativePointerField(vm, 0, static_cast<void*>(&startParam));
-        endParam->SetNativePointerFieldCount(vm, 1);
-        endParam->SetNativePointerField(vm, 0, static_cast<void*>(&endParam));
         // 2: Array length
         panda::Local<panda::JSValueRef> params[2] = { startParam, endParam };
         func->Call(vm, func.ToLocal(), params, 2); // 2: Array length

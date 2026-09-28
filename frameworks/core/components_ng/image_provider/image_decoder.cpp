@@ -167,18 +167,12 @@ RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(
     std::pair<int32_t, int32_t> sourceSize = source->GetImageSize();
     // Determine whether to decode the width and height of each other based on the orientation
     SwapDecodeSize(obj, width, height);
-    std::string isTrimMemRebuild = "False";
-    if (imageDfxConfig.GetIsTrimMemRecycle()) {
-        isTrimMemRebuild = "True";
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "CreateImagePixelMapRebuild, %{private}s-%{public}s.", src.c_str(),
-            imageDfxConfig.ToStringWithoutSrc().c_str());
-    }
     ACE_SCOPED_TRACE("CreateImagePixelMap %s, sourceSize: [ %d, %d ], targetSize: [ %d, %d ],"
-                     "[%d-%d-%d], isTrimMemRebuild: [%s]",
+                     "[%d-%d-%d]",
         src.c_str(), sourceSize.first, sourceSize.second, width, height,
         static_cast<int32_t>(imageDecoderConfig.isHdrDecoderNeed_),
         static_cast<int32_t>(imageDecoderConfig.imageQuality_),
-        static_cast<int32_t>(imageDecoderConfig.photoDecodeFormat_), isTrimMemRebuild.c_str());
+        static_cast<int32_t>(imageDecoderConfig.photoDecodeFormat_));
 
     PixelMapConfig pixelMapConfig = { imageDecoderConfig.imageQuality_, imageDecoderConfig.isHdrDecoderNeed_,
         imageDecoderConfig.photoDecodeFormat_ };

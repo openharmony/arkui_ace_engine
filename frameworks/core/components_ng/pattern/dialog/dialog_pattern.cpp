@@ -26,6 +26,9 @@
 #include "base/memory/referenced.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
+#ifndef CROSS_PLATFORM
+#include "base/ressched/ressched_report.h"
+#endif
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/measure_util.h"
 #include "base/utils/multi_thread.h"
@@ -82,6 +85,17 @@
 namespace OHOS::Ace::NG {
 
 namespace {
+std::string MaterialTypeToString(int32_t type)
+{
+    static const std::string MaterialTypeStyles[] = { "MaterialType.NONE", "MaterialType.SEMI_TRANSPARENT",
+        "MaterialType.IMMERSIVE" };
+    if (type >= static_cast<int32_t>(MaterialType::NONE) &&
+        type <= static_cast<int32_t>(MaterialType::IMMERSIVE)) {
+        return MaterialTypeStyles[type];
+    }
+    return MaterialTypeStyles[0];
+}
+
 constexpr int32_t SHEET_INFO_IDX = -2;
 constexpr Dimension SHEET_IMAGE_MARGIN = 16.0_vp;
 constexpr Dimension SHEET_DIVIDER_WIDTH = 1.0_px;
@@ -1747,6 +1761,7 @@ void DialogPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
         filter);
     json->PutExtAttr("distortionEnabled", needDistortion_.value_or(false) ? "true" : "false", filter);
     json->PutExtAttr("edgeLightEnabled", needFlowLight_.value_or(false) ? "true" : "false", filter);
+    json->PutExtAttr("hasSystemMaterial", dialogProperties_.systemMaterial ? "true" : "false", filter);
 }
 
 void DialogPattern::OnColorConfigurationUpdate()
@@ -2440,6 +2455,25 @@ void DialogPattern::DumpInfo()
     }
     DumpBoolProperty();
     DumpObjectProperty();
+    bool hasSystemMaterial = dialogProperties_.systemMaterial != nullptr;
+    DumpLog::GetInstance().AddDesc("HasSystemMaterial: " + std::string(hasSystemMaterial ? "true" : "false"));
+    if (hasSystemMaterial) {
+        auto nativeMaterial = MaterialUtils::PreProcessMaterial(AceType::RawPtr(dialogProperties_.systemMaterial));
+        auto materialType = MaterialUtils::GetTypeFromMaterial(nativeMaterial);
+        DumpLog::GetInstance().AddDesc("MaterialType: " +
+            (materialType.has_value() ? MaterialTypeToString(static_cast<int32_t>(materialType.value()))
+                                      : std::string("MaterialType.NONE")));
+    }
+    DumpLog::GetInstance().AddDesc(
+        "DistortionMode: " +
+        DistortionModeToString(dialogProperties_.distortionMode.value_or(DistortionMode::DISTORTION_AUTO)));
+    DumpLog::GetInstance().AddDesc(
+        "EdgeLightMode: " +
+        EdgeLightModeToString(dialogProperties_.edgeLightMode.value_or(EdgeLightMode::EDGELIGHT_AUTO)));
+    DumpLog::GetInstance().AddDesc(
+        "DistortionEnabled: " + std::string(needDistortion_.value_or(false) ? "true" : "false"));
+    DumpLog::GetInstance().AddDesc(
+        "EdgeLightEnabled: " + std::string(needFlowLight_.value_or(false) ? "true" : "false"));
 }
 
 void DialogPattern::DumpBoolProperty()
@@ -2676,6 +2710,21 @@ void DialogPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     }
     DumpBoolProperty(json);
     DumpObjectProperty(json);
+    bool hasSystemMaterial = dialogProperties_.systemMaterial != nullptr;
+    json->Put("HasSystemMaterial", hasSystemMaterial ? "true" : "false");
+    if (hasSystemMaterial) {
+        auto nativeMaterial = MaterialUtils::PreProcessMaterial(AceType::RawPtr(dialogProperties_.systemMaterial));
+        auto materialType = MaterialUtils::GetTypeFromMaterial(nativeMaterial);
+        json->Put("MaterialType",
+            materialType.has_value() ? MaterialTypeToString(static_cast<int32_t>(materialType.value())).c_str()
+                                     : "MaterialType.NONE");
+    }
+    json->Put("DistortionMode",
+        DistortionModeToString(dialogProperties_.distortionMode.value_or(DistortionMode::DISTORTION_AUTO)).c_str());
+    json->Put("EdgeLightMode",
+        EdgeLightModeToString(dialogProperties_.edgeLightMode.value_or(EdgeLightMode::EDGELIGHT_AUTO)).c_str());
+    json->Put("DistortionEnabled", needDistortion_.value_or(false) ? "true" : "false");
+    json->Put("EdgeLightEnabled", needFlowLight_.value_or(false) ? "true" : "false");
 }
 
 void DialogPattern::DumpBoolProperty(std::unique_ptr<JsonValue>& json)
@@ -3154,6 +3203,7 @@ void DialogPattern::ReportShow()
 {
 #ifndef CROSS_PLATFORM
     TAG_LOGD(AceLogTag::ACE_DIALOG, "[DIALOG]Report show event.");
+    ResSchedReport::GetInstance().ReportDialogShow();
     if (dialogProperties_.type == DialogType::ALERT_DIALOG) {
         UiSessionManager::GetInstance()->ReportComponentChangeEvent("onVisibleChange", "show",
             ComponentEventType::COMPONENT_EVENT_DIALOG);

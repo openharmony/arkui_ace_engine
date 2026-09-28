@@ -29,7 +29,7 @@ public:
 private:
     static bool HandleThemeColorsArg(const EcmaVM* vm, const Local<JSValueRef>& colorsArg,
         std::vector<ArkUI_Uint32>& colors, std::vector<RefPtr<ResourceObject>>& resObjs,
-        ArkUI_Int32 themeId, bool isDark);
+        ArkUI_Int32 themeId, bool isDark, ColorMode colorMode);
     static ArkUINodeHandle CreateWithThemeNode(ArkUI_Int32 themeScopeId);
 };
 }

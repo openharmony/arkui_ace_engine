@@ -81,10 +81,10 @@ HWTEST_F(RichEditorScrollControllerTest, IsReachTop001, TestSize.Level0)
     scrollController->textRect_ = RectF(0, 0, 100, 100);
 
     scrollController->contentRect_ = RectF(0, 0, 100, 100);
-    EXPECT_TRUE(scrollController->IsReachTop());
+    EXPECT_TRUE(scrollController->geometryEvaluator_.IsReachTop());
 
     scrollController->contentRect_ = RectF(50, 50, 100, 100);
-    EXPECT_FALSE(scrollController->IsReachTop());
+    EXPECT_FALSE(scrollController->geometryEvaluator_.IsReachTop());
 }
 
 /**
@@ -101,10 +101,10 @@ HWTEST_F(RichEditorScrollControllerTest, IsReachBottom001, TestSize.Level0)
     scrollController->textRect_ = RectF(0, 0, 100, 100);
 
     scrollController->contentRect_ = RectF(0, 0, 100, 100);
-    EXPECT_TRUE(scrollController->IsReachBottom());
+    EXPECT_TRUE(scrollController->geometryEvaluator_.IsReachBottom());
 
     scrollController->contentRect_ = RectF(50, 50, 100, 100);
-    EXPECT_FALSE(scrollController->IsReachBottom());
+    EXPECT_FALSE(scrollController->geometryEvaluator_.IsReachBottom());
 }
 
 /**
@@ -121,10 +121,10 @@ HWTEST_F(RichEditorScrollControllerTest, IsReachLeft001, TestSize.Level0)
     scrollController->textRect_ = RectF(0, 0, 100, 100);
 
     scrollController->contentRect_ = RectF(0, 0, 100, 100);
-    EXPECT_TRUE(scrollController->IsReachLeft());
+    EXPECT_TRUE(scrollController->geometryEvaluator_.IsReachLeft());
 
     scrollController->contentRect_ = RectF(50, 50, 100, 100);
-    EXPECT_FALSE(scrollController->IsReachLeft());
+    EXPECT_FALSE(scrollController->geometryEvaluator_.IsReachLeft());
 }
 
 /**
@@ -141,10 +141,10 @@ HWTEST_F(RichEditorScrollControllerTest, IsReachRight001, TestSize.Level0)
     scrollController->textRect_ = RectF(0, 0, 100, 100);
 
     scrollController->contentRect_ = RectF(0, 0, 100, 100);
-    EXPECT_TRUE(scrollController->IsReachRight());
+    EXPECT_TRUE(scrollController->geometryEvaluator_.IsReachRight());
 
     scrollController->contentRect_ = RectF(50, 50, 100, 100);
-    EXPECT_FALSE(scrollController->IsReachRight());
+    EXPECT_FALSE(scrollController->geometryEvaluator_.IsReachRight());
 }
 
 /**
@@ -162,19 +162,19 @@ HWTEST_F(RichEditorScrollControllerTest, IsReachLowerBoundary001, TestSize.Level
     scrollController->contentRect_ = RectF(0, 0, 100, 100);
 
     scrollController->isSingleLineMode_ = true;
-    EXPECT_TRUE(scrollController->IsReachLowerBoundary());
-    EXPECT_TRUE(scrollController->IsReachBoundary());
+    EXPECT_TRUE(scrollController->geometryEvaluator_.IsReachLowerBoundary(!scrollController->isSingleLineMode_));
+    EXPECT_TRUE(scrollController->geometryEvaluator_.IsReachBoundary(!scrollController->isSingleLineMode_));
     scrollController->isSingleLineMode_ = false;
-    EXPECT_TRUE(scrollController->IsReachLowerBoundary());
-    EXPECT_TRUE(scrollController->IsReachBoundary());
+    EXPECT_TRUE(scrollController->geometryEvaluator_.IsReachLowerBoundary(!scrollController->isSingleLineMode_));
+    EXPECT_TRUE(scrollController->geometryEvaluator_.IsReachBoundary(!scrollController->isSingleLineMode_));
 
     scrollController->contentRect_ = RectF(50, 50, 100, 100);
     scrollController->isSingleLineMode_ = true;
-    EXPECT_FALSE(scrollController->IsReachLowerBoundary());
-    EXPECT_FALSE(scrollController->IsReachBoundary());
+    EXPECT_FALSE(scrollController->geometryEvaluator_.IsReachLowerBoundary(!scrollController->isSingleLineMode_));
+    EXPECT_FALSE(scrollController->geometryEvaluator_.IsReachBoundary(!scrollController->isSingleLineMode_));
     scrollController->isSingleLineMode_ = false;
-    EXPECT_FALSE(scrollController->IsReachLowerBoundary());
-    EXPECT_FALSE(scrollController->IsReachBoundary());
+    EXPECT_FALSE(scrollController->geometryEvaluator_.IsReachLowerBoundary(!scrollController->isSingleLineMode_));
+    EXPECT_FALSE(scrollController->geometryEvaluator_.IsReachBoundary(!scrollController->isSingleLineMode_));
 }
 
 /**
@@ -192,19 +192,19 @@ HWTEST_F(RichEditorScrollControllerTest, IsReachUpperBoundary001, TestSize.Level
     scrollController->contentRect_ = RectF(0, 0, 100, 100);
 
     scrollController->isSingleLineMode_ = true;
-    EXPECT_TRUE(scrollController->IsReachUpperBoundary());
-    EXPECT_TRUE(scrollController->IsReachBoundary());
+    EXPECT_TRUE(scrollController->geometryEvaluator_.IsReachUpperBoundary(!scrollController->isSingleLineMode_));
+    EXPECT_TRUE(scrollController->geometryEvaluator_.IsReachBoundary(!scrollController->isSingleLineMode_));
     scrollController->isSingleLineMode_ = false;
-    EXPECT_TRUE(scrollController->IsReachUpperBoundary());
-    EXPECT_TRUE(scrollController->IsReachBoundary());
+    EXPECT_TRUE(scrollController->geometryEvaluator_.IsReachUpperBoundary(!scrollController->isSingleLineMode_));
+    EXPECT_TRUE(scrollController->geometryEvaluator_.IsReachBoundary(!scrollController->isSingleLineMode_));
 
     scrollController->contentRect_ = RectF(50, 50, 100, 100);
     scrollController->isSingleLineMode_ = true;
-    EXPECT_FALSE(scrollController->IsReachUpperBoundary());
-    EXPECT_FALSE(scrollController->IsReachBoundary());
+    EXPECT_FALSE(scrollController->geometryEvaluator_.IsReachUpperBoundary(!scrollController->isSingleLineMode_));
+    EXPECT_FALSE(scrollController->geometryEvaluator_.IsReachBoundary(!scrollController->isSingleLineMode_));
     scrollController->isSingleLineMode_ = false;
-    EXPECT_FALSE(scrollController->IsReachUpperBoundary());
-    EXPECT_FALSE(scrollController->IsReachBoundary());
+    EXPECT_FALSE(scrollController->geometryEvaluator_.IsReachUpperBoundary(!scrollController->isSingleLineMode_));
+    EXPECT_FALSE(scrollController->geometryEvaluator_.IsReachBoundary(!scrollController->isSingleLineMode_));
 }
 
 /**
@@ -222,9 +222,9 @@ HWTEST_F(RichEditorScrollControllerTest, IsReachAvoidBoundary001, TestSize.Level
     scrollController->contentRect_ = RectF(0, 0, 100, 100);
 
     scrollController->isSingleLineMode_ = true;
-    EXPECT_TRUE(scrollController->IsReachAvoidBoundary(1.0f));
+    EXPECT_TRUE(scrollController->geometryEvaluator_.IsReachAvoidBoundary(1.0f, Axis::HORIZONTAL, 0.0f));
     scrollController->isSingleLineMode_ = false;
-    EXPECT_TRUE(scrollController->IsReachAvoidBoundary(1.0f));
+    EXPECT_TRUE(scrollController->geometryEvaluator_.IsReachAvoidBoundary(1.0f, Axis::VERTICAL, 0.0f));
 }
 
 /**
@@ -234,7 +234,7 @@ HWTEST_F(RichEditorScrollControllerTest, IsReachAvoidBoundary001, TestSize.Level
  */
 HWTEST_F(RichEditorScrollControllerTest, CalcDragSpeed001, TestSize.Level0)
 {
-    auto speed = RichEditorScrollController::CalcDragSpeed(0.0f, 5.0f, 1.0f);
+    auto speed = ScrollGeometryEvaluator::CalcDragSpeed(0.0f, 5.0f, 1.0f);
     EXPECT_NE(speed, 0.0f);
 }
 
@@ -253,7 +253,7 @@ HWTEST_F(RichEditorScrollControllerTest, CalcDragSpeed002, TestSize.Level2)
     float hotAreaEnd = 101.1f;
     float point = 50.1f;
     float result = 17.472723f;
-    speed = RichEditorScrollController::CalcDragSpeed(hotAreaStart, hotAreaEnd, point);
+    speed = ScrollGeometryEvaluator::CalcDragSpeed(hotAreaStart, hotAreaEnd, point);
     EXPECT_EQ(result, speed);
 }
 
@@ -321,7 +321,7 @@ HWTEST_F(RichEditorScrollControllerTest, ScheduleAutoScroll003, TestSize.Level0)
     richEditorPattern->richTextRect_.SetRect(0, 2, 1, 1);
     auto& scrollController = richEditorPattern->scrollController_;
 
-    scrollController->isAutoScrollRunning_ = true;
+    scrollController->autoScrollScheduler_->isAutoScrollRunning_ = true;
     scrollController->ScheduleAutoScroll(param);
     EXPECT_TRUE(param.isFirstRun_);
 }
@@ -344,10 +344,10 @@ HWTEST_F(RichEditorScrollControllerTest, StopAutoScroll001, TestSize.Level0)
      * @tc.steps: step2. check isAutoScrollRunning_
      */
     auto& scrollController = richEditorPattern->scrollController_;
-    EXPECT_FALSE(scrollController->isAutoScrollRunning_);
-    scrollController->isAutoScrollRunning_ = true;
+    EXPECT_FALSE(scrollController->autoScrollScheduler_->isAutoScrollRunning_);
+    scrollController->autoScrollScheduler_->isAutoScrollRunning_ = true;
     scrollController->StopAutoScroll();
-    EXPECT_FALSE(scrollController->isAutoScrollRunning_);
+    EXPECT_FALSE(scrollController->autoScrollScheduler_->isAutoScrollRunning_);
 }
 
 /**
@@ -368,21 +368,23 @@ HWTEST_F(RichEditorScrollControllerTest, GetAutoScrollOffsetDiff001, TestSize.Le
      * @tc.steps: step2. GetAutoScrollOffsetDiff
      */
     auto& scrollController = richEditorPattern->scrollController_;
-    scrollController->prevAutoScrollOffset_ = OffsetF(1.0f, 0.0f);
+    auto fixedScroll = AceType::DynamicCast<RichEditorFixedScrollController>(scrollController);
+    ASSERT_NE(fixedScroll, nullptr);
+    fixedScroll->prevAutoScrollOffset_ = OffsetF(1.0f, 0.0f);
     scrollController->isSingleLineMode_ = true;
-    EXPECT_NE(scrollController->GetAutoScrollOffsetDiff(OffsetF(0.0f, 0.0f)), 0.0f);
+    EXPECT_NE(fixedScroll->GetAutoScrollOffsetDiff(OffsetF(0.0f, 0.0f)), 0.0f);
 
-    scrollController->prevAutoScrollOffset_ = OffsetF(0.0f, 1.0f);
+    fixedScroll->prevAutoScrollOffset_ = OffsetF(0.0f, 1.0f);
     scrollController->isSingleLineMode_ = false;
-    EXPECT_NE(scrollController->GetAutoScrollOffsetDiff(OffsetF(0.0f, 0.0f)), 0.0f);
+    EXPECT_NE(fixedScroll->GetAutoScrollOffsetDiff(OffsetF(0.0f, 0.0f)), 0.0f);
 }
 
 /**
- * @tc.name: GetHotAreaOverflow001
- * @tc.desc: test GetHotAreaOverflow
+ * @tc.name: IsHotAreaOverflow001
+ * @tc.desc: test IsHotAreaOverflow
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorScrollControllerTest, GetHotAreaOverflow001, TestSize.Level0)
+HWTEST_F(RichEditorScrollControllerTest, IsHotAreaOverflow001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. get RichEditorPattern
@@ -399,15 +401,15 @@ HWTEST_F(RichEditorScrollControllerTest, GetHotAreaOverflow001, TestSize.Level0)
     scrollController->contentRect_ = RectF(0.0f, 0.0f, 100.0f, 100.0f);
 
     /**
-     * @tc.steps: step3. GetHotAreaOverflow
+     * @tc.steps: step3. IsHotAreaOverflow
      */
     scrollController->isSingleLineMode_ = true;
-    EXPECT_TRUE(scrollController->GetHotAreaOverflow(true, 100.0f));
-    EXPECT_TRUE(scrollController->GetHotAreaOverflow(false, 100.0f));
+    EXPECT_TRUE(scrollController->geometryEvaluator_.IsHotAreaOverflow(true, 100.0f));
+    EXPECT_TRUE(scrollController->geometryEvaluator_.IsHotAreaOverflow(false, 100.0f));
 
     scrollController->isSingleLineMode_ = false;
-    EXPECT_TRUE(scrollController->GetHotAreaOverflow(true, 100.0f));
-    EXPECT_TRUE(scrollController->GetHotAreaOverflow(false, 100.0f));
+    EXPECT_TRUE(scrollController->geometryEvaluator_.IsHotAreaOverflow(true, 100.0f));
+    EXPECT_TRUE(scrollController->geometryEvaluator_.IsHotAreaOverflow(false, 100.0f));
 }
 
 /**
@@ -434,23 +436,24 @@ HWTEST_F(RichEditorScrollControllerTest, AutoScrollByEdgeDetection001, TestSize.
     param.handleRect = RectF(50, richEditorPattern->contentRect_.GetY() + edgeDistance + 1, 20, 20);
     richEditorPattern->AutoScrollByEdgeDetection(
         param, param.handleRect.GetOffset(), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_FALSE(scrollController->autoScrollTask_) << "handle move up but not reach top edge";
+    EXPECT_FALSE(scrollController->autoScrollScheduler_->autoScrollTask_);
     richEditorPattern->StopAutoScroll();
 
     scrollController->prevAutoScrollOffset_ = OffsetF(0, 0);
     param.handleRect = RectF(50, richEditorPattern->contentRect_.GetY() + edgeDistance - 1, 20, 20);
     richEditorPattern->AutoScrollByEdgeDetection(
         param, param.handleRect.GetOffset(), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_TRUE(scrollController->IsReachTop()) << "handle reach top edge";
+    EXPECT_TRUE(scrollController->geometryEvaluator_.IsReachTop());
     richEditorPattern->StopAutoScroll();
 
     auto handleHeight = 20;
     scrollController->prevAutoScrollOffset_ = OffsetF(0, 0);
     param.handleRect =
-        RectF(50, richEditorPattern->contentRect_.Bottom() - edgeDistance - 1 - handleHeight, 20, handleHeight);
+        RectF(50, richEditorPattern->contentRect_.Bottom() - edgeDistance - 1 - handleHeight,
+              20, handleHeight);
     richEditorPattern->AutoScrollByEdgeDetection(
         param, param.handleRect.GetOffset(), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_FALSE(scrollController->autoScrollTask_) << "handle move down but not reach bottom edge";
+    EXPECT_FALSE(scrollController->autoScrollScheduler_->autoScrollTask_);
     richEditorPattern->StopAutoScroll();
 
     scrollController->prevAutoScrollOffset_ = OffsetF(0, 0);
@@ -458,7 +461,7 @@ HWTEST_F(RichEditorScrollControllerTest, AutoScrollByEdgeDetection001, TestSize.
         RectF(50, richEditorPattern->contentRect_.Bottom() - edgeDistance - handleHeight + 1, 20, handleHeight);
     richEditorPattern->AutoScrollByEdgeDetection(
         param, param.handleRect.GetOffset(), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_TRUE(scrollController->IsReachBottom()) << "handle reach bottom edge";
+    EXPECT_TRUE(scrollController->geometryEvaluator_.IsReachBottom());
     richEditorPattern->StopAutoScroll();
 
     pipeline->taskExecutor_.Reset();
@@ -487,25 +490,26 @@ HWTEST_F(RichEditorScrollControllerTest, AutoScrollByEdgeDetection002, TestSize.
 
     richEditorPattern->AutoScrollByEdgeDetection(param,
         OffsetF(50, richEditorPattern->contentRect_.GetY() + edgeDistance + 1), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_FALSE(scrollController->autoScrollTask_) << "mouse move up but not reach top edge";
+    EXPECT_FALSE(scrollController->autoScrollScheduler_->autoScrollTask_);
     richEditorPattern->StopAutoScroll();
 
     scrollController->prevAutoScrollOffset_ = OffsetF(0, 0);
     richEditorPattern->AutoScrollByEdgeDetection(param,
         OffsetF(50, richEditorPattern->contentRect_.GetY() + edgeDistance - 1), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_TRUE(scrollController->IsReachTop()) << "mouse reach top edge";
+    EXPECT_TRUE(scrollController->geometryEvaluator_.IsReachTop());
     richEditorPattern->StopAutoScroll();
 
     scrollController->prevAutoScrollOffset_ = OffsetF(0, 0);
     richEditorPattern->AutoScrollByEdgeDetection(param,
-        OffsetF(50, richEditorPattern->contentRect_.Bottom() - edgeDistance - 1), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_FALSE(scrollController->autoScrollTask_) << "mouse move down but not reach bottom edge";
+        OffsetF(50, richEditorPattern->contentRect_.Bottom() - edgeDistance - 1),
+        EdgeDetectionStrategy::OUT_BOUNDARY);
+    EXPECT_FALSE(scrollController->autoScrollScheduler_->autoScrollTask_);
     richEditorPattern->StopAutoScroll();
 
     scrollController->prevAutoScrollOffset_ = OffsetF(0, 0);
     richEditorPattern->AutoScrollByEdgeDetection(param,
         OffsetF(50, richEditorPattern->contentRect_.Bottom() - edgeDistance + 1), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_TRUE(scrollController->IsReachBottom()) << "mouse reach bottom edge";
+    EXPECT_TRUE(scrollController->geometryEvaluator_.IsReachBottom());
     richEditorPattern->StopAutoScroll();
 
     pipeline->taskExecutor_.Reset();
@@ -536,30 +540,30 @@ HWTEST_F(RichEditorScrollControllerTest, AutoScrollByEdgeDetection003, TestSize.
     scrollController->prevAutoScrollOffset_ = OffsetF(0, 0);
     richEditorPattern->AutoScrollByEdgeDetection(
         param, OffsetF(50, dragDistance + 1), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_FALSE(scrollController->autoScrollTask_) << "drag move up but not reach top edge";
+    EXPECT_FALSE(scrollController->autoScrollScheduler_->autoScrollTask_) << "drag move up but not reach top edge";
     richEditorPattern->StopAutoScroll();
 
     scrollController->prevAutoScrollOffset_ = OffsetF(0, 0);
     richEditorPattern->AutoScrollByEdgeDetection(
         param, OffsetF(50, dragDistance - 10), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_TRUE(scrollController->IsReachTop()) << "drag reach top edge";
-    auto speed = scrollController->CalcDragSpeed(dragDistance, 0, dragDistance - 10);
-    EXPECT_EQ(scrollController->currentScrollParam_.offset, speed) << "darg speed move up";
+    EXPECT_TRUE(scrollController->geometryEvaluator_.IsReachTop()) << "drag reach top edge";
+    auto speed = scrollController->geometryEvaluator_.CalcDragSpeed(dragDistance, 0, dragDistance - 10);
+    EXPECT_EQ(scrollController->autoScrollScheduler_->currentScrollParam_.offset, speed) << "darg speed move up";
     richEditorPattern->StopAutoScroll();
 
     scrollController->prevAutoScrollOffset_ = OffsetF(0, 0);
     richEditorPattern->AutoScrollByEdgeDetection(param,
         OffsetF(50, richEditorPattern->frameRect_.Bottom() - dragDistance - 1), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_FALSE(scrollController->autoScrollTask_) << "drag move down but not reach bottom edge";
+    EXPECT_FALSE(scrollController->autoScrollScheduler_->autoScrollTask_) << "drag move down but not reach bottom edge";
     richEditorPattern->StopAutoScroll();
 
     scrollController->prevAutoScrollOffset_ = OffsetF(0, 0);
     auto pointY = richEditorPattern->frameRect_.Bottom() - dragDistance + 10;
     richEditorPattern->AutoScrollByEdgeDetection(param, OffsetF(50, pointY), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_TRUE(scrollController->IsReachBottom()) << "drag reach bottom edge";
-    speed = scrollController->CalcDragSpeed(
+    EXPECT_TRUE(scrollController->geometryEvaluator_.IsReachBottom()) << "drag reach bottom edge";
+    speed = scrollController->geometryEvaluator_.CalcDragSpeed(
         richEditorPattern->frameRect_.Bottom() - dragDistance, richEditorPattern->frameRect_.Bottom(), pointY);
-    EXPECT_EQ(scrollController->currentScrollParam_.offset, -speed) << "darg speed move down"
+    EXPECT_EQ(scrollController->autoScrollScheduler_->currentScrollParam_.offset, -speed) << "darg speed move down"
         << ", hotAreaStart=" << richEditorPattern->frameRect_.Bottom() - dragDistance
         << ", hotAreaEnd=" << richEditorPattern->frameRect_.Bottom()
         << ", point=" << pointY;
@@ -589,16 +593,19 @@ HWTEST_F(RichEditorScrollControllerTest, AutoScrollByEdgeDetection004, TestSize.
     auto edgeDistance = AUTO_SCROLL_EDGE_DISTANCE.ConvertToPx();
 
     scrollController->prevAutoScrollOffset_ = OffsetF(50, 50);
-    AutoScrollParam param = { .autoScrollEvent = AutoScrollEvent::HANDLE, .handleRect = RectF(50, 50, 20, 20) };
+    AutoScrollParam param = {
+        .autoScrollEvent = AutoScrollEvent::HANDLE,
+        .handleRect = RectF(50, 50, 20, 20)
+    };
     richEditorPattern->AutoScrollByEdgeDetection(param, OffsetF(50, 50), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_FALSE(scrollController->autoScrollTask_) << "the touch point is the same as the last time";
+    EXPECT_FALSE(scrollController->autoScrollScheduler_->autoScrollTask_);
     richEditorPattern->StopAutoScroll();
 
     scrollController->prevAutoScrollOffset_ = OffsetF(0, 0);
     richEditorPattern->contentRect_ = RectF(0, 0, 100, edgeDistance - 1);
     richEditorPattern->AutoScrollByEdgeDetection(
         param, param.handleRect.GetOffset(), EdgeDetectionStrategy::OUT_BOUNDARY);
-    EXPECT_FALSE(scrollController->autoScrollTask_) << "content height is too small.";
+    EXPECT_FALSE(scrollController->autoScrollScheduler_->autoScrollTask_) << "content height is too small.";
     richEditorPattern->StopAutoScroll();
 
     pipeline->taskExecutor_.Reset();
@@ -627,11 +634,11 @@ HWTEST_F(RichEditorScrollControllerTest, GetOffset2d001, TestSize.Level0)
 
     scrollController->isSingleLineMode_ = true;
     OffsetF offsetX{ 1.0f, 0.0f };
-    EXPECT_EQ(scrollController->GetOffset2d(1.0f), offsetX);
+    EXPECT_EQ(ScrollGeometryEvaluator::GetOffset2d(1.0f, !scrollController->isSingleLineMode_), offsetX);
 
     scrollController->isSingleLineMode_ = false;
     OffsetF offsetY{ 0.0f, 1.0f };
-    EXPECT_EQ(scrollController->GetOffset2d(1.0f), offsetY);
+    EXPECT_EQ(ScrollGeometryEvaluator::GetOffset2d(1.0f, !scrollController->isSingleLineMode_), offsetY);
 }
 
 /**
@@ -661,7 +668,8 @@ HWTEST_F(RichEditorScrollControllerTest, MoveHandleOnScroll001, TestSize.Level0)
         richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
     ASSERT_TRUE(richEditorPattern->SelectOverlayIsOn());
 
-    scrollController->MoveHandleOnScroll(1.0f);
+    scrollController->MoveHandlesOnScroll(1.0f,
+        scrollController->isSingleLineMode_ ? Axis::HORIZONTAL : Axis::VERTICAL);
     EXPECT_NE(textSelector.selectionBaseOffset, offset);
     EXPECT_NE(textSelector.selectionDestinationOffset, offset);
 }
@@ -693,19 +701,22 @@ HWTEST_F(RichEditorScrollControllerTest, MoveHandleOnScroll002, TestSize.Level0)
         richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
     ASSERT_TRUE(richEditorPattern->SelectOverlayIsOn());
 
-    scrollController->MoveHandleOnScroll(1.0f);
+    scrollController->MoveHandlesOnScroll(1.0f,
+        scrollController->isSingleLineMode_ ? Axis::HORIZONTAL : Axis::VERTICAL);
     EXPECT_NE(textSelector.selectionBaseOffset, offset);
     EXPECT_NE(textSelector.selectionDestinationOffset, offset);
 
     textSelector.selectionBaseOffset = offset;
     textSelector.selectionDestinationOffset = offset;
-    scrollController->MoveHandleOnScroll(1.0f, true);
+    scrollController->MoveHandleWithAxisOnScroll(1.0f, true,
+        scrollController->isSingleLineMode_ ? Axis::HORIZONTAL : Axis::VERTICAL);
     EXPECT_NE(textSelector.selectionBaseOffset, offset);
     EXPECT_EQ(textSelector.selectionDestinationOffset, offset);
 
     textSelector.selectionBaseOffset = offset;
     textSelector.selectionDestinationOffset = offset;
-    scrollController->MoveHandleOnScroll(1.0f, false);
+    scrollController->MoveHandleWithAxisOnScroll(1.0f, false,
+        scrollController->isSingleLineMode_ ? Axis::HORIZONTAL : Axis::VERTICAL);
     EXPECT_EQ(textSelector.selectionBaseOffset, offset);
     EXPECT_NE(textSelector.selectionDestinationOffset, offset);
 }
@@ -737,7 +748,8 @@ HWTEST_F(RichEditorScrollControllerTest, MoveHandleOnScroll003, TestSize.Level0)
         richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
     ASSERT_TRUE(richEditorPattern->SelectOverlayIsOn());
 
-    scrollController->MoveHandleOnScroll(1.0f);
+    scrollController->MoveHandlesOnScroll(1.0f,
+        scrollController->isSingleLineMode_ ? Axis::HORIZONTAL : Axis::VERTICAL);
     EXPECT_NE(textSelector.selectionBaseOffset, offset);
     EXPECT_NE(textSelector.selectionDestinationOffset, offset);
 }
@@ -757,12 +769,12 @@ HWTEST_F(RichEditorScrollControllerTest, MoveTextRect001, TestSize.Level0)
     scrollController->textRect_ = RectF(0.0f, 0.0f, 100.0f, 100.0f);
     scrollController->contentRect_ = RectF(0.0f, 0.0f, 100.0f, 100.0f);
     scrollController->isSingleLineMode_ = true;
-    EXPECT_EQ(scrollController->MoveTextRect(10.0f), 0.0f);
-    EXPECT_EQ(scrollController->MoveTextRect(-10.0f), 0.0f);
+    EXPECT_EQ(scrollController->MoveTextRectWithAxis(10.0f, Axis::HORIZONTAL, 0.0f), 0.0f);
+    EXPECT_EQ(scrollController->MoveTextRectWithAxis(-10.0f, Axis::HORIZONTAL, 0.0f), 0.0f);
 
     scrollController->isSingleLineMode_ = false;
-    EXPECT_EQ(scrollController->MoveTextRect(10.0f), 0.0f);
-    EXPECT_EQ(scrollController->MoveTextRect(-10.0f), 0.0f);
+    EXPECT_EQ(scrollController->MoveTextRectWithAxis(10.0f, Axis::VERTICAL, 0.0f), 0.0f);
+    EXPECT_EQ(scrollController->MoveTextRectWithAxis(-10.0f, Axis::VERTICAL, 0.0f), 0.0f);
 }
 
 /**
@@ -780,10 +792,10 @@ HWTEST_F(RichEditorScrollControllerTest, CalCaretToContentRectDistanceVertical00
     scrollController->contentRect_ = RectF(0.0f, 0.0f, 10.0f, 10.0f);
     float caretHeight = 20.0f;
     // contentHeight < caretHeight and caret not at bottom
-    EXPECT_EQ(scrollController->CalCaretToContentRectDistanceVertical(
+    EXPECT_EQ(scrollController->geometryEvaluator_.CalCaretToContentRectDistanceVertical(
         OffsetF(10.0f, 120.0f), caretHeight, 30.0f), -160.0f);
     // contentHeight < caretHeight and caret at bottom
-    EXPECT_EQ(scrollController->CalCaretToContentRectDistanceVertical(
+    EXPECT_EQ(scrollController->geometryEvaluator_.CalCaretToContentRectDistanceVertical(
         OffsetF(10.0f, -10.0f), caretHeight, 0.0f), 0.0f);
 }
 
@@ -802,18 +814,18 @@ HWTEST_F(RichEditorScrollControllerTest, CalCaretToContentRectDistanceVertical00
     scrollController->contentRect_ = RectF(0.0f, 0.0f, 100.0f, 100.0f);
     float caretHeight = 20.0f;
     // caret above top and caretX <= textRectX
-    EXPECT_EQ(scrollController->CalCaretToContentRectDistanceVertical(
+    EXPECT_EQ(scrollController->geometryEvaluator_.CalCaretToContentRectDistanceVertical(
         OffsetF(0.0f, -10.0f), caretHeight, 0.0f), 30.0f);
     // caret above top and caretX > textRectX
-    EXPECT_EQ(scrollController->CalCaretToContentRectDistanceVertical(
+    EXPECT_EQ(scrollController->geometryEvaluator_.CalCaretToContentRectDistanceVertical(
         OffsetF(10.0f, -10.0f), caretHeight, 0.0f), 10.0f);
     // caret beyond bottom
     Dimension caretBottomDistance = 16.0_vp;
     float bottomDistance = caretBottomDistance.ConvertToPx();
-    EXPECT_EQ(scrollController->CalCaretToContentRectDistanceVertical(
+    EXPECT_EQ(scrollController->geometryEvaluator_.CalCaretToContentRectDistanceVertical(
         OffsetF(0.0f, 90.0f), caretHeight, 0.0f), -10.0f - bottomDistance);
     // caret within content, default return
-    EXPECT_EQ(scrollController->CalCaretToContentRectDistanceVertical(
+    EXPECT_EQ(scrollController->geometryEvaluator_.CalCaretToContentRectDistanceVertical(
         OffsetF(0.0f, 10.0f), caretHeight, 0.0f), 0.0f);
 }
 
@@ -828,15 +840,16 @@ HWTEST_F(RichEditorScrollControllerTest, CalCaretToContentRectDistanceHorizontal
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     auto& scrollController = richEditorPattern->scrollController_;
-    scrollController->contentRect_ = RectF(10.0f, 0.0f, 80.0f, 100.0f); // Left=10, Right=90
+    scrollController->contentRect_ = RectF(10.0f, 0.0f, 80.0f, 100.0f);
+    auto& geoEval = scrollController->geometryEvaluator_;
     // caret within content
-    EXPECT_EQ(scrollController->CalCaretToContentRectDistanceHorizontal(OffsetF(20.0f, 0.0f), 10.0f), 0.0f);
+    EXPECT_EQ(geoEval.CalCaretToContentRectDistanceHorizontal(OffsetF(20.0f, 0.0f), 10.0f), 0.0f);
     // caret left of content
-    EXPECT_EQ(scrollController->CalCaretToContentRectDistanceHorizontal(OffsetF(0.0f, 0.0f), 5.0f), 10.0f);
+    EXPECT_EQ(geoEval.CalCaretToContentRectDistanceHorizontal(OffsetF(0.0f, 0.0f), 5.0f), 10.0f);
     // caret right of content
-    EXPECT_EQ(scrollController->CalCaretToContentRectDistanceHorizontal(OffsetF(95.0f, 0.0f), 10.0f), -15.0f);
+    EXPECT_EQ(geoEval.CalCaretToContentRectDistanceHorizontal(OffsetF(95.0f, 0.0f), 10.0f), -15.0f);
     // caret spans entire content
-    EXPECT_EQ(scrollController->CalCaretToContentRectDistanceHorizontal(OffsetF(0.0f, 0.0f), 100.0f), 0.0f);
+    EXPECT_EQ(geoEval.CalCaretToContentRectDistanceHorizontal(OffsetF(0.0f, 0.0f), 100.0f), 0.0f);
 }
 
 /**
@@ -857,11 +870,11 @@ HWTEST_F(RichEditorScrollControllerTest, NeedScroll001, TestSize.Level0)
     scrollController->isSingleLineMode_ = true;
     textRect_.SetSize(SizeF(150.0f, 100.0f));
     contentRect_.SetSize(SizeF(100.0f, 100.0f));
-    EXPECT_TRUE(scrollController->NeedScroll());
+    EXPECT_TRUE(scrollController->geometryEvaluator_.NeedScroll(!scrollController->isSingleLineMode_));
 
     textRect_.SetSize(SizeF(50.0f, 100.0f));
     contentRect_.SetSize(SizeF(100.0f, 100.0f));
-    EXPECT_FALSE(scrollController->NeedScroll());
+    EXPECT_FALSE(scrollController->geometryEvaluator_.NeedScroll(!scrollController->isSingleLineMode_));
 }
 
 /**
@@ -882,11 +895,11 @@ HWTEST_F(RichEditorScrollControllerTest, NeedScroll002, TestSize.Level0)
     scrollController->isSingleLineMode_ = false;
     textRect_.SetSize(SizeF(100.0f, 150.0f));
     contentRect_.SetSize(SizeF(100.0f, 100.0f));
-    EXPECT_TRUE(scrollController->NeedScroll());
+    EXPECT_TRUE(scrollController->geometryEvaluator_.NeedScroll(!scrollController->isSingleLineMode_));
 
     textRect_.SetSize(SizeF(100.0f, 50.0f));
     contentRect_.SetSize(SizeF(100.0f, 100.0f));
-    EXPECT_FALSE(scrollController->NeedScroll());
+    EXPECT_FALSE(scrollController->geometryEvaluator_.NeedScroll(!scrollController->isSingleLineMode_));
 }
 
 /**
@@ -1244,12 +1257,16 @@ HWTEST_F(RichEditorScrollControllerTest, UpdateScrollBar001, TestSize.Level0)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->isHorizontalScrolling_ = true;
+    richEditorPattern->HandleFreeScroll(true);
     auto& scrollController = richEditorPattern->scrollController_;
+    auto freeScroll = AceType::DynamicCast<RichEditorFreeScrollController>(scrollController);
+    ASSERT_NE(freeScroll, nullptr);
 
     scrollController->SetScrollBar(DisplayMode::ON);
-    ASSERT_NE(scrollController->scrollBar_, nullptr);
-    auto verticalBar = scrollController->scrollBar_->GetVerticalBar();
-    auto horizontalBar = scrollController->scrollBar_->GetHorizontalBar();
+    ASSERT_NE(freeScroll->scrollBar_, nullptr);
+    auto verticalBar = freeScroll->scrollBar_->GetVerticalBar();
+    auto horizontalBar = freeScroll->scrollBar_->GetHorizontalBar();
     ASSERT_NE(verticalBar, nullptr);
     ASSERT_NE(horizontalBar, nullptr);
 
@@ -1262,7 +1279,7 @@ HWTEST_F(RichEditorScrollControllerTest, UpdateScrollBar001, TestSize.Level0)
     horizontalBar->SetHoverAnimationType(HoverAnimationType::GROW);
     horizontalBar->SetOpacityAnimationType(OpacityAnimationType::APPEAR);
 
-    scrollController->UpdateScrollBar();
+    freeScroll->UpdateScrollBar();
     EXPECT_EQ(verticalBar->GetHoverAnimationType(), HoverAnimationType::NONE);
     EXPECT_EQ(verticalBar->GetOpacityAnimationType(), OpacityAnimationType::NONE);
     EXPECT_EQ(horizontalBar->GetHoverAnimationType(), HoverAnimationType::GROW);

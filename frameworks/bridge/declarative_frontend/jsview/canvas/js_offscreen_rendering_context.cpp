@@ -234,7 +234,7 @@ void JSOffscreenRenderingContext::Constructor(const JSCallbackInfo& args)
     double height = 0.0;
     double density = jsRenderContext->GetDensity();
     if (args.GetDoubleArg(0, width, true) && args.GetDoubleArg(1, height, true)) {
-        if (!std::isfinite(width) || !std::isfinite(height) || width <= 0.0 || height <= 0.0) {
+        if (!std::isfinite(width) || !std::isfinite(height)) {
             return;
         }
         width *= density;

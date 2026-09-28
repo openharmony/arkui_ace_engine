@@ -515,6 +515,7 @@ static const char* FindDoubleValue(const char str[], double& value)
 
 void RosenSvgPainter::StringToPoints(const char str[], std::vector<RSPoint>& points)
 {
+    constexpr size_t MAX_POINT_COUNT = 1024 * 10;
     for (;;) {
         double x = 0.0;
         str = FindDoubleValue(str, x);
@@ -528,6 +529,10 @@ void RosenSvgPainter::StringToPoints(const char str[], std::vector<RSPoint>& poi
             break;
         }
         points.emplace_back(RSPoint(x, y));
+        if (points.size() >= MAX_POINT_COUNT) {
+            LOGW("SVG polygon point count exceeds limit (%{public}zu), truncating", MAX_POINT_COUNT);
+            break;
+        }
     }
 }
 

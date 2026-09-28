@@ -78,7 +78,7 @@
 | 文档 | 稳定路径 | 与渲染树同步的关系 |
 |------|----------|------------------|
 | 渲染主流程规格 | `specs/03-engine-framework/01-render-pipeline/01-basic-render-pipeline/Feat-01-render-main-flow-spec.md` | 覆盖 FlushVsync 编排；延迟合并的渲染树重建由 `FlushRebuildRenderTree` 在 FlushVsync 前段执行 |
-| 渲染树同步规格 | `specs/03-engine-framework/01-render-pipeline/01-basic-render-pipeline/Feat-02-render-tree-sync-spec.md` | 覆盖 MarkNeedSyncRenderTree→RebuildRenderContextTree→ProcessRenderTreeDiff 全链路，isPendingState_ 生命周期约束 |
+| 渲染树同步规格 | `specs/03-engine-framework/01-render-pipeline/01-basic-render-pipeline/Feat-04-render-stage-spec.md` | 覆盖 MarkNeedSyncRenderTree→RebuildRenderContextTree→ProcessRenderTreeDiff 全链路，isPendingState_ 生命周期约束 |
 | 设计文档 | `specs/03-engine-framework/01-render-pipeline/01-basic-render-pipeline/design.md` | 记录基础渲染管线的模块边界和架构决策 |
 
 ## 常见问题定位

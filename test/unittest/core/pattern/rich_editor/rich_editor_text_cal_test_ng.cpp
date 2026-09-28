@@ -348,7 +348,7 @@ HWTEST_F(RichEditorTextCalTestNg, MoveTextRect001, TestSize.Level0)
     richEditorPattern->UpdateScrollStateAfterLayout(true);
     auto scrollController = richEditorPattern->GetScrollController();
     ASSERT_NE(scrollController, nullptr);
-    EXPECT_EQ(scrollController->MoveTextRect(0.0f), 0.0f);
+    EXPECT_EQ(scrollController->MoveTextRectWithAxis(0.0f, Axis::VERTICAL, 0.0f), 0.0f);
 }
 
 /**

@@ -388,6 +388,8 @@ public:
     void SetTransparencyCallbackId(const std::optional<int32_t>& id);
     std::optional<ImmersiveMaterialConfig> GetImmersiveMaterialConfig() const;
     std::optional<int32_t> GetTransparencyCallbackId() const;
+    void SetMaterialColorModeChangeCallback(std::function<void()>&& callback);
+    void OnMaterialColorModeChange();
     RefPtr<UiMaterial> GetSystemMaterial() const;
 
     virtual void OpacityAnimation(const AnimationOption& option, double begin, double end) {}

@@ -54,27 +54,78 @@ ArkUI_NativeNodeAPI_Compatible nodeImpl_compatible = {
 
 ArkUI_NativeNodeAPI_1 nodeImpl_1 = {
     CURRENT_NATIVE_NODE_API_VERSION,
-    OHOS::Ace::NodeModel::CreateNode,
-    OHOS::Ace::NodeModel::DisposeNode,
-    OHOS::Ace::NodeModel::AddChild,
-    OHOS::Ace::NodeModel::RemoveChild,
-    OHOS::Ace::NodeModel::InsertChildAfter,
-    OHOS::Ace::NodeModel::InsertChildBefore,
-    OHOS::Ace::NodeModel::InsertChildAt,
-    OHOS::Ace::NodeModel::SetAttribute,
-    OHOS::Ace::NodeModel::GetAttribute,
-    OHOS::Ace::NodeModel::ResetAttribute,
+    [](ArkUI_NodeType type) -> ArkUI_NodeHandle {
+        CHECK_UI_THREAD("ArkUI_NativeNodeAPI_1.createNode");
+        return OHOS::Ace::NodeModel::CreateNode(type);
+    },
+    [](ArkUI_NodeHandle node) -> void {
+        CHECK_UI_THREAD("ArkUI_NativeNodeAPI_1.disposeNode");
+        OHOS::Ace::NodeModel::DisposeNode(node);
+    },
+    [](ArkUI_NodeHandle parent, ArkUI_NodeHandle child) -> int32_t {
+        CHECK_UI_THREAD("ArkUI_NativeNodeAPI_1.addChild");
+        return OHOS::Ace::NodeModel::AddChild(parent, child);
+    },
+    [](ArkUI_NodeHandle parent, ArkUI_NodeHandle child) -> int32_t {
+        CHECK_UI_THREAD("ArkUI_NativeNodeAPI_1.removeChild");
+        return OHOS::Ace::NodeModel::RemoveChild(parent, child);
+    },
+    [](ArkUI_NodeHandle parent, ArkUI_NodeHandle child, ArkUI_NodeHandle sibling) -> int32_t {
+        CHECK_UI_THREAD("ArkUI_NativeNodeAPI_1.insertChildAfter");
+        return OHOS::Ace::NodeModel::InsertChildAfter(parent, child, sibling);
+    },
+    [](ArkUI_NodeHandle parent, ArkUI_NodeHandle child, ArkUI_NodeHandle sibling) -> int32_t {
+        CHECK_UI_THREAD("ArkUI_NativeNodeAPI_1.insertChildBefore");
+        return OHOS::Ace::NodeModel::InsertChildBefore(parent, child, sibling);
+    },
+    [](ArkUI_NodeHandle parent, ArkUI_NodeHandle child, int32_t position) -> int32_t {
+        CHECK_UI_THREAD("ArkUI_NativeNodeAPI_1.insertChildAt");
+        return OHOS::Ace::NodeModel::InsertChildAt(parent, child, position);
+    },
+    [](ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, const ArkUI_AttributeItem* item) -> int32_t {
+        CHECK_UI_THREAD("ArkUI_NativeNodeAPI_1.setAttribute");
+        return OHOS::Ace::NodeModel::SetAttribute(node, attribute, item);
+    },
+    [](ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute) -> const ArkUI_AttributeItem* {
+        CHECK_UI_THREAD("ArkUI_NativeNodeAPI_1.getAttribute");
+        return OHOS::Ace::NodeModel::GetAttribute(node, attribute);
+    },
+    [](ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute) -> int32_t {
+        CHECK_UI_THREAD("ArkUI_NativeNodeAPI_1.resetAttribute");
+        return OHOS::Ace::NodeModel::ResetAttribute(node, attribute);
+    },
     OHOS::Ace::NodeModel::RegisterNodeEvent,
     OHOS::Ace::NodeModel::UnregisterNodeEvent,
     OHOS::Ace::NodeModel::RegisterOnEvent,
     OHOS::Ace::NodeModel::UnregisterOnEvent,
-    OHOS::Ace::NodeModel::MarkDirty,
-    OHOS::Ace::NodeModel::GetTotalChildCount,
-    OHOS::Ace::NodeModel::GetChildAt,
-    OHOS::Ace::NodeModel::GetFirstChild,
-    OHOS::Ace::NodeModel::GetLastChild,
-    OHOS::Ace::NodeModel::GetPreviousSibling,
-    OHOS::Ace::NodeModel::GetNextSibling,
+    [](ArkUI_NodeHandle node, ArkUI_NodeDirtyFlag dirtyFlag) -> void {
+        CHECK_UI_THREAD("ArkUI_NativeNodeAPI_1.markDirty");
+        OHOS::Ace::NodeModel::MarkDirty(node, dirtyFlag);
+    },
+    [](ArkUI_NodeHandle node) -> uint32_t {
+        CHECK_UI_THREAD("ArkUI_NativeNodeAPI_1.getTotalChildCount");
+        return OHOS::Ace::NodeModel::GetTotalChildCount(node);
+    },
+    [](ArkUI_NodeHandle node, int32_t position) -> ArkUI_NodeHandle {
+        CHECK_UI_THREAD("ArkUI_NativeNodeAPI_1.getChildAt");
+        return OHOS::Ace::NodeModel::GetChildAt(node, position);
+    },
+    [](ArkUI_NodeHandle node) -> ArkUI_NodeHandle {
+        CHECK_UI_THREAD("ArkUI_NativeNodeAPI_1.getFirstChild");
+        return OHOS::Ace::NodeModel::GetFirstChild(node);
+    },
+    [](ArkUI_NodeHandle node) -> ArkUI_NodeHandle {
+        CHECK_UI_THREAD("ArkUI_NativeNodeAPI_1.getLastChild");
+        return OHOS::Ace::NodeModel::GetLastChild(node);
+    },
+    [](ArkUI_NodeHandle node) -> ArkUI_NodeHandle {
+        CHECK_UI_THREAD("ArkUI_NativeNodeAPI_1.getPreviousSibling");
+        return OHOS::Ace::NodeModel::GetPreviousSibling(node);
+    },
+    [](ArkUI_NodeHandle node) -> ArkUI_NodeHandle {
+        CHECK_UI_THREAD("ArkUI_NativeNodeAPI_1.getNextSibling");
+        return OHOS::Ace::NodeModel::GetNextSibling(node);
+    },
     OHOS::Ace::NodeModel::RegisterNodeCustomEvent,
     OHOS::Ace::NodeModel::UnregisterNodeCustomEvent,
     OHOS::Ace::NodeModel::RegisterNodeCustomReceiver,
@@ -91,9 +142,18 @@ ArkUI_NativeNodeAPI_1 nodeImpl_1 = {
     OHOS::Ace::NodeModel::RemoveNodeCustomEventReceiver,
     OHOS::Ace::NodeModel::SetUserData,
     OHOS::Ace::NodeModel::GetUserData,
-    OHOS::Ace::NodeModel::SetLengthMetricUnit,
-    OHOS::Ace::NodeModel::GetParent,
-    OHOS::Ace::NodeModel::RemoveAllChildren,
+    [](ArkUI_NodeHandle node, ArkUI_LengthMetricUnit unit) -> int32_t {
+        CHECK_UI_THREAD("ArkUI_NativeNodeAPI_1.setLengthMetricUnit");
+        return OHOS::Ace::NodeModel::SetLengthMetricUnit(node, unit);
+    },
+    [](ArkUI_NodeHandle node) -> ArkUI_NodeHandle {
+        CHECK_UI_THREAD("ArkUI_NativeNodeAPI_1.getParent");
+        return OHOS::Ace::NodeModel::GetParent(node);
+    },
+    [](ArkUI_NodeHandle parent) -> int32_t {
+        CHECK_UI_THREAD("ArkUI_NativeNodeAPI_1.removeAllChildren");
+        return OHOS::Ace::NodeModel::RemoveAllChildren(parent);
+    },
 };
 
 ArkUI_NativeNodeAPI_1 multiThreadNodeImpl_1 = {

@@ -1253,6 +1253,7 @@
       "OHOS::Ace::NG::Converter::AssignArkValue(Ark_SliderChangeMode&, OHOS::Ace::SliderModel::SliderChangeMode const&)";
       "OHOS::Ace::NG::Converter::AssignArkValue(Ark_StrokeJoinStyle&, OHOS::Ace::StrokeJoinStyle const&)";
       "OHOS::Ace::NG::Converter::AssignArkValue(Ark_TabBarDisplayMode&, OHOS::Ace::NG::TabBarDisplayMode const&)";
+      "OHOS::Ace::NG::Converter::AssignArkValue(Ark_TabsSidebarDisplayStyle&, OHOS::Ace::NG::SidebarDisplayStyle const&)";
       "OHOS::Ace::NG::Converter::AssignArkValue(Ark_TextBackgroundStyle&, OHOS::Ace::TextBackgroundStyle const&, OHOS::Ace::NG::Converter::ConvContext*)";
       "OHOS::Ace::NG::Converter::AssignArkValue(Ark_TextChangeOptions&, OHOS::Ace::ChangeValueInfo const&, OHOS::Ace::NG::Converter::ConvContext*)";
       "OHOS::Ace::NG::Converter::AssignArkValue(Ark_TextChangeReason&, OHOS::Ace::TextChangeReason const&)";
@@ -1743,6 +1744,7 @@
       "OHOS::Ace::NG::LayoutProperty::UpdateAlignRules(std::__h::map<OHOS::Ace::AlignDirection, OHOS::Ace::AlignRule, std::__h::less<OHOS::Ace::AlignDirection>, std::__h::allocator<std::__h::pair<OHOS::Ace::AlignDirection const, OHOS::Ace::AlignRule>>> const&)";
       "OHOS::Ace::NG::LayoutProperty::UpdateAlignSelf(OHOS::Ace::FlexAlign const&)";
       "OHOS::Ace::NG::LayoutProperty::UpdateBorderWidth(OHOS::Ace::NG::BorderWidthPropertyT<OHOS::Ace::Dimension> const&)";
+      "OHOS::Ace::NG::LayoutProperty::UpdateMaterialBorderWidth(OHOS::Ace::NG::BorderWidthPropertyT<OHOS::Ace::Dimension> const&)";
       "OHOS::Ace::NG::LayoutProperty::UpdateCalcLayoutProperty(OHOS::Ace::NG::MeasureProperty const&)";
       "OHOS::Ace::NG::LayoutProperty::UpdateCalcMaxSize(OHOS::Ace::NG::CalcSize const&)";
       "OHOS::Ace::NG::LayoutProperty::UpdateCalcMinSize(OHOS::Ace::NG::CalcSize const&)";
@@ -2434,6 +2436,8 @@
       "OHOS::Ace::NG::TextScrollBar2D::UpdateBorderRadius(bool)";
       "OHOS::Ace::NG::TextScrollBar2D::UpdateVerticalBar(float, float, OHOS::Ace::Size const&, OHOS::Ace::Offset)";
       "OHOS::Ace::NG::TextScrollBar2D::UpdateHorizontalBar(float, float, OHOS::Ace::Size const&, OHOS::Ace::Offset)";
+      "OHOS::Ace::NG::TextScrollBar2D::~TextScrollBar2D()";
+      "virtual thunk to OHOS::Ace::NG::TextScrollBar2D::~TextScrollBar2D()";
       "OHOS::Ace::NG::TextLayoutadapter::IsLeftToRight(int)";
       "OHOS::Ace::NG::TextLayoutadapter::IsRightToLeft(int)";
       "OHOS::Ace::NG::TextLayoutadapter::IsRightTOLeftArabic(int)";
@@ -3508,6 +3512,7 @@
       "OHOS::Ace::SystemProperties::GetDebugEnabled()";
       "OHOS::Ace::SystemProperties::GetDeviceType()";
       "OHOS::Ace::SystemProperties::GetDragStartPanDistanceThreshold()";
+      "OHOS::Ace::SystemProperties::GetEventBenchMarkEnabled()";
       "OHOS::Ace::SystemProperties::GetMultiInstanceEnabled()";
       "OHOS::Ace::SystemProperties::GetSideBarContainerBlurEnable()";
       "OHOS::Ace::SystemProperties::GetVelocityTrackerPointNumber()";
@@ -4030,6 +4035,7 @@
       "OHOS::Ace::PreMakeScope::SetPreMake(bool)";
       "OHOS::Ace::ResourceParseUtils::ParseResDimensionNG(OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject> const&, OHOS::Ace::CalcDimension&, OHOS::Ace::DimensionUnit, bool)";
       "OHOS::Ace::ResSchedReport::HandleSwiperChange(std::__h::unordered_map<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::hash<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>, std::__h::equal_to<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>, std::__h::allocator<std::__h::pair<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>>>&)";
+      "OHOS::Ace::ResSchedReport::ReportDialogShow()";
       "void OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::BarPosition, Ark_BarPosition>(std::__h::optional<OHOS::Ace::BarPosition>&, Ark_BarPosition const&)";
       "void OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::BoardStyle, Ark_BoardStyle>(std::__h::optional<OHOS::Ace::BoardStyle>&, Ark_BoardStyle const&)";
       "void OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::IndicatorStyle, Ark_SubTabBarIndicatorStyle>(std::__h::optional<OHOS::Ace::IndicatorStyle>&, Ark_SubTabBarIndicatorStyle const&)";
@@ -4046,6 +4052,7 @@
       "void OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::RefPtr<OHOS::Ace::Curve>, InteropString>(std::__h::optional<OHOS::Ace::RefPtr<OHOS::Ace::Curve>>&, InteropString const&)";
       "void OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::TabBarMode, Ark_BarMode>(std::__h::optional<OHOS::Ace::TabBarMode>&, Ark_BarMode const&)";
       "void OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::NG::TabBarDisplayMode, Ark_TabBarDisplayMode>(std::__h::optional<OHOS::Ace::NG::TabBarDisplayMode>&, Ark_TabBarDisplayMode const&)";
+      "void OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::NG::SidebarDisplayStyle, Ark_TabsSidebarDisplayStyle>(std::__h::optional<OHOS::Ace::NG::SidebarDisplayStyle>&, Ark_TabsSidebarDisplayStyle const&)";
       "void OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::TabAnimateMode, Ark_AnimationMode>(std::__h::optional<OHOS::Ace::TabAnimateMode>&, Ark_AnimationMode const&)";
       "void OHOS::Ace::NG::Converter::AssignCast<int, Ark_PageFlipMode>(std::__h::optional<int>&, Ark_PageFlipMode const&)";
       "OHOS::Ace::NG::FrameNodeBridge::CreateEventTargetObject(panda::ecmascript::EcmaVM*, OHOS::Ace::BaseEventInfo const&)";
@@ -5324,6 +5331,7 @@
       construction?vtable?for?OHOS::Parcelable-in-OHOS::Ace::PluginComponentManager::UIServiceListener;
       GetArkUIAniModifiers;
       GetArkUIAnyFullNodeAPI;
+      GetArkUIPageTextAPI;
       GetArkUIDrawableDescriptor;
       GetArkUIFullNodeAPI;
       GetArkUINodeAPI;
@@ -6105,6 +6113,7 @@
       VTT?for?OHOS::Ace::NG::TextFieldManagerNG;
       OHOS::Ace::NG::TokenThemeStorage::GetInstance*;
       OHOS::Ace::NG::TokenThemeStorage::GetDefaultTheme*;
+      OHOS::Ace::NG::PanRecognizer::SetEscapeModeForPan*;
     };
   local:
     *;

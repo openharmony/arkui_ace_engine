@@ -20,23 +20,43 @@
 
 #include "native_type.h"
 
-namespace OHOS::Ace::NodeModel::ConfigManager {
-// Saves the process-level runtime check mode of one runtime check type.
-// checkType/mode are raw integers because the C ABI may pass any value; invalid input returns false.
-// Must be called on the UI thread: a non-UI-thread call terminates the process before validation.
+namespace OHOS::Ace::NodeModel {
+
+// Check type values, kept in sync with OH_ArkUI_NativeModule_RuntimeCheckType (public C API).
+enum class CheckType : uint32_t {
+    UI_THREAD = 0,
+    NODE_DISPOSED = 1,
+    // Number of check types and the exclusive upper bound for configuration indices;
+    // COUNT is not a configurable check type. Keep values contiguous from zero.
+    // Append new types immediately before COUNT without changing existing values,
+    // align their values with the public C API, and add their default policy,
+    // detection entry points and tests. The configuration array grows with COUNT.
+    COUNT,
+};
+
+// Runtime check mode values, kept in sync with OH_ArkUI_NativeModule_RuntimeCheckMode (public C API).
+enum class CheckMode : int32_t {
+    DISABLED = 0,
+    LOG = 1,
+    CRASH = 2,
+};
+
+namespace ConfigManager {
+// Saves the process-level user configuration. The UI thread check runs before
+// parameter validation and is independent of the configured check modes.
 bool SetRuntimeCheckMode(int32_t checkType, int32_t mode);
 
-// NODE_DISPOSED detection point: diagnoses a disposed handle according to the effective mode.
-// errorMessage carries the call-site reason text (parameter role) for the diagnosis output.
-// A crash from the debug build default also explains how to disable the check through the public API.
-// It never short-circuits the caller: DISABLED returns silently, LOG prints the diagnosis and
-// returns, CRASH prints the diagnosis and terminates the process.
+// Diagnose misuse without short-circuiting the caller in DISABLED or LOG mode.
+void CheckUIThread(const char* publicApiName);
 void CheckNodeDisposed(ArkUI_NodeHandle nodePtr, const char* apiName, const char* errorMessage);
-} // namespace OHOS::Ace::NodeModel::ConfigManager
+} // namespace ConfigManager
 
-// One-line diagnosis guard for the public C API entries. __FUNCTION__ is captured at the call
-// site so the diagnosis records the entry name; the guard never short-circuits.
+} // namespace OHOS::Ace::NodeModel
+
 #define CHECK_NODE_DISPOSED(nodePtr, errorMessage)                                                    \
     OHOS::Ace::NodeModel::ConfigManager::CheckNodeDisposed((nodePtr), __FUNCTION__, (errorMessage))
+
+#define CHECK_UI_THREAD(apiName)                                                                      \
+    OHOS::Ace::NodeModel::ConfigManager::CheckUIThread((apiName))
 
 #endif // ARKUI_NATIVE_NODE_CONFIG_MANAGER_H

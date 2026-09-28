@@ -15,6 +15,8 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
 
+#include "base/log/log_wrapper.h"
+
 namespace OHOS::Ace::Framework {
 
 static const std::unordered_set<std::string> g_clickPreventDefPattern = { "RichEditor", "Hyperlink" };
@@ -28,6 +30,8 @@ Local<JSValueRef> JsStopPropagation(panda::JsiRuntimeCallInfo *info)
         info->GetVM(), 0));
     if (eventInfo) {
         eventInfo->SetStopPropagation(true);
+    } else {
+        TAG_LOGE(AceLogTag::ACE_UIEVENT, "StopPropagation failed: native pointer is null");
     }
     return JSValueRef::Undefined(info->GetVM());
 }
@@ -39,6 +43,8 @@ Local<JSValueRef> JsPropagation(panda::JsiRuntimeCallInfo* info)
         static_cast<BaseEventInfo*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(info->GetVM(), 0));
     if (eventInfo) {
         eventInfo->SetStopPropagation(false);
+    } else {
+        TAG_LOGE(AceLogTag::ACE_UIEVENT, "Propagation failed: native pointer is null");
     }
     return JSValueRef::Undefined(info->GetVM());
 }
@@ -50,6 +56,8 @@ Local<JSValueRef> JsPreventDefault(panda::JsiRuntimeCallInfo *info)
         info->GetVM(), 0));
     if (eventInfo) {
         eventInfo->SetPreventDefault(true);
+    } else {
+        TAG_LOGE(AceLogTag::ACE_UIEVENT, "PreventDefault failed: native pointer is null");
     }
     return JSValueRef::Undefined(info->GetVM());
 }
@@ -67,6 +75,8 @@ Local<JSValueRef> JsClickPreventDefault(panda::JsiRuntimeCallInfo *info)
             return JSValueRef::Undefined(info->GetVM());
         }
         eventInfo->SetPreventDefault(true);
+    } else {
+        TAG_LOGE(AceLogTag::ACE_UIEVENT, "ClickPreventDefault failed: native pointer is null");
     }
     return JSValueRef::Undefined(info->GetVM());
 }
@@ -84,6 +94,8 @@ Local<JSValueRef> JsTouchPreventDefault(panda::JsiRuntimeCallInfo *info)
             return JSValueRef::Undefined(info->GetVM());
         }
         eventInfo->SetPreventDefault(true);
+    } else {
+        TAG_LOGE(AceLogTag::ACE_UIEVENT, "TouchPreventDefault failed: native pointer is null");
     }
     return JSValueRef::Undefined(info->GetVM());
 }
@@ -94,6 +106,7 @@ Local<JSValueRef> JsGetHistoricalPoints(panda::JsiRuntimeCallInfo *info)
     auto eventInfo = static_cast<TouchEventInfo*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(
         info->GetVM(), 0));
     if (!eventInfo) {
+        TAG_LOGE(AceLogTag::ACE_UIEVENT, "GetHistoricalPoints failed: native pointer is null");
         return ArrayRef::New(info->GetVM(), 0);
     }
     const auto& history = eventInfo->GetHistory();
@@ -158,6 +171,7 @@ Local<JSValueRef> JsGetMouseHistoricalPoints(panda::JsiRuntimeCallInfo* info)
     auto eventInfo =
         static_cast<MouseInfo*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(info->GetVM(), 0));
     if (!eventInfo) {
+        TAG_LOGE(AceLogTag::ACE_UIEVENT, "GetMouseHistoricalPoints failed: native pointer is null");
         return ArrayRef::New(info->GetVM(), 0);
     }
 
@@ -284,6 +298,8 @@ Local<JSValueRef> JsGetCurrentLocalPositionForFinger(panda::JsiRuntimeCallInfo *
             return JSValueRef::Undefined(info->GetVM());
         }
         currentLocal = fingerInfo->currentLocalLocation_();
+    } else {
+        TAG_LOGE(AceLogTag::ACE_UIEVENT, "GetCurrentLocalPositionForFinger failed: native pointer is null");
     }
     auto retObj = ObjectRef::New(info->GetVM());
     retObj->Set(info->GetVM(), ToJSValue("x"), ToJSValue(PipelineBase::Px2VpWithCurrentDensity(currentLocal.GetX())));
@@ -304,6 +320,8 @@ Local<JSValueRef> JsGetCurrentLocalPosition(panda::JsiRuntimeCallInfo *info)
         if (!GetCurrentLocalFromEventInfo(info->GetVM(), thisObjRef, eventInfo, currentLocal)) {
             return JSValueRef::Undefined(info->GetVM());
         }
+    } else {
+        TAG_LOGE(AceLogTag::ACE_UIEVENT, "GetCurrentLocalPosition failed: native pointer is null");
     }
     auto retObj = ObjectRef::New(info->GetVM());
     retObj->Set(info->GetVM(), ToJSValue("x"), ToJSValue(PipelineBase::Px2VpWithCurrentDensity(currentLocal.GetX())));

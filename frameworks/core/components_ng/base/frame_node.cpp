@@ -94,6 +94,7 @@
 #include "core/components_ng/manager/privacy_sensitive/privacy_sensitive_manager.h"
 #include "core/components_ng/pattern/corner_mark/corner_mark.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/page_translate/page_translate_node.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/property/accessibility_property.h"
 #include "core/components_ng/pattern/badge/badge_accessibility_property.h"
@@ -2036,6 +2037,9 @@ void FrameNode::HandleColorModeConfigurationUpdate(const ConfigurationChange& co
         cb();
     }
     FireColorNDKCallback();
+    if (renderContext_) {
+        renderContext_->OnMaterialColorModeChange();
+    }
     MarkModifyDone();
     MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     if (cornerMarkNode_) {
@@ -7576,6 +7580,14 @@ void FrameNode::ChangeSensitiveStyle(bool isSensitive)
 
 void FrameNode::AttachContext(PipelineContext* context, bool recursive)
 {
+    CHECK_NULL_VOID(context);
+#ifndef CROSS_PLATFORM
+    const bool updateTranslateContext = context_ != context && AceType::InstanceOf<PageTranslateNode>(pattern_);
+    if (updateTranslateContext && context_) {
+        // Remove the old registration before AttachContext changes the node's context and instance ID.
+        context_->UnRegisterListenerForTranslate(GetId());
+    }
+#endif
     if (SystemProperties::GetMultiInstanceEnabled()) {
         auto renderContext = GetRenderContext();
         if (!isDeleteRsNode_ && renderContext) {
@@ -7587,6 +7599,11 @@ void FrameNode::AttachContext(PipelineContext* context, bool recursive)
         eventHub_->OnAttachContext(context);
     }
     pattern_->OnAttachContext(context);
+#ifndef CROSS_PLATFORM
+    if (updateTranslateContext) {
+        context->RegisterListenerForTranslate(WeakClaim(this));
+    }
+#endif
 #ifdef SMART_GESTURE_SUPPORTED
     if (smartGestureProperty_) {
         auto eventManager = context->GetEventManager();
@@ -7610,6 +7627,11 @@ void FrameNode::DetachContext(bool recursive)
         if (manager) {
             manager->RemovePrimaryActionNode(GetId());
         }
+    }
+#endif
+#ifndef CROSS_PLATFORM
+    if (AceType::InstanceOf<PageTranslateNode>(pattern_)) {
+        context_->UnRegisterListenerForTranslate(GetId());
     }
 #endif
     pattern_->OnDetachContext(context_);

@@ -492,3 +492,5 @@ declare interface NativeUtilsNativeModule {
   parseResourceColor(...args: any[]): any;
   blendColor(...args: any[]): any;
 }
+
+declare function withInstanceId<T>(instanceId: number | undefined, callback: () => T): T;

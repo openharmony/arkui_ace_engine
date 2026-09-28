@@ -51,7 +51,6 @@ public:
     void UpdateSecondHandleOffset() override;
 
     // override SelectOverlayHolder
-    RefPtr<FrameNode> GetOwner() override;
     std::optional<SelectHandleInfo> GetFirstHandleInfo() override;
     std::optional<SelectHandleInfo> GetSecondHandleInfo() override;
     void OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOverlayDirtyFlag dirtyFlag) override;

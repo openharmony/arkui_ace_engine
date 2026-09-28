@@ -53,7 +53,8 @@ class InteropExtractorModule {
         ) {
           newValue = InteropExtractorModule.makeObserved(newValue) as T;
         }
-        if ('addWatchSubscriber' in newValue && typeof (newValue as any).addWatchSubscriber === 'function') {
+        if (isStaBuiltin && 'addWatchSubscriber' in newValue &&
+            typeof (newValue as any).addWatchSubscriber === 'function') {
             const callback = () => {
                 ObserveV2.getObserve().fireChange(owningProperty, propertyKey);
             };

@@ -39,6 +39,7 @@ namespace OHOS::Ace {
 std::string FontManager::appCustomFont_ = "";
 float FontManager::fontWeightScale_ = 1.0f;
 bool FontManager::isDefaultFontChanged_ = false;
+std::shared_mutex FontManager::appCustomFontMutex_;
 constexpr std::string_view URL_HTTP = "http://";
 constexpr std::string_view URL_HTTPS = "https://";
 namespace {
@@ -105,16 +106,19 @@ bool FontManager::IsDefaultFontChanged()
 
 bool FontManager::IsUseAppCustomFont() const
 {
+    std::shared_lock<std::shared_mutex> lock(appCustomFontMutex_);
     return !appCustomFont_.empty();
 }
 
 void FontManager::SetAppCustomFont(const std::string& familyName)
 {
+    std::unique_lock<std::shared_mutex> lock(appCustomFontMutex_);
     appCustomFont_ = familyName;
 }
 
-const std::string& FontManager::GetAppCustomFont() const
+std::string FontManager::GetAppCustomFont() const
 {
+    std::shared_lock<std::shared_mutex> lock(appCustomFontMutex_);
     return appCustomFont_;
 }
 
