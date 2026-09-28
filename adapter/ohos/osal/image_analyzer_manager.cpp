@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/utils/napi_scope_raii.h"
 #include "core/common/ai/image_analyzer_manager.h"
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
@@ -55,10 +56,9 @@ void ImageAnalyzerManager::CreateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMa
 
     RefPtr<NG::UINode> customNode;
     {
-        napi_handle_scope scope = nullptr;
         napi_env env = reinterpret_cast<napi_env>(imageAnalyzerAdapter_->GetNapiEnv());
-        auto status = napi_open_handle_scope(env, &scope);
-        if (status != napi_ok || scope == nullptr) {
+        ScopeRAII scope(env);
+        if (!scope) {
             return;
         }
         NG::ScopedViewStackProcessor builderViewStackProcessor;
@@ -66,7 +66,6 @@ void ImageAnalyzerManager::CreateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMa
         ImageAnalyzerMgr::GetInstance().BuildNodeFunc(
             pixelmapNapiVal, analyzerConfig, &analyzerUIConfig_, &overlayData_);
         customNode = NG::ViewStackProcessor::GetInstance()->Finish();
-        napi_close_handle_scope(env, scope);
     }
     auto overlayNode = AceType::DynamicCast<NG::FrameNode>(customNode);
     CHECK_NULL_VOID(overlayNode);
@@ -107,10 +106,9 @@ void ImageAnalyzerManager::CreateMovingPhotoAnalyzerOverlay(const RefPtr<OHOS::A
 
     RefPtr<NG::UINode> customNode;
     {
-        napi_handle_scope scope = nullptr;
         napi_env env = reinterpret_cast<napi_env>(imageAnalyzerAdapter_->GetNapiEnv());
-        auto status = napi_open_handle_scope(env, &scope);
-        if (status != napi_ok || scope == nullptr) {
+        ScopeRAII scope(env);
+        if (!scope) {
             return;
         }
         NG::ScopedViewStackProcessor builderViewStackProcessor;
@@ -118,7 +116,6 @@ void ImageAnalyzerManager::CreateMovingPhotoAnalyzerOverlay(const RefPtr<OHOS::A
         ImageAnalyzerMgr::GetInstance().BuildNodeFunc(info.uri, pixelmapNapiVal,
             info.frameTimestamp, analyzerConfig, &analyzerUIConfig_, &overlayData_);
         customNode = NG::ViewStackProcessor::GetInstance()->Finish();
-        napi_close_handle_scope(env, scope);
     }
     auto overlayNode = AceType::DynamicCast<NG::FrameNode>(customNode);
     CHECK_NULL_VOID(overlayNode);
@@ -173,16 +170,14 @@ void ImageAnalyzerManager::UpdateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMa
     auto pixelmapNapiVal = imageAnalyzerAdapter_->ConvertPixmapNapi(pixelMap);
     auto overlayNode = node->GetOverlayNode();
     CHECK_NULL_VOID(overlayNode);
-    napi_handle_scope scope = nullptr;
     napi_env env = reinterpret_cast<napi_env>(imageAnalyzerAdapter_->GetNapiEnv());
-    auto status = napi_open_handle_scope(env, &scope);
-    if (status != napi_ok || scope == nullptr) {
+    ScopeRAII scope(env);
+    if (!scope) {
         return;
     }
     auto analyzerConfig = imageAnalyzerAdapter_->GetImageAnalyzerConfig();
     ImageAnalyzerMgr::GetInstance().UpdateImage(&overlayData_, pixelmapNapiVal, analyzerConfig, &analyzerUIConfig_);
     overlayNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE_SELF);
-    napi_close_handle_scope(env, scope);
 }
 
 void ImageAnalyzerManager::UpdateMovingPhotoAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap,
@@ -213,17 +208,15 @@ void ImageAnalyzerManager::UpdateMovingPhotoAnalyzerOverlay(const RefPtr<OHOS::A
     auto pixelmapNapiVal = imageAnalyzerAdapter_->ConvertPixmapNapi(pixelMap);
     auto overlayNode = node->GetOverlayNode();
     CHECK_NULL_VOID(overlayNode);
-    napi_handle_scope scope = nullptr;
     napi_env env = reinterpret_cast<napi_env>(imageAnalyzerAdapter_->GetNapiEnv());
-    auto status = napi_open_handle_scope(env, &scope);
-    if (status != napi_ok || scope == nullptr) {
+    ScopeRAII scope(env);
+    if (!scope) {
         return;
     }
     auto analyzerConfig = imageAnalyzerAdapter_->GetImageAnalyzerConfig();
     ImageAnalyzerMgr::GetInstance().UpdateImage(&overlayData_, info.uri, pixelmapNapiVal,
         info.frameTimestamp, analyzerConfig, &analyzerUIConfig_);
     overlayNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE_SELF);
-    napi_close_handle_scope(env, scope);
 }
 
 void ImageAnalyzerManager::DestroyAnalyzerOverlay()
@@ -393,26 +386,23 @@ void ImageAnalyzerManager::SetImageAnalyzerConfig(void* config)
         return;
     }
     imageAnalyzerAdapter_->SetImageAnalyzerConfig(config);
-    napi_handle_scope scope = nullptr;
     napi_env env = reinterpret_cast<napi_env>(imageAnalyzerAdapter_->GetNapiEnv());
-    auto status = napi_open_handle_scope(env, &scope);
-    if (status != napi_ok || scope == nullptr) {
+    ScopeRAII scope(env);
+    if (!scope) {
         return;
     }
     auto analyzerConfig = imageAnalyzerAdapter_->GetImageAnalyzerConfig();
     if (isAnalyzerOverlayBuild_) {
         ImageAnalyzerMgr::GetInstance().UpdateConfig(&overlayData_, analyzerConfig);
     }
-    napi_close_handle_scope(env, scope);
 }
 
 void ImageAnalyzerManager::SetImageAIOptions(void* options)
 {
     CHECK_NULL_VOID(imageAnalyzerAdapter_);
-    napi_handle_scope scope = nullptr;
     napi_env env = reinterpret_cast<napi_env>(imageAnalyzerAdapter_->GetNapiEnv());
-    auto status = napi_open_handle_scope(env, &scope);
-    if (status != napi_ok || scope == nullptr) {
+    ScopeRAII scope(env);
+    if (!scope) {
         return;
     }
     imageAnalyzerAdapter_->SetImageAnalyzerConfig(options, true);
@@ -420,7 +410,6 @@ void ImageAnalyzerManager::SetImageAIOptions(void* options)
     if (isAnalyzerOverlayBuild_) {
         ImageAnalyzerMgr::GetInstance().UpdateConfig(&overlayData_, analyzerConfig);
     }
-    napi_close_handle_scope(env, scope);
 }
 
 void ImageAnalyzerManager::SetImageAnalyzerCallback(OnAnalyzedCallback& callback)

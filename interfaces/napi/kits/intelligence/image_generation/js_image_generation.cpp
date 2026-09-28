@@ -19,6 +19,7 @@
 
 #include "base/error/error_code.h"
 #include "base/log/log_wrapper.h"
+#include "base/utils/napi_scope_raii.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_image_generator_dialog_view.h"
 
@@ -80,9 +81,8 @@ napi_value CreatePromise(napi_env env, int32_t errCode, const std::string& errMs
 
 static int32_t CallImageGeneratorCreator(napi_env env, napi_value options, napi_value instanceId)
 {
-    napi_handle_scope scope = nullptr;
-    napi_open_handle_scope(env, &scope);
-    if (scope == nullptr) {
+    ScopeRAII scope(env);
+    if (!scope) {
         return CREATOR_INTERNAL_ERROR;
     }
     napi_value globalValue;
@@ -93,16 +93,13 @@ static int32_t CallImageGeneratorCreator(napi_env env, napi_value options, napi_
     napi_value returnValue;
     if (napi_call_function(env, globalValue, imageGeneratorCreator, 2, funcArgv, &returnValue) != napi_ok) {
         TAG_LOGE(AceLogTag::ACE_SIDEBAR, "CallLoadImageGeneratorDialog failed");
-        napi_close_handle_scope(env, scope);
         return CREATOR_INTERNAL_ERROR;
     }
     int32_t errorCode = CREATOR_INTERNAL_ERROR;
     if (napi_get_value_int32(env, returnValue, &errorCode) != napi_ok) {
         TAG_LOGE(AceLogTag::ACE_SIDEBAR, "parse error code failed when create image generator");
-        napi_close_handle_scope(env, scope);
         return CREATOR_INTERNAL_ERROR;
     }
-    napi_close_handle_scope(env, scope);
     return errorCode;
 }
 
