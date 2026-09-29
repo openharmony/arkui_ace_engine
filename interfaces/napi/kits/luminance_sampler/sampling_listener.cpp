@@ -14,6 +14,7 @@
  */
 
 #include "base/error/error_code.h"
+#include "base/utils/napi_scope_raii.h"
 #include "core/event/ace_events.h"
 #include "interfaces/napi/kits/utils/napi_utils.h"
 #include "js_native_api.h"
@@ -30,9 +31,8 @@ void SamplingListener::OnLuminanceChange(uint32_t luminance)
     if (!env_ || !callback_) {
         return;
     }
-    napi_handle_scope scope = nullptr;
-    auto status = napi_open_handle_scope(env_, &scope);
-    if (status != napi_ok) {
+    ScopeRAII scope(env_);
+    if (!scope) {
         return;
     }
     napi_value callback = nullptr;
@@ -43,8 +43,6 @@ void SamplingListener::OnLuminanceChange(uint32_t luminance)
 
     napi_value argv[] = { jsLuminance };
     napi_call_function(env_, nullptr, callback, PARAM_SIZE_ONE, argv, nullptr);
-
-    napi_close_handle_scope(env_, scope);
 }
 
 bool SamplingListener::NapiEqual(napi_value cb)
