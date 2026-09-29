@@ -40,6 +40,7 @@ public:
     SmartLayoutAlign crossAxisAlign = SmartLayoutAlign::CENTER;
     SmartLayoutSize size = SmartLayoutSize(0.0, 0.0);
     bool avoidSafeArea = false;
+    // Container padding in px, used for constraints and scale-up available area
     EdgesSpaces padding = {0.0, 0.0, 0.0, 0.0};
 };
 

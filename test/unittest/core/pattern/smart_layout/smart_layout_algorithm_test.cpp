@@ -237,7 +237,7 @@ public:
         applyGeneralCount_++;
     }
 
-    void ApplyScaleUpConstraints(double emptyRatioThreshold) override
+    void ApplyScaleUpConstraints() override
     {
         applyScaleUpCount_++;
     }
