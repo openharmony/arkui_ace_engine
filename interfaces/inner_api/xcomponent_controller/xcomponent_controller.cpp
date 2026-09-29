@@ -59,7 +59,7 @@ XComponentControllerErrorCode ChangeSurfaceCallbackMode(void* frameNode, char mo
 {
     static ChangeSurfaceCallbackModeFunc entry = nullptr;
     if (entry == nullptr) {
-        LIBHANDLE handle = LOADLIB(AceForwardCompatibility::GetAceLibName());
+        LIBHANDLE handle = LOADLIB(AceForwardCompatibility::GetAceXComponentLibName());
         CHECK_NULL_RETURN(handle, XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER);
         entry = reinterpret_cast<ChangeSurfaceCallbackModeFunc>(
             LOADSYM(handle, XCOMPONENT_CHANGE_SURFACE_CALLBACKMODE_FUNC));
@@ -183,7 +183,7 @@ XComponentControllerErrorCode XComponentController::SetRenderFitBySurfaceId(
 {
     static SetRenderFitFunc setRenderFitMethod = nullptr;
     if (setRenderFitMethod == nullptr) {
-        LIBHANDLE handle = LOADLIB(AceForwardCompatibility::GetAceLibName());
+        LIBHANDLE handle = LOADLIB(AceForwardCompatibility::GetAceXComponentLibName());
         CHECK_NULL_RETURN(handle, XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_LOAD_LIB_FAILED);
         setRenderFitMethod = reinterpret_cast<SetRenderFitFunc>(LOADSYM(handle, XCOMPONENT_SET_RENDER_FIT_FUNC));
         if (setRenderFitMethod == nullptr) {
@@ -199,7 +199,7 @@ XComponentControllerErrorCode XComponentController::GetRenderFitBySurfaceId(
 {
     static GetRenderFitFunc getRenderFitMethod = nullptr;
     if (getRenderFitMethod == nullptr) {
-        LIBHANDLE handle = LOADLIB(AceForwardCompatibility::GetAceLibName());
+        LIBHANDLE handle = LOADLIB(AceForwardCompatibility::GetAceXComponentLibName());
         CHECK_NULL_RETURN(handle, XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_LOAD_LIB_FAILED);
         getRenderFitMethod = reinterpret_cast<GetRenderFitFunc>(LOADSYM(handle, XCOMPONENT_GET_RENDER_FIT_FUNC));
         if (getRenderFitMethod == nullptr) {
@@ -215,7 +215,7 @@ XComponentControllerErrorCode XComponentController::GetSurfaceRotationBySurfaceI
 {
     static GetSurfaceRotationFunc getSurfaceRotationMethod = nullptr;
     if (getSurfaceRotationMethod == nullptr) {
-        LIBHANDLE handle = LOADLIB(AceForwardCompatibility::GetAceLibName());
+        LIBHANDLE handle = LOADLIB(AceForwardCompatibility::GetAceXComponentLibName());
         CHECK_NULL_RETURN(handle, XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_LOAD_LIB_FAILED);
         getSurfaceRotationMethod =
             reinterpret_cast<GetSurfaceRotationFunc>(LOADSYM(handle, XCOMPONENT_GET_SURFACE_ROTATION_FUNC));
