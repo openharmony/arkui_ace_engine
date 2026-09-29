@@ -122,6 +122,25 @@ enum class CancelAnimationStatus : int32_t {
     TASK_EXECUTION_FAILURE,
     NODE_EXCEPTION,
 };
+
+enum class AnimationGroupState : int32_t {
+    RUNNING = 0,
+    PAUSED = 1,
+    INACTIVE = 2,
+};
+
+enum class InteractiveAnimationStatus : int32_t {
+    INACTIVE,
+    ACTIVE,
+    RUNNING,
+    PAUSED,
+};
+
+enum class InteractiveAnimationFinishPosition : int32_t {
+    TO_START = 0,
+    TO_CURRENT,
+    TO_END,
+};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_ANIMATION_ANIMATION_CONSTANTS_H

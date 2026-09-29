@@ -2555,6 +2555,13 @@ const ArkUIAnimation* GetAnimationAPI()
         .interpolatingSpring = CreateInterpolatingSpring,
         .customCurve = CreateCustomCurve,
         .disposeCurve = DisposeCurve,
+        .addAnimationGroup = ViewAnimate::AddAnimationGroup,
+        .removeAnimationGroup = ViewAnimate::RemoveAnimationGroup,
+        .pauseAnimationGroup = ViewAnimate::PauseAnimationGroup,
+        .resumeAnimationGroup = ViewAnimate::ResumeAnimationGroup,
+        .finishAnimationGroup = ViewAnimate::FinishAnimationGroup,
+        .getAnimationGroupState = ViewAnimate::GetAnimationGroupState,
+        .hasAnimationGroup = ViewAnimate::HasAnimationGroup,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

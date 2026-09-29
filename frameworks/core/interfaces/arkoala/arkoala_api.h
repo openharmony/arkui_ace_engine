@@ -128,6 +128,7 @@ struct _ArkUIRenderModifier;
 struct _ArkUIRSProperty;
 struct ArkUI_GridLayoutOptions;
 struct ArkUI_AccessibilityProvider;
+struct OH_ArkUI_AnimationGroup;
 typedef struct ArkUI_InnerColor ArkUI_InnerColor;
 typedef struct ArkUI_ImmersiveMaterial ArkUI_ImmersiveMaterial;
 struct ArkUI_EditModeOptions {
@@ -221,6 +222,7 @@ typedef ArkUI_EmbeddedComponentOption* ArkUIEmbeddedComponentOptionHandle;
 struct _ArkUICurve;
 typedef _ArkUICurve* ArkUICurveHandle;
 typedef _ArkUIRenderNode* ArkUIRenderNodeHandle;
+typedef OH_ArkUI_AnimationGroup* ArkUIAnimationGroupHandle;
 typedef _ArkUIRenderModifier* ArkUIRenderModifierHandle;
 typedef _ArkUIRSProperty* ArkUIPropertyHandle;
 
@@ -10022,6 +10024,14 @@ struct ArkUIAnimation {
     ArkUICurveHandle (*customCurve)(
         ArkUI_Float32 (*interpolate)(ArkUI_Float32 fraction, void* userdata), void* userdata);
     void (*disposeCurve)(ArkUICurveHandle curve);
+    ArkUI_Int32 (*addAnimationGroup)(ArkUIContext* context, ArkUIAnimationGroupHandle group,
+        const ArkUIRenderNodeHandle* resolvedTargets, ArkUI_Uint32 targetCount, ArkUI_CharPtr key);
+    ArkUI_Int32 (*removeAnimationGroup)(ArkUIContext* context, ArkUI_CharPtr key);
+    ArkUI_Int32 (*pauseAnimationGroup)(ArkUIContext* context, ArkUI_CharPtr key);
+    ArkUI_Int32 (*resumeAnimationGroup)(ArkUIContext* context, ArkUI_CharPtr key);
+    ArkUI_Int32 (*finishAnimationGroup)(ArkUIContext* context, ArkUI_CharPtr key, ArkUI_Int32 mode);
+    ArkUI_Int32 (*getAnimationGroupState)(ArkUIContext* context, ArkUI_CharPtr key, ArkUI_Int32* state);
+    ArkUI_Int32 (*hasAnimationGroup)(ArkUIContext* context, ArkUI_CharPtr key, bool* exists);
 };
 struct ArkUINavigation {
     void (*popPageToIndex)(ArkUI_Int32 index);
@@ -10308,6 +10318,7 @@ struct ArkUINDKRenderNodeModifier {
     ArkUI_Int32 (*resetForegroundBlurOption)(ArkUIRenderNodeHandle node);
     ArkUI_Int32 (*setContentBlurOption)(ArkUIRenderNodeHandle node, ArkUI_Float32 blurRadius);
     ArkUI_Int32 (*resetContentBlurOption)(ArkUIRenderNodeHandle node);
+    ArkUIRSNodeHandle (*getRSNode)(ArkUIRenderNodeHandle node);
 };
 
 struct ArkUIDynamicLayoutModifier {

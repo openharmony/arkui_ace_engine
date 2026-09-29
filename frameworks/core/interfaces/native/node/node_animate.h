@@ -51,6 +51,15 @@ ArkUICurveHandle CreateInterpolatingSpring(
 ArkUICurveHandle CreateCustomCurve(
     ArkUI_Float32 (*interpolate)(ArkUI_Float32 fraction, void* userData), void* userData);
 void DisposeCurve(ArkUICurveHandle curve);
+
+ArkUI_Int32 AddAnimationGroup(ArkUIContext* context, ArkUIAnimationGroupHandle group,
+    const ArkUIRenderNodeHandle* resolvedTargets, ArkUI_Uint32 targetCount, ArkUI_CharPtr key);
+ArkUI_Int32 RemoveAnimationGroup(ArkUIContext* context, ArkUI_CharPtr key);
+ArkUI_Int32 PauseAnimationGroup(ArkUIContext* context, ArkUI_CharPtr key);
+ArkUI_Int32 ResumeAnimationGroup(ArkUIContext* context, ArkUI_CharPtr key);
+ArkUI_Int32 FinishAnimationGroup(ArkUIContext* context, ArkUI_CharPtr key, ArkUI_Int32 mode);
+ArkUI_Int32 GetAnimationGroupState(ArkUIContext* context, ArkUI_CharPtr key, ArkUI_Int32* state);
+ArkUI_Int32 HasAnimationGroup(ArkUIContext* context, ArkUI_CharPtr key, bool* exists);
 } // namespace OHOS::Ace::NG::ViewAnimate
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NODE_ANIMATE_H

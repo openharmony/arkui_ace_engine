@@ -39,6 +39,7 @@ Rosen::FinishCallbackType ToAnimationFinishCallbackType(const FinishCallbackType
         return Rosen::FinishCallbackType::TIME_SENSITIVE;
     }
 }
+
 Rosen::RSAnimationTimingProtocol OptionToTimingProtocol(const AnimationOption& option)
 {
     Rosen::RSAnimationTimingProtocol timingProtocol;
@@ -60,6 +61,7 @@ Rosen::RSAnimationTimingProtocol OptionToTimingProtocol(const AnimationOption& o
     }
     return timingProtocol;
 }
+
 std::function<void()> GetWrappedCallback(
     const std::function<void()>& callback, bool once, const RefPtr<PipelineBase>& pipeline)
 {
@@ -451,5 +453,76 @@ uint64_t AnimationUtils::GetRSUIContextToken(RefPtr<PipelineBase> context)
         return rsUIContext->GetToken();
     }
     return 0;
+}
+
+std::shared_ptr<AnimationUtils::InteractiveAnimation> AnimationUtils::CreateGroupInteractiveAnimation(
+    const InteractiveAnimationCallback& addCallback, const AnimationOption& option,
+    const RefPtr<Curve>& curve, const FinishCallback& callback)
+{
+    auto interactiveAnimation = std::make_shared<AnimationUtils::InteractiveAnimation>();
+    CHECK_NULL_RETURN(interactiveAnimation, nullptr);
+    auto wrappedOnFinish = GetWrappedCallback(callback, true, nullptr);
+    auto timingProtocol = OptionToTimingProtocol(option);
+    auto timingCurve = curve ? NativeCurveHelper::ToNativeCurve(curve) : Rosen::RSAnimationTimingCurve::LINEAR;
+    auto rsUIContext = GetCurrentRSUIContext(nullptr);
+    auto weakAnimator = Rosen::RSInteractiveImplictAnimator::CreateGroup(rsUIContext, timingProtocol, timingCurve);
+    interactiveAnimation->interactiveAnimation_ = weakAnimator.lock();
+    CHECK_NULL_RETURN(interactiveAnimation->interactiveAnimation_, nullptr);
+    if (addCallback) {
+        interactiveAnimation->interactiveAnimation_->AddAnimation(addCallback);
+    }
+    interactiveAnimation->interactiveAnimation_->SetFinishCallBack(wrappedOnFinish);
+    return interactiveAnimation;
+}
+
+void AnimationUtils::FinishInteractiveAnimation(
+    const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation,
+    InteractiveAnimationFinishPosition position)
+{
+    CHECK_NULL_VOID(interactiveAnimation);
+    CHECK_NULL_VOID(interactiveAnimation->interactiveAnimation_);
+    Rosen::RSInteractiveAnimationPosition rosenPosition = Rosen::RSInteractiveAnimationPosition::END;
+    switch (position) {
+        case InteractiveAnimationFinishPosition::TO_END:
+            rosenPosition = Rosen::RSInteractiveAnimationPosition::END;
+            break;
+        case InteractiveAnimationFinishPosition::TO_START:
+            rosenPosition = Rosen::RSInteractiveAnimationPosition::START;
+            break;
+        case InteractiveAnimationFinishPosition::TO_CURRENT:
+            rosenPosition = Rosen::RSInteractiveAnimationPosition::CURRENT;
+            break;
+        default:
+            break;
+    }
+    interactiveAnimation->interactiveAnimation_->FinishAnimation(rosenPosition);
+}
+
+void AnimationUtils::PauseInteractiveAnimation(
+    const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation)
+{
+    CHECK_NULL_VOID(interactiveAnimation);
+    CHECK_NULL_VOID(interactiveAnimation->interactiveAnimation_);
+    interactiveAnimation->interactiveAnimation_->PauseAnimation();
+}
+
+InteractiveAnimationStatus AnimationUtils::GetInteractiveAnimationStatus(
+    const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation)
+{
+    CHECK_NULL_RETURN(interactiveAnimation, InteractiveAnimationStatus::INACTIVE);
+    CHECK_NULL_RETURN(interactiveAnimation->interactiveAnimation_, InteractiveAnimationStatus::INACTIVE);
+    auto rosenStatus = interactiveAnimation->interactiveAnimation_->GetStatus();
+    switch (rosenStatus) {
+        case Rosen::RSInteractiveAnimationState::INACTIVE:
+            return InteractiveAnimationStatus::INACTIVE;
+        case Rosen::RSInteractiveAnimationState::ACTIVE:
+            return InteractiveAnimationStatus::ACTIVE;
+        case Rosen::RSInteractiveAnimationState::RUNNING:
+            return InteractiveAnimationStatus::RUNNING;
+        case Rosen::RSInteractiveAnimationState::PAUSED:
+            return InteractiveAnimationStatus::PAUSED;
+        default:
+            return InteractiveAnimationStatus::INACTIVE;
+    }
 }
 } // namespace OHOS::Ace

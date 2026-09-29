@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <cstring>
 #include <securec.h>
 
 #include "animate_impl.h"
@@ -22,8 +23,19 @@
 #include "base/error/error_code.h"
 #include "base/hiviewdfx/histogram_wrapper.h"
 #include "interfaces/native/native_error_message_macros.h"
+#include "interfaces/native/node/render_node.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
+
+namespace {
+constexpr int32_t MIN_KEYFRAME_SIZE = 2;
+constexpr int32_t BOUNDS_W_IDX = 2;
+constexpr int32_t BOUNDS_H_IDX = 3;
+constexpr int32_t VEC2_CNT = 2;
+constexpr int32_t ROTATE_CNT = 3;
+constexpr int32_t BOUNDS_CNT = 4;
+} // namespace
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -31,14 +43,14 @@ extern "C" {
 ArkUI_AnimateOption* OH_ArkUI_AnimateOption_Create()
 {
     ArkUI_AnimateOption* option = new ArkUI_AnimateOption;
-    //duration default 1000
+    // duration default 1000
     option->duration = 1000;
-    //tempo default 1.0
+    // tempo default 1.0
     option->tempo = 1.0f;
     option->curve = ArkUI_AnimationCurve::ARKUI_CURVE_EASE_IN_OUT;
-    //delay default 0
+    // delay default 0
     option->delay = 0;
-    //iterations default 1
+    // iterations default 1
     option->iterations = 1;
     option->playMode = ArkUI_AnimationPlayMode::ARKUI_ANIMATION_PLAY_MODE_NORMAL;
     option->expectedFrameRateRange = nullptr;
@@ -137,7 +149,7 @@ void OH_ArkUI_AnimateOption_SetDelay(ArkUI_AnimateOption* option, int32_t value)
 void OH_ArkUI_AnimateOption_SetIterations(ArkUI_AnimateOption* option, int32_t value)
 {
     CHECK_NULL_VOID(option);
-    //取值范围：[-1, +∞)
+    // 取值范围：[-1, +∞)
     if (value < -1) {
         return;
     }
@@ -159,8 +171,7 @@ void OH_ArkUI_AnimateOption_SetExpectedFrameRateRange(ArkUI_AnimateOption* optio
 {
     CHECK_NULL_VOID(option);
     CHECK_NULL_VOID(value);
-    option->expectedFrameRateRange =
-        new ArkUI_ExpectedFrameRateRange { value->min, value->max, value->expected };
+    option->expectedFrameRateRange = new ArkUI_ExpectedFrameRateRange { value->min, value->max, value->expected };
 }
 
 void OH_ArkUI_AnimateOption_SetICurve(ArkUI_AnimateOption* option, ArkUI_CurveHandle value)
@@ -191,7 +202,7 @@ ArkUI_KeyframeAnimateOption* OH_ArkUI_KeyframeAnimateOption_Create(int32_t size)
     animateOption->expectedFrameRateRange = nullptr;
 
     for (int32_t i = 0; i < size; ++i) {
-        //duration default 1000
+        // duration default 1000
         animateOption->keyframes[i].duration = 1000;
         animateOption->keyframes[i].curve = nullptr;
         animateOption->keyframes[i].event = nullptr;
@@ -320,7 +331,7 @@ ArkUI_AnimatorOption* OH_ArkUI_AnimatorOption_Create(int32_t keyframeSize)
     if (keyframeSize < 0) {
         return nullptr;
     }
-    
+
     ArkUI_AnimatorOption* option = new ArkUI_AnimatorOption;
     option->keyframes.resize(keyframeSize);
     for (int32_t i = 0; i < keyframeSize; i++) {
@@ -621,8 +632,7 @@ int32_t OH_ArkUI_KeyframeAnimateOption_SetExpectedFrameRate(
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_ExpectedFrameRateRange* OH_ArkUI_KeyframeAnimateOption_GetExpectedFrameRate(
-    ArkUI_KeyframeAnimateOption* option)
+ArkUI_ExpectedFrameRateRange* OH_ArkUI_KeyframeAnimateOption_GetExpectedFrameRate(ArkUI_KeyframeAnimateOption* option)
 {
     if (option != nullptr) {
         return option->expectedFrameRateRange;
@@ -917,6 +927,1208 @@ ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_GetRotatable(const ArkUI_MotionPathOp
     }
     *rotatable = options->rotatable;
     return ARKUI_ERROR_CODE_NO_ERROR;
+}
+// =============================================================================
+// Group Animation Helpers
+// =============================================================================
+
+static bool IsDurationIndependentCurveType(ArkUI_CurveType type)
+{
+    return type == ARKUI_CURVE_TYPE_SPRING_MOTION || type == ARKUI_CURVE_TYPE_RESPONSIVE_SPRING_MOTION ||
+           type == ARKUI_CURVE_TYPE_INTERPOLATING_SPRING;
+}
+
+static int32_t GetPropertyValueSize(OH_ArkUI_AnimationPropertyType propertyType)
+{
+    switch (propertyType) {
+        case OH_ARKUI_ANIMATION_PROPERTY_TRANSLATION:
+            return VEC2_CNT;
+        case OH_ARKUI_ANIMATION_PROPERTY_TRANSLATION_X:
+        case OH_ARKUI_ANIMATION_PROPERTY_TRANSLATION_Y:
+        case OH_ARKUI_ANIMATION_PROPERTY_TRANSLATION_Z:
+        case OH_ARKUI_ANIMATION_PROPERTY_SCALE_X:
+        case OH_ARKUI_ANIMATION_PROPERTY_SCALE_Y:
+        case OH_ARKUI_ANIMATION_PROPERTY_ROTATION_X:
+        case OH_ARKUI_ANIMATION_PROPERTY_ROTATION_Y:
+        case OH_ARKUI_ANIMATION_PROPERTY_ROTATION_Z:
+        case OH_ARKUI_ANIMATION_PROPERTY_OPACITY:
+        case OH_ARKUI_ANIMATION_PROPERTY_BOUNDS_X:
+        case OH_ARKUI_ANIMATION_PROPERTY_BOUNDS_Y:
+        case OH_ARKUI_ANIMATION_PROPERTY_BOUNDS_WIDTH:
+        case OH_ARKUI_ANIMATION_PROPERTY_BOUNDS_HEIGHT:
+        case OH_ARKUI_ANIMATION_PROPERTY_BACKGROUND_COLOR:
+            return 1;
+        case OH_ARKUI_ANIMATION_PROPERTY_SCALE:
+            return VEC2_CNT;
+        case OH_ARKUI_ANIMATION_PROPERTY_ROTATION:
+            return ROTATE_CNT;
+        case OH_ARKUI_ANIMATION_PROPERTY_BOUNDS:
+            return BOUNDS_CNT;
+        default:
+            return -1;
+    }
+}
+
+static bool ValidatePropertyValue(
+    OH_ArkUI_AnimationPropertyType propertyType, const ArkUI_NumberValue* value, int32_t size)
+{
+    int32_t expectedSize = GetPropertyValueSize(propertyType);
+    if (expectedSize < 0 || size != expectedSize) {
+        return false;
+    }
+    if (value == nullptr) {
+        return false;
+    }
+    if (propertyType == OH_ARKUI_ANIMATION_PROPERTY_OPACITY) {
+        if (value[0].f32 < 0.0f || value[0].f32 > 1.0f) {
+            return false;
+        }
+    } else if (propertyType == OH_ARKUI_ANIMATION_PROPERTY_BOUNDS) {
+        if (value[BOUNDS_W_IDX].i32 < 0 || value[BOUNDS_H_IDX].i32 < 0) {
+            return false;
+        }
+    } else if (propertyType == OH_ARKUI_ANIMATION_PROPERTY_BOUNDS_WIDTH ||
+               propertyType == OH_ARKUI_ANIMATION_PROPERTY_BOUNDS_HEIGHT) {
+        if (value[0].i32 < 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+// =============================================================================
+// PropertyAnimation
+// =============================================================================
+
+OH_ArkUI_PropertyAnimationHandle OH_ArkUI_NativeModule_PropertyAnimation_Create(
+    OH_ArkUI_AnimationPropertyType propertyType)
+{
+    if (propertyType < OH_ARKUI_ANIMATION_PROPERTY_TRANSLATION ||
+        propertyType > OH_ARKUI_ANIMATION_PROPERTY_BACKGROUND_COLOR) {
+        return nullptr;
+    }
+    return new OH_ArkUI_PropertyAnimation { .propertyType = propertyType };
+}
+
+void OH_ArkUI_NativeModule_PropertyAnimation_Destroy(OH_ArkUI_PropertyAnimationHandle animation)
+{
+    if (animation == nullptr) {
+        return;
+    }
+    delete animation;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_PropertyAnimation_SetFromValue(
+    OH_ArkUI_PropertyAnimationHandle animation, const ArkUI_NumberValue* value, int32_t size)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    if (!ValidatePropertyValue(animation->propertyType, value, size)) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    animation->fromValue.assign(value, value + size);
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_PropertyAnimation_SetToValue(
+    OH_ArkUI_PropertyAnimationHandle animation, const ArkUI_NumberValue* value, int32_t size)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    if (!ValidatePropertyValue(animation->propertyType, value, size)) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    animation->toValue.assign(value, value + size);
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_PropertyAnimation_GetFromValue(
+    OH_ArkUI_PropertyAnimationHandle animation, ArkUI_NumberValue* value, int32_t size)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(value, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "value is null");
+    if (animation->fromValue.empty()) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_NO_ATTRIBUTE_FOUND, __FUNCTION__, "fromValue is not set");
+        return ARKUI_ERROR_CODE_NO_ATTRIBUTE_FOUND;
+    }
+    int32_t expectedSize = GetPropertyValueSize(animation->propertyType);
+    if (size != expectedSize) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR, __FUNCTION__, "buffer size mismatch");
+        return ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR;
+    }
+    for (int32_t i = 0; i < expectedSize; ++i) {
+        value[i] = animation->fromValue[i];
+    }
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_PropertyAnimation_GetToValue(
+    OH_ArkUI_PropertyAnimationHandle animation, ArkUI_NumberValue* value, int32_t size)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(value, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "value is null");
+    if (animation->toValue.empty()) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_NO_ATTRIBUTE_FOUND, __FUNCTION__, "toValue is not set");
+        return ARKUI_ERROR_CODE_NO_ATTRIBUTE_FOUND;
+    }
+    int32_t expectedSize = GetPropertyValueSize(animation->propertyType);
+    if (size != expectedSize) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR, __FUNCTION__, "buffer size mismatch");
+        return ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR;
+    }
+    for (int32_t i = 0; i < expectedSize; ++i) {
+        value[i] = animation->toValue[i];
+    }
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_PropertyAnimation_SetDuration(
+    OH_ArkUI_PropertyAnimationHandle animation, int32_t duration)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    if (duration <= 0) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "duration must be greater than 0");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    animation->duration = duration;
+    animation->hasDuration = true;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_PropertyAnimation_GetDuration(
+    OH_ArkUI_PropertyAnimationHandle animation, int32_t* duration)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(duration, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "duration is null");
+    if (!animation->hasDuration) {
+        return ARKUI_ERROR_CODE_NO_ATTRIBUTE_FOUND;
+    }
+    *duration = animation->duration;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_PropertyAnimation_SetDelay(
+    OH_ArkUI_PropertyAnimationHandle animation, int32_t delay)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    animation->delay = delay;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_PropertyAnimation_GetDelay(
+    OH_ArkUI_PropertyAnimationHandle animation, int32_t* delay)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(delay, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "delay is null");
+    *delay = animation->delay;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_PropertyAnimation_SetCurve(
+    OH_ArkUI_PropertyAnimationHandle animation, ArkUI_CurveHandle curve)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(curve, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "curve is null");
+    animation->curve = curve;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_PropertyAnimation_GetCurve(
+    OH_ArkUI_PropertyAnimationHandle animation, ArkUI_CurveHandle* outBorrowedCurve)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        outBorrowedCurve, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "outBorrowedCurve is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        animation->curve, ARKUI_ERROR_CODE_NO_ATTRIBUTE_FOUND, __FUNCTION__, "curve is not set");
+    *outBorrowedCurve = animation->curve;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_PropertyAnimation_SetTempo(
+    OH_ArkUI_PropertyAnimationHandle animation, float tempo)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    if (tempo <= 0) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "tempo must be greater than 0");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    animation->tempo = tempo;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_PropertyAnimation_GetTempo(
+    OH_ArkUI_PropertyAnimationHandle animation, float* tempo)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(tempo, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "tempo is null");
+    *tempo = animation->tempo;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_PropertyAnimation_SetAutoReverse(
+    OH_ArkUI_PropertyAnimationHandle animation, bool autoReverse)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    animation->autoReverse = autoReverse;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_PropertyAnimation_GetAutoReverse(
+    OH_ArkUI_PropertyAnimationHandle animation, bool* autoReverse)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(autoReverse, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "autoReverse is null");
+    *autoReverse = animation->autoReverse;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_PropertyAnimation_SetTargetNode(
+    OH_ArkUI_PropertyAnimationHandle animation, ArkUI_RenderNodeHandle targetNode)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    animation->targetNode = targetNode;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_PropertyAnimation_GetTargetNode(
+    OH_ArkUI_PropertyAnimationHandle animation, ArkUI_RenderNodeHandle* outBorrowedTargetNode)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        outBorrowedTargetNode, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "outBorrowedTargetNode is null");
+    *outBorrowedTargetNode = animation->targetNode;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_PropertyAnimation_SetIterations(
+    OH_ArkUI_PropertyAnimationHandle animation, int32_t iterations)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    if (iterations < -1 || iterations == 0) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "iterations must be -1 or greater than 0");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    animation->iterations = iterations;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_PropertyAnimation_GetIterations(
+    OH_ArkUI_PropertyAnimationHandle animation, int32_t* iterations)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(iterations, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "iterations is null");
+    *iterations = animation->iterations;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+// =============================================================================
+// KeyframeAnimation
+// =============================================================================
+
+OH_ArkUI_KeyframeAnimationHandle OH_ArkUI_NativeModule_KeyframeAnimation_Create(
+    OH_ArkUI_AnimationPropertyType propertyType, int32_t size)
+{
+    if (propertyType < OH_ARKUI_ANIMATION_PROPERTY_TRANSLATION ||
+        propertyType > OH_ARKUI_ANIMATION_PROPERTY_BACKGROUND_COLOR) {
+        return nullptr;
+    }
+    if (size < MIN_KEYFRAME_SIZE) {
+        return nullptr;
+    }
+    auto* animation = new OH_ArkUI_KeyframeAnimation();
+    animation->propertyType = propertyType;
+    animation->keyframes.resize(size);
+    float percent = 1.0f / (size - 1);
+    for (int32_t i = 0; i < size - 1; ++i) {
+        animation->keyframes[i].keyTime = percent * i;
+    }
+    animation->keyframes[size - 1].keyTime = 1.0f;
+    return animation;
+}
+
+void OH_ArkUI_NativeModule_KeyframeAnimation_Destroy(OH_ArkUI_KeyframeAnimationHandle animation)
+{
+    if (animation == nullptr) {
+        return;
+    }
+    delete animation;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_KeyframeAnimation_SetKeyTimes(
+    OH_ArkUI_KeyframeAnimationHandle animation, const float* keyTimes, int32_t size)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(keyTimes, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "keyTimes is null");
+    if (size != static_cast<int32_t>(animation->keyframes.size()) || size < MIN_KEYFRAME_SIZE) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (keyTimes[0] < 0.0f || keyTimes[0] > 1.0f) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    for (int32_t i = 1; i < size; ++i) {
+        if (keyTimes[i] < 0.0f || keyTimes[i] > 1.0f || keyTimes[i] < keyTimes[i - 1]) {
+            return ARKUI_ERROR_CODE_PARAM_INVALID;
+        }
+    }
+    for (int32_t i = 0; i < size; ++i) {
+        animation->keyframes[i].keyTime = keyTimes[i];
+    }
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_KeyframeAnimation_GetKeyTime(
+    OH_ArkUI_KeyframeAnimationHandle animation, int32_t index, float* keyTime)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(keyTime, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "keyTime is null");
+    if (index < 0 || index >= static_cast<int32_t>(animation->keyframes.size())) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    *keyTime = animation->keyframes[index].keyTime;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_KeyframeAnimation_SetKeyTime(
+    OH_ArkUI_KeyframeAnimationHandle animation, int32_t index, float keyTime)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    auto size = static_cast<int32_t>(animation->keyframes.size());
+    if (index < 0 || index >= size) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (keyTime < 0.0f || keyTime > 1.0f) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    animation->keyframes[index].keyTime = keyTime;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_KeyframeAnimation_SetValue(
+    OH_ArkUI_KeyframeAnimationHandle animation, int32_t index, const ArkUI_NumberValue* value, int32_t size)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    if (index < 0 || index >= static_cast<int32_t>(animation->keyframes.size())) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (!ValidatePropertyValue(animation->propertyType, value, size)) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    animation->keyframes[index].values.assign(value, value + size);
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_KeyframeAnimation_SetValues(
+    OH_ArkUI_KeyframeAnimationHandle animation, const ArkUI_NumberValue* values, int32_t size)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(values, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "values is null");
+    int32_t keyframeCount = static_cast<int32_t>(animation->keyframes.size());
+    int32_t valuesPerKeyframe = GetPropertyValueSize(animation->propertyType);
+    int32_t expectedSize = keyframeCount * valuesPerKeyframe;
+    if (size != expectedSize || size < 0) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "values size mismatch");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    for (int32_t i = 0; i < keyframeCount; ++i) {
+        const ArkUI_NumberValue* chunk = values + i * valuesPerKeyframe;
+        if (!ValidatePropertyValue(animation->propertyType, chunk, valuesPerKeyframe)) {
+            SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "invalid property value");
+            return ARKUI_ERROR_CODE_PARAM_INVALID;
+        }
+    }
+    for (int32_t i = 0; i < keyframeCount; ++i) {
+        const ArkUI_NumberValue* chunk = values + i * valuesPerKeyframe;
+        animation->keyframes[i].values.assign(chunk, chunk + valuesPerKeyframe);
+    }
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_KeyframeAnimation_GetValue(
+    OH_ArkUI_KeyframeAnimationHandle animation, int32_t index, ArkUI_NumberValue* value, int32_t size)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(value, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "value is null");
+    if (index < 0 || index >= static_cast<int32_t>(animation->keyframes.size())) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (animation->keyframes[index].values.empty()) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_NO_ATTRIBUTE_FOUND, __FUNCTION__, "keyframe value is not set");
+        return ARKUI_ERROR_CODE_NO_ATTRIBUTE_FOUND;
+    }
+    int32_t expectedSize = GetPropertyValueSize(animation->propertyType);
+    if (size != expectedSize) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR, __FUNCTION__, "buffer size mismatch");
+        return ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR;
+    }
+    for (int32_t i = 0; i < expectedSize; ++i) {
+        value[i] = animation->keyframes[index].values[i];
+    }
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_KeyframeAnimation_SetCurves(
+    OH_ArkUI_KeyframeAnimationHandle animation, const ArkUI_CurveHandle* value, int32_t size)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(value, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "value is null");
+    if (size != static_cast<int32_t>(animation->keyframes.size())) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    for (int32_t i = 0; i < size; ++i) {
+        if (value[i] == nullptr || value[i]->type == ARKUI_CURVE_TYPE_SPRING_MOTION ||
+            value[i]->type == ARKUI_CURVE_TYPE_RESPONSIVE_SPRING_MOTION ||
+            value[i]->type == ARKUI_CURVE_TYPE_INTERPOLATING_SPRING) {
+            return ARKUI_ERROR_CODE_PARAM_INVALID;
+        }
+    }
+    for (int32_t i = 0; i < size; ++i) {
+        animation->keyframes[i].curve = value[i];
+    }
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_KeyframeAnimation_SetCurve(
+    OH_ArkUI_KeyframeAnimationHandle animation, int32_t index, ArkUI_CurveHandle curve)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(curve, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "curve is null");
+    if (curve->type == ARKUI_CURVE_TYPE_SPRING_MOTION || curve->type == ARKUI_CURVE_TYPE_RESPONSIVE_SPRING_MOTION ||
+        curve->type == ARKUI_CURVE_TYPE_INTERPOLATING_SPRING) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (index < 0 || index >= static_cast<int32_t>(animation->keyframes.size())) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    animation->keyframes[index].curve = curve;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_KeyframeAnimation_GetCurve(
+    OH_ArkUI_KeyframeAnimationHandle animation, int32_t index, ArkUI_CurveHandle* outBorrowedCurve)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        outBorrowedCurve, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "outBorrowedCurve is null");
+    if (index < 0 || index >= static_cast<int32_t>(animation->keyframes.size())) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    *outBorrowedCurve = animation->keyframes[index].curve;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_KeyframeAnimation_SetDuration(
+    OH_ArkUI_KeyframeAnimationHandle animation, int32_t duration)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    if (duration <= 0) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "duration must be greater than 0");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    animation->duration = duration;
+    animation->hasDuration = true;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_KeyframeAnimation_GetDuration(
+    OH_ArkUI_KeyframeAnimationHandle animation, int32_t* duration)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(duration, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "duration is null");
+    if (!animation->hasDuration) {
+        return ARKUI_ERROR_CODE_NO_ATTRIBUTE_FOUND;
+    }
+    *duration = animation->duration;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_KeyframeAnimation_SetDelay(
+    OH_ArkUI_KeyframeAnimationHandle animation, int32_t delay)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    animation->delay = delay;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_KeyframeAnimation_GetDelay(
+    OH_ArkUI_KeyframeAnimationHandle animation, int32_t* delay)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(delay, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "delay is null");
+    *delay = animation->delay;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_KeyframeAnimation_SetTempo(
+    OH_ArkUI_KeyframeAnimationHandle animation, float tempo)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    if (tempo <= 0) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "tempo must be greater than 0");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    animation->tempo = tempo;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_KeyframeAnimation_GetTempo(
+    OH_ArkUI_KeyframeAnimationHandle animation, float* tempo)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(tempo, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "tempo is null");
+    *tempo = animation->tempo;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_KeyframeAnimation_SetAutoReverse(
+    OH_ArkUI_KeyframeAnimationHandle animation, bool autoReverse)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    animation->autoReverse = autoReverse;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_KeyframeAnimation_GetAutoReverse(
+    OH_ArkUI_KeyframeAnimationHandle animation, bool* autoReverse)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(autoReverse, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "autoReverse is null");
+    *autoReverse = animation->autoReverse;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_KeyframeAnimation_SetTargetNode(
+    OH_ArkUI_KeyframeAnimationHandle animation, ArkUI_RenderNodeHandle targetNode)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    animation->targetNode = targetNode;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_KeyframeAnimation_GetTargetNode(
+    OH_ArkUI_KeyframeAnimationHandle animation, ArkUI_RenderNodeHandle* outBorrowedTargetNode)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        outBorrowedTargetNode, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "outBorrowedTargetNode is null");
+    *outBorrowedTargetNode = animation->targetNode;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_KeyframeAnimation_SetIterations(
+    OH_ArkUI_KeyframeAnimationHandle animation, int32_t iterations)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    if (iterations < -1 || iterations == 0) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "iterations must be -1 or greater than 0");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    animation->iterations = iterations;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_KeyframeAnimation_GetIterations(
+    OH_ArkUI_KeyframeAnimationHandle animation, int32_t* iterations)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(iterations, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "iterations is null");
+    *iterations = animation->iterations;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+// =============================================================================
+// PathAnimation
+// =============================================================================
+
+OH_ArkUI_PathAnimationHandle OH_ArkUI_NativeModule_PathAnimation_Create(const char* path)
+{
+    if (path == nullptr) {
+        return nullptr;
+    }
+    if (path[0] == '\0') {
+        return nullptr;
+    }
+    if (strstr(path, "start") != nullptr || strstr(path, "end") != nullptr) {
+        return nullptr;
+    }
+    auto* animation = new OH_ArkUI_PathAnimation();
+    size_t len = strlen(path) + 1;
+    animation->path = new char[len];
+    if (strcpy_s(animation->path, len, path) != 0) {
+        delete[] animation->path;
+        animation->path = nullptr;
+        delete animation;
+        return nullptr;
+    }
+    return animation;
+}
+
+void OH_ArkUI_NativeModule_PathAnimation_Destroy(OH_ArkUI_PathAnimationHandle animation)
+{
+    if (animation == nullptr) {
+        return;
+    }
+    if (animation->path != nullptr) {
+        delete[] animation->path;
+        animation->path = nullptr;
+    }
+    delete animation;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_PathAnimation_SetDuration(
+    OH_ArkUI_PathAnimationHandle animation, int32_t duration)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    if (duration <= 0) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "duration must be greater than 0");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    animation->duration = duration;
+    animation->hasDuration = true;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_PathAnimation_GetDuration(
+    OH_ArkUI_PathAnimationHandle animation, int32_t* duration)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(duration, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "duration is null");
+    if (!animation->hasDuration) {
+        return ARKUI_ERROR_CODE_NO_ATTRIBUTE_FOUND;
+    }
+    *duration = animation->duration;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_PathAnimation_SetDelay(OH_ArkUI_PathAnimationHandle animation, int32_t delay)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    animation->delay = delay;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_PathAnimation_GetDelay(OH_ArkUI_PathAnimationHandle animation, int32_t* delay)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(delay, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "delay is null");
+    *delay = animation->delay;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_PathAnimation_SetCurve(
+    OH_ArkUI_PathAnimationHandle animation, ArkUI_CurveHandle curve)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(curve, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "curve is null");
+    if (IsDurationIndependentCurveType(curve->type)) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "duration-independent curve is not allowed");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    animation->curve = curve;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_PathAnimation_GetCurve(
+    OH_ArkUI_PathAnimationHandle animation, ArkUI_CurveHandle* outBorrowedCurve)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        outBorrowedCurve, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "outBorrowedCurve is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        animation->curve, ARKUI_ERROR_CODE_NO_ATTRIBUTE_FOUND, __FUNCTION__, "curve is not set");
+    *outBorrowedCurve = animation->curve;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_PathAnimation_SetTempo(OH_ArkUI_PathAnimationHandle animation, float tempo)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    if (tempo <= 0) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "tempo must be greater than 0");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    animation->tempo = tempo;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_PathAnimation_GetTempo(OH_ArkUI_PathAnimationHandle animation, float* tempo)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(tempo, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "tempo is null");
+    *tempo = animation->tempo;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_PathAnimation_SetAutoReverse(
+    OH_ArkUI_PathAnimationHandle animation, bool autoReverse)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    animation->autoReverse = autoReverse;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_PathAnimation_GetAutoReverse(
+    OH_ArkUI_PathAnimationHandle animation, bool* autoReverse)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(autoReverse, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "autoReverse is null");
+    *autoReverse = animation->autoReverse;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_PathAnimation_SetTargetNode(
+    OH_ArkUI_PathAnimationHandle animation, ArkUI_RenderNodeHandle targetNode)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    animation->targetNode = targetNode;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_PathAnimation_GetTargetNode(
+    OH_ArkUI_PathAnimationHandle animation, ArkUI_RenderNodeHandle* outBorrowedTargetNode)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        outBorrowedTargetNode, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "outBorrowedTargetNode is null");
+    *outBorrowedTargetNode = animation->targetNode;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_PathAnimation_SetIterations(
+    OH_ArkUI_PathAnimationHandle animation, int32_t iterations)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    if (iterations < -1 || iterations == 0) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "iterations must be -1 or greater than 0");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    animation->iterations = iterations;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_PathAnimation_GetIterations(
+    OH_ArkUI_PathAnimationHandle animation, int32_t* iterations)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(iterations, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "iterations is null");
+    *iterations = animation->iterations;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_PathAnimation_SetAutoRotation(
+    OH_ArkUI_PathAnimationHandle animation, bool autoRotation)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    animation->autoRotation = autoRotation;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_PathAnimation_GetAutoRotation(
+    OH_ArkUI_PathAnimationHandle animation, bool* autoRotation)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(autoRotation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "autoRotation is null");
+    *autoRotation = animation->autoRotation;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+// =============================================================================
+// AnimationGroup
+// =============================================================================
+
+OH_ArkUI_AnimationGroupHandle OH_ArkUI_NativeModule_AnimationGroup_Create()
+{
+    return new OH_ArkUI_AnimationGroup();
+}
+
+void OH_ArkUI_NativeModule_AnimationGroup_Destroy(OH_ArkUI_AnimationGroupHandle group)
+{
+    if (group == nullptr) {
+        return;
+    }
+    if (group->expectedFrameRateRange != nullptr) {
+        delete group->expectedFrameRateRange;
+        group->expectedFrameRateRange = nullptr;
+    }
+    delete group;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_AnimationGroup_SetDuration(OH_ArkUI_AnimationGroupHandle group, int32_t duration)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(group, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "group is null");
+    if (duration <= 0) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "duration must be greater than 0");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    group->duration = duration;
+    group->hasDuration = true;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_AnimationGroup_GetDuration(OH_ArkUI_AnimationGroupHandle group, int32_t* duration)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(group, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "group is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(duration, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "duration is null");
+    if (!group->hasDuration) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_NO_ATTRIBUTE_FOUND, __FUNCTION__, "duration is not set");
+        return ARKUI_ERROR_CODE_NO_ATTRIBUTE_FOUND;
+    }
+    *duration = group->duration;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_AnimationGroup_SetDelay(OH_ArkUI_AnimationGroupHandle group, int32_t delay)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(group, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "group is null");
+    if (delay < 0) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "delay must be greater than or equal to 0");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    group->delay = delay;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_AnimationGroup_GetDelay(OH_ArkUI_AnimationGroupHandle group, int32_t* delay)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(group, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "group is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(delay, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "delay is null");
+    *delay = group->delay;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_AnimationGroup_SetCurve(
+    OH_ArkUI_AnimationGroupHandle group, ArkUI_CurveHandle curve)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(group, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "group is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(curve, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "curve is null");
+    if (IsDurationIndependentCurveType(curve->type)) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "duration-independent curve is not allowed");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    group->curve = curve;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_AnimationGroup_GetCurve(
+    OH_ArkUI_AnimationGroupHandle group, ArkUI_CurveHandle* outBorrowedCurve)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(group, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "group is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        outBorrowedCurve, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "outBorrowedCurve is null");
+    if (group->curve == nullptr) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_NO_ATTRIBUTE_FOUND, __FUNCTION__, "curve is not set");
+        return ARKUI_ERROR_CODE_NO_ATTRIBUTE_FOUND;
+    }
+    *outBorrowedCurve = group->curve;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_AnimationGroup_SetTempo(OH_ArkUI_AnimationGroupHandle group, float tempo)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(group, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "group is null");
+    if (tempo <= 0) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "tempo must be greater than 0");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    group->tempo = tempo;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_AnimationGroup_GetTempo(OH_ArkUI_AnimationGroupHandle group, float* tempo)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(group, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "group is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(tempo, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "tempo is null");
+    *tempo = group->tempo;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_AnimationGroup_SetAutoReverse(
+    OH_ArkUI_AnimationGroupHandle group, bool autoReverse)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(group, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "group is null");
+    group->autoReverse = autoReverse;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_AnimationGroup_GetAutoReverse(
+    OH_ArkUI_AnimationGroupHandle group, bool* autoReverse)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(group, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "group is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(autoReverse, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "autoReverse is null");
+    *autoReverse = group->autoReverse;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_AnimationGroup_SetTargetNode(
+    OH_ArkUI_AnimationGroupHandle group, ArkUI_RenderNodeHandle targetNode)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(group, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "group is null");
+    group->targetNode = targetNode;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_AnimationGroup_GetTargetNode(
+    OH_ArkUI_AnimationGroupHandle group, ArkUI_RenderNodeHandle* outBorrowedTargetNode)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(group, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "group is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(
+        outBorrowedTargetNode, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "outBorrowedTargetNode is null");
+    *outBorrowedTargetNode = group->targetNode;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_AnimationGroup_SetIterations(
+    OH_ArkUI_AnimationGroupHandle group, int32_t iterations)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(group, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "group is null");
+    if (iterations < -1 || iterations == 0) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "iterations must be -1 or greater than 0");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    group->iterations = iterations;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_AnimationGroup_GetIterations(
+    OH_ArkUI_AnimationGroupHandle group, int32_t* iterations)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(group, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "group is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(iterations, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "iterations is null");
+    *iterations = group->iterations;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_AnimationGroup_SetExpectedFrameRateRange(
+    OH_ArkUI_AnimationGroupHandle group, const ArkUI_ExpectedFrameRateRange* frameRate)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(group, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "group is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(frameRate, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "frameRate is null");
+    if (frameRate->min > frameRate->expected || frameRate->expected > frameRate->max) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (group->expectedFrameRateRange != nullptr) {
+        *(group->expectedFrameRateRange) = *frameRate;
+    } else {
+        group->expectedFrameRateRange =
+            new ArkUI_ExpectedFrameRateRange { frameRate->min, frameRate->max, frameRate->expected };
+    }
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_AnimationGroup_GetExpectedFrameRateRange(
+    OH_ArkUI_AnimationGroupHandle group, ArkUI_ExpectedFrameRateRange* frameRate)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(group, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "group is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(frameRate, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "frameRate is null");
+    if (group->expectedFrameRateRange == nullptr) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_NO_ATTRIBUTE_FOUND, __FUNCTION__, "expectedFrameRateRange is not set");
+        return ARKUI_ERROR_CODE_NO_ATTRIBUTE_FOUND;
+    }
+    *frameRate = *group->expectedFrameRateRange;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_AnimationGroup_RegisterOnFinishCallback(
+    OH_ArkUI_AnimationGroupHandle group, void* userData, void (*callback)(void* userData))
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(group, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "group is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(callback, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "callback is null");
+    group->onFinish = callback;
+    group->userData = userData;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_AnimationGroup_AddPropertyAnimation(
+    OH_ArkUI_AnimationGroupHandle group, OH_ArkUI_PropertyAnimationHandle animation)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(group, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "group is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    if (animation->propertyType < OH_ARKUI_ANIMATION_PROPERTY_TRANSLATION ||
+        animation->propertyType > OH_ARKUI_ANIMATION_PROPERTY_BACKGROUND_COLOR) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_SUB_ANIMATION_INVALID, __FUNCTION__, "propertyType out of range");
+        return ARKUI_ERROR_CODE_SUB_ANIMATION_INVALID;
+    }
+    if (animation->toValue.empty()) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_SUB_ANIMATION_INVALID, __FUNCTION__, "toValue is empty");
+        return ARKUI_ERROR_CODE_SUB_ANIMATION_INVALID;
+    }
+    for (const auto& child : group->childAnimations) {
+        if (const auto* prop = std::get_if<OH_ArkUI_PropertyAnimationHandle>(&child)) {
+            if (*prop == animation) {
+                SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "duplicate property animation");
+                return ARKUI_ERROR_CODE_PARAM_INVALID;
+            }
+        }
+    }
+    group->childAnimations.push_back(animation);
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_AnimationGroup_AddKeyframeAnimation(
+    OH_ArkUI_AnimationGroupHandle group, OH_ArkUI_KeyframeAnimationHandle animation)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(group, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "group is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    if (animation->propertyType < OH_ARKUI_ANIMATION_PROPERTY_TRANSLATION ||
+        animation->propertyType > OH_ARKUI_ANIMATION_PROPERTY_BACKGROUND_COLOR) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_SUB_ANIMATION_INVALID, __FUNCTION__, "propertyType out of range");
+        return ARKUI_ERROR_CODE_SUB_ANIMATION_INVALID;
+    }
+    if (animation->keyframes.empty()) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_SUB_ANIMATION_INVALID, __FUNCTION__, "keyframes is empty");
+        return ARKUI_ERROR_CODE_SUB_ANIMATION_INVALID;
+    }
+    int32_t expectedValueSize = GetPropertyValueSize(animation->propertyType);
+    float prevKeyTime = -1.0f;
+    for (const auto& kf : animation->keyframes) {
+        if (kf.keyTime < prevKeyTime) {
+            SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_SUB_ANIMATION_INVALID, __FUNCTION__, "keyTime is not non-decreasing");
+            return ARKUI_ERROR_CODE_SUB_ANIMATION_INVALID;
+        }
+        if (static_cast<int32_t>(kf.values.size()) != expectedValueSize) {
+            SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_SUB_ANIMATION_INVALID, __FUNCTION__, "keyframe values size mismatch");
+            return ARKUI_ERROR_CODE_SUB_ANIMATION_INVALID;
+        }
+        if (kf.curve && IsDurationIndependentCurveType(kf.curve->type)) {
+            SET_ERROR_MESSAGE(
+                ARKUI_ERROR_CODE_SUB_ANIMATION_INVALID, __FUNCTION__, "duration-independent curve is not allowed");
+            return ARKUI_ERROR_CODE_SUB_ANIMATION_INVALID;
+        }
+        prevKeyTime = kf.keyTime;
+    }
+    for (const auto& child : group->childAnimations) {
+        if (const auto* kf = std::get_if<OH_ArkUI_KeyframeAnimationHandle>(&child)) {
+            if (*kf == animation) {
+                SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "duplicate keyframe animation");
+                return ARKUI_ERROR_CODE_PARAM_INVALID;
+            }
+        }
+    }
+    group->childAnimations.push_back(animation);
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_AnimationGroup_AddPathAnimation(
+    OH_ArkUI_AnimationGroupHandle group, OH_ArkUI_PathAnimationHandle animation)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(group, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "group is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(animation, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "animation is null");
+    if (animation->path == nullptr) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_SUB_ANIMATION_INVALID, __FUNCTION__, "path is null");
+        return ARKUI_ERROR_CODE_SUB_ANIMATION_INVALID;
+    }
+    if (animation->curve && IsDurationIndependentCurveType(animation->curve->type)) {
+        SET_ERROR_MESSAGE(
+            ARKUI_ERROR_CODE_SUB_ANIMATION_INVALID, __FUNCTION__, "duration-independent curve is not allowed");
+        return ARKUI_ERROR_CODE_SUB_ANIMATION_INVALID;
+    }
+    for (const auto& child : group->childAnimations) {
+        if (const auto* path = std::get_if<OH_ArkUI_PathAnimationHandle>(&child)) {
+            if (*path == animation) {
+                SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "duplicate path animation");
+                return ARKUI_ERROR_CODE_PARAM_INVALID;
+            }
+        }
+    }
+    group->childAnimations.push_back(animation);
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_AddAnimationGroup(
+    ArkUI_ContextHandle context, OH_ArkUI_AnimationGroupHandle group, const char* key)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(context, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "context is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(group, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "group is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(key, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "key is null");
+    if (group->childAnimations.empty()) {
+        SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_SUB_ANIMATION_INVALID, __FUNCTION__, "group has no child animations");
+        return ARKUI_ERROR_CODE_SUB_ANIMATION_INVALID;
+    }
+    std::vector<ArkUIRenderNodeHandle> resolvedTargets;
+    resolvedTargets.reserve(group->childAnimations.size());
+    for (const auto& child : group->childAnimations) {
+        ArkUI_RenderNodeHandle resolved = nullptr;
+        if (const auto* prop = std::get_if<OH_ArkUI_PropertyAnimationHandle>(&child)) {
+            resolved = (*prop)->targetNode ? (*prop)->targetNode : group->targetNode;
+        } else if (const auto* kf = std::get_if<OH_ArkUI_KeyframeAnimationHandle>(&child)) {
+            resolved = (*kf)->targetNode ? (*kf)->targetNode : group->targetNode;
+        } else if (const auto* path = std::get_if<OH_ArkUI_PathAnimationHandle>(&child)) {
+            resolved = (*path)->targetNode ? (*path)->targetNode : group->targetNode;
+        }
+        if (resolved == nullptr) {
+            SET_ERROR_MESSAGE(
+                ARKUI_ERROR_CODE_SUB_ANIMATION_INVALID, __FUNCTION__, "child has no resolvable target node");
+            return ARKUI_ERROR_CODE_SUB_ANIMATION_INVALID;
+        }
+        resolvedTargets.push_back(resolved->renderNodeHandle);
+    }
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN_WITH_MESSAGE(impl, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "impl is null");
+    return static_cast<ArkUI_ErrorCode>(
+        impl->getAnimation()->addAnimationGroup(reinterpret_cast<ArkUIContext*>(context), group, resolvedTargets.data(),
+            static_cast<ArkUI_Uint32>(resolvedTargets.size()), key));
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_RemoveAnimationGroup(ArkUI_ContextHandle context, const char* key)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(context, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "context is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(key, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "key is null");
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN_WITH_MESSAGE(impl, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "impl is null");
+    return static_cast<ArkUI_ErrorCode>(
+        impl->getAnimation()->removeAnimationGroup(reinterpret_cast<ArkUIContext*>(context), key));
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_GetAnimationGroupState(
+    ArkUI_ContextHandle context, const char* key, OH_ArkUI_AnimationGroupState* state)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(context, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "context is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(key, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "key is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(state, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "state is null");
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN_WITH_MESSAGE(impl, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "impl is null");
+    return static_cast<ArkUI_ErrorCode>(impl->getAnimation()->getAnimationGroupState(
+        reinterpret_cast<ArkUIContext*>(context), key, reinterpret_cast<ArkUI_Int32*>(state)));
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_HasAnimationGroup(ArkUI_ContextHandle context, const char* key, bool* exists)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(context, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "context is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(key, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "key is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(exists, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "exists is null");
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN_WITH_MESSAGE(impl, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "impl is null");
+    return static_cast<ArkUI_ErrorCode>(
+        impl->getAnimation()->hasAnimationGroup(reinterpret_cast<ArkUIContext*>(context), key, exists));
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_PauseAnimationGroup(ArkUI_ContextHandle context, const char* key)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(context, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "context is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(key, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "key is null");
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN_WITH_MESSAGE(impl, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "impl is null");
+    return static_cast<ArkUI_ErrorCode>(
+        impl->getAnimation()->pauseAnimationGroup(reinterpret_cast<ArkUIContext*>(context), key));
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_ResumeAnimationGroup(ArkUI_ContextHandle context, const char* key)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(context, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "context is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(key, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "key is null");
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN_WITH_MESSAGE(impl, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "impl is null");
+    return static_cast<ArkUI_ErrorCode>(
+        impl->getAnimation()->resumeAnimationGroup(reinterpret_cast<ArkUIContext*>(context), key));
+}
+
+ArkUI_ErrorCode OH_ArkUI_NativeModule_FinishAnimationGroup(
+    ArkUI_ContextHandle context, const char* key, OH_ArkUI_AnimationFinishMode mode)
+{
+    CHECK_NULL_RETURN_WITH_MESSAGE(context, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "context is null");
+    CHECK_NULL_RETURN_WITH_MESSAGE(key, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "key is null");
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN_WITH_MESSAGE(impl, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "impl is null");
+    return static_cast<ArkUI_ErrorCode>(impl->getAnimation()->finishAnimationGroup(
+        reinterpret_cast<ArkUIContext*>(context), key, static_cast<ArkUI_Int32>(mode)));
 }
 #ifdef __cplusplus
 };

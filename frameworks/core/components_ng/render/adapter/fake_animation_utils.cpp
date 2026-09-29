@@ -187,6 +187,28 @@ void AnimationUtils::AddInteractiveAnimation(
     const std::function<void()>& callback)
 {}
 
+std::shared_ptr<AnimationUtils::InteractiveAnimation> AnimationUtils::CreateGroupInteractiveAnimation(
+    const InteractiveAnimationCallback& addCallback, const AnimationOption& option,
+    const RefPtr<Curve>& curve, const FinishCallback& callback)
+{
+    return nullptr;
+}
+
+void AnimationUtils::FinishInteractiveAnimation(
+    const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation,
+    InteractiveAnimationFinishPosition position)
+{}
+
+void AnimationUtils::PauseInteractiveAnimation(
+    const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation)
+{}
+
+InteractiveAnimationStatus AnimationUtils::GetInteractiveAnimationStatus(
+    const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation)
+{
+    return InteractiveAnimationStatus::INACTIVE;
+}
+
 void AnimationUtils::SetNavGroupNodeTransAnimationCallback()
 {}
 

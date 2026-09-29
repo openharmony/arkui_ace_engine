@@ -14,20 +14,23 @@
  */
 
 #include "core/interfaces/native/node/node_animate.h"
+
 #include "ui/animation/animation_constants.h"
 
 #include "base/error/error_code.h"
 #include "base/log/ace_trace.h"
-#include "core/interfaces/native/utility/error_message_macros.h"
 #include "core/animation/animation_pub.h"
 #include "core/animation/animator.h"
 #include "core/animation/curve_animation.h"
-#include "core/animation/spring_curve.h"
 #include "core/animation/keyframe_animation.h"
+#include "core/animation/spring_curve.h"
 #include "core/common/ace_engine.h"
+#include "core/components_ng/animation/animation_group_adapter.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/render/animation_utils.h"
+#include "core/interfaces/native/node/node_render_node_modifier.h"
+#include "core/interfaces/native/utility/error_message_macros.h"
 
 namespace OHOS::Ace::NG::ViewAnimate {
 namespace {
@@ -652,5 +655,102 @@ void DisposeCurve(ArkUICurveHandle curve)
     if (curvePtr) {
         curvePtr->DecRefCount();
     }
+}
+
+ArkUI_Int32 AddAnimationGroup(ArkUIContext* context, ArkUIAnimationGroupHandle group,
+    const ArkUIRenderNodeHandle* resolvedTargets, ArkUI_Uint32 targetCount, ArkUI_CharPtr key)
+{
+    CHECK_NULL_RETURN(context, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(group, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(key, ERROR_CODE_PARAM_INVALID);
+    auto instanceId = context->id;
+    std::string keyStr(key);
+    const auto* renderNodeModifier = NodeModifier::GetNDKRenderNodeModifier();
+    CHECK_NULL_RETURN(renderNodeModifier, ERROR_CODE_PARAM_INVALID);
+
+    std::vector<OHOS::Rosen::RSNode*> childRawRSNodes;
+    for (ArkUI_Uint32 i = 0; i < targetCount; i++) {
+        auto rsNodeHandle = renderNodeModifier->getRSNode(resolvedTargets[i]);
+        auto* rawRSNode = reinterpret_cast<OHOS::Rosen::RSNode*>(rsNodeHandle);
+        CHECK_NULL_RETURN(rawRSNode, ERROR_CODE_PARAM_INVALID);
+        childRawRSNodes.push_back(rawRSNode);
+    }
+    if (!ValidateRSNodeInstance(childRawRSNodes, instanceId)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto createFn = [childRawRSNodes = std::move(childRawRSNodes), group](
+        int32_t instanceId, const std::string& k, int64_t gen)
+        -> std::shared_ptr<AnimationUtils::InteractiveAnimation> {
+        return CreateAndStartGroupAnimation(group, childRawRSNodes, instanceId, k, gen);
+    };
+    return AnimationGroupAdapter::GetInstance().AddAnimationGroup(instanceId, keyStr, createFn);
+}
+
+ArkUI_Int32 RemoveAnimationGroup(ArkUIContext* context, ArkUI_CharPtr key)
+{
+    CHECK_NULL_RETURN(context, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(key, ERROR_CODE_PARAM_INVALID);
+    auto instanceId = context->id;
+    std::string keyStr(key);
+    return AnimationGroupAdapter::GetInstance().RemoveAnimationGroup(instanceId, keyStr);
+}
+
+ArkUI_Int32 PauseAnimationGroup(ArkUIContext* context, ArkUI_CharPtr key)
+{
+    CHECK_NULL_RETURN(context, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(key, ERROR_CODE_PARAM_INVALID);
+    auto instanceId = context->id;
+    std::string keyStr(key);
+    return AnimationGroupAdapter::GetInstance().PauseAnimationGroup(instanceId, keyStr);
+}
+
+ArkUI_Int32 ResumeAnimationGroup(ArkUIContext* context, ArkUI_CharPtr key)
+{
+    CHECK_NULL_RETURN(context, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(key, ERROR_CODE_PARAM_INVALID);
+    auto instanceId = context->id;
+    std::string keyStr(key);
+    return AnimationGroupAdapter::GetInstance().ResumeAnimationGroup(instanceId, keyStr);
+}
+
+ArkUI_Int32 FinishAnimationGroup(ArkUIContext* context, ArkUI_CharPtr key, ArkUI_Int32 mode)
+{
+    CHECK_NULL_RETURN(context, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(key, ERROR_CODE_PARAM_INVALID);
+    InteractiveAnimationFinishPosition position = InteractiveAnimationFinishPosition::TO_END;
+    switch (static_cast<InteractiveAnimationFinishPosition>(mode)) {
+        case InteractiveAnimationFinishPosition::TO_START:
+            position = InteractiveAnimationFinishPosition::TO_START;
+            break;
+        case InteractiveAnimationFinishPosition::TO_CURRENT:
+            position = InteractiveAnimationFinishPosition::TO_CURRENT;
+            break;
+        case InteractiveAnimationFinishPosition::TO_END:
+            position = InteractiveAnimationFinishPosition::TO_END;
+            break;
+        default:
+            return ERROR_CODE_PARAM_INVALID;
+    }
+    auto instanceId = context->id;
+    std::string keyStr(key);
+    return AnimationGroupAdapter::GetInstance().FinishAnimationGroup(instanceId, keyStr, position);
+}
+
+ArkUI_Int32 GetAnimationGroupState(ArkUIContext* context, ArkUI_CharPtr key, ArkUI_Int32* state)
+{
+    CHECK_NULL_RETURN(context, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(key, ERROR_CODE_PARAM_INVALID);
+    auto instanceId = context->id;
+    std::string keyStr(key);
+    return AnimationGroupAdapter::GetInstance().GetAnimationGroupState(instanceId, keyStr, state);
+}
+
+ArkUI_Int32 HasAnimationGroup(ArkUIContext* context, ArkUI_CharPtr key, bool* exists)
+{
+    CHECK_NULL_RETURN(context, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(key, ERROR_CODE_PARAM_INVALID);
+    auto instanceId = context->id;
+    std::string keyStr(key);
+    return AnimationGroupAdapter::GetInstance().HasAnimationGroup(instanceId, keyStr, exists);
 }
 } // namespace OHOS::Ace::NG::ViewAnimate
