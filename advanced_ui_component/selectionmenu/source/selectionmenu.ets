@@ -281,7 +281,7 @@ struct SelectionMenuComponent {
   }
 
   popDataFromPasteboard(richEditorSelection: RichEditorSelection) {
-    if (!richEditorSelection) {
+    if (!richEditorSelection || !richEditorSelection.selection) {
       return
     }
     let start = richEditorSelection.selection[0]

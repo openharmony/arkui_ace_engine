@@ -79,7 +79,7 @@ export class ArkTextAreaNode extends ArkBaseNode  implements TextAreaAttribute  
         this.markDirty();
         return this;
     }
-    fontWeight(value: int32 | FontWeight | string | undefined): this {
+    fontWeight(value: int32 | FontWeight | ResourceStr | undefined): this {
         this.getPeer().setFontWeightAttribute(value);
         this.markDirty();
         return this;

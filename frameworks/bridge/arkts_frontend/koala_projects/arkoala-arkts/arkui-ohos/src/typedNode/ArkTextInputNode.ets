@@ -124,7 +124,7 @@ export class ArkTextInputNode extends ArkBaseNode  implements TextInputAttribute
         this.markDirty();
         return this;
     }
-    fontWeight(value: int32 | FontWeight | string | undefined): this {
+    fontWeight(value: int32 | FontWeight | ResourceStr | undefined): this {
         this.getPeer().setFontWeightAttribute(value);
         this.markDirty();
         return this;
