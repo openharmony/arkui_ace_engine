@@ -292,11 +292,13 @@ SizeF TabsLayoutAlgorithm::MeasureSwiperInSideBarMode(
     return swiperWrapper->GetGeometryNode()->GetMarginFrameSize();
 }
 
-void TabsLayoutAlgorithm::MeasureInSideBarMode(
-    LayoutWrapper* layoutWrapper, const RefPtr<TabsLayoutProperty>& layoutProperty, const SizeF& idealSize)
+void TabsLayoutAlgorithm::MeasureInSideBarMode(LayoutWrapper* layoutWrapper,
+    const RefPtr<TabsLayoutProperty>& layoutProperty, const SizeF& idealSize, bool needMeasureEnterComponents)
 {
     CHECK_NULL_VOID(layoutWrapper);
     CHECK_NULL_VOID(layoutProperty);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(layoutWrapper->GetHostNode());
+    CHECK_NULL_VOID(tabsNode);
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
 
@@ -314,10 +316,49 @@ void TabsLayoutAlgorithm::MeasureInSideBarMode(
     } else if (swiperWrapper && swiperWrapper->GetGeometryNode()) {
         swiperWrapper->GetGeometryNode()->SetFrameSize(SizeF());
     }
-    auto effectWrapper = layoutWrapper->GetChildByIndex(itemIndex_.effectIndex);
-    if (effectWrapper) {
-        MeasureEffectNode(layoutProperty, effectWrapper, swiperSize);
+    if (tabsNode->HasEffectNode()) {
+        auto effectWrapper = layoutWrapper->GetChildByIndex(itemIndex_.effectIndex);
+        if (effectWrapper) {
+            MeasureEffectNode(layoutProperty, effectWrapper, needMeasureEnterComponents ? idealSize : swiperSize);
+        }
     }
+    if (!needMeasureEnterComponents) {
+        return;
+    }
+    // Animation start layout (fromMode=SIDEBAR → toMode=BOTTOM): additionally measure the
+    // entering bottom-tabbar components so they have geometry for the enter animation.
+    // Per spec the tabbar (and effectNode/bgMaskNode) width reference is the whole tabs
+    // container width, same as a normal bottom-mode layout pass.
+    // Re-entrant layout during animation (now in toMode=SIDEBAR): also measure the exiting
+    // bottom-tabbar components so they keep proper geometry while animating out.
+    auto enterConstraint = layoutProperty->CreateChildConstraint();
+    enterConstraint.parentIdealSize = OptionalSizeF(idealSize);
+    SizeF enterTabBarSize = MeasureTabBar(layoutWrapper, enterConstraint);
+    auto enterDividerWrapper = layoutWrapper->GetOrCreateChildByIndex(itemIndex_.dividerIndex);
+    if (enterDividerWrapper) {
+        MeasureDivider(layoutProperty, enterDividerWrapper, idealSize);
+    }
+    // effectNode and backgroundMask node must also be measured with the same size
+    // reference as the tabbar (the whole tabs container), so they have geometry for
+    // the enter animation.
+    MeasureBackgroundMask(layoutWrapper, idealSize, enterTabBarSize);
+}
+
+bool TabsLayoutAlgorithm::CheckIfNeedModeChangeAnimation(const RefPtr<TabsLayoutProperty>& layoutProperty,
+    const RefPtr<TabsPattern>& tabsPattern, bool displayModeChanged, bool firstLayout)
+{
+    // Determine whether to animate the display mode switch.
+    // Skip animation on first layout and when an external animation closure is active
+    // (e.g., dynamic component rotation, split-window transitions).
+    // Non-floating tabbar only animates when it's a bottom tabbar (horizontal + barPosition=END);
+    // other positions (vertical, or barPosition=START) get a one-frame switch via the non-animate path.
+    CHECK_NULL_RETURN(tabsPattern, false);
+    CHECK_NULL_RETURN(layoutProperty, false);
+    bool isHorizontal = layoutProperty->GetAxis().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL;
+    bool isBarPositionEnd = layoutProperty->GetTabBarPosition().value_or(BarPosition::START) == BarPosition::END;
+    bool isAnimatableTabBar = tabsPattern->IsFloatingBar() || (isHorizontal && isBarPositionEnd);
+    return displayModeChanged && !firstLayout
+        && !AnimationUtils::IsImplicitAnimationOpen() && isAnimatableTabBar;
 }
 
 void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -357,23 +398,66 @@ void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (firstLayout) {
         displayModeChanged = tabsPattern->GetSideBarNode() != nullptr;
     }
-    bool preIsDisableSwipe = tabsPattern->GetIsRealDisableSwipe();
-    tabsPattern->SetCurrentBarDisplayMode(curDisplayMode);
-    bool curIsDisableSwipe = tabsPattern->GetIsRealDisableSwipe();
+    bool shouldAnimate = CheckIfNeedModeChangeAnimation(layoutProperty, tabsPattern, displayModeChanged, firstLayout);
+    // During the animation closure's FlushUITasks re-entrant layout, the pattern flag is set,
+    // so we take the non-animate path but must NOT touch visibility (the animation owns it).
+    bool isReentrantDuringAnim = tabsPattern->IsOnDisplayModeSwitchAnimation();
+    // The animation-start pass additionally measures+layouts the entering component. The
+    // re-entrant layout inside the animation closure is NOT the start pass.
+    measuringForAnimStart_ = shouldAnimate;
 
-    if (displayModeChanged) {
-        UpdateSideBarAndSideBarDividerVisibility(layoutWrapper, curDisplayMode == TabBarDisplayMode::SIDEBAR);
-        UpdateTabBarAndDividerVisibility(layoutWrapper, curDisplayMode == TabBarDisplayMode::BOTTOMTABBAR);
-        UpdateBgMaskNodeVisibility(layoutWrapper, curDisplayMode == TabBarDisplayMode::BOTTOMTABBAR);
+    bool preIsDisableSwipe = tabsPattern->GetIsRealDisableSwipe();
+    TabBarDisplayMode effectiveMode = curDisplayMode;
+
+    if (shouldAnimate) {
+        // Animate path: keep layout in the old mode for this pass so the "from" state is
+        // captured. The animation closure (AddAfterLayoutTask) switches the mode and calls
+        // FlushUITasks, causing a re-entrant layout in the new mode whose offset diffs are
+        // captured by the implicit animation.
+        effectiveMode = preDisplayMode.value();
+        auto fromMode = preDisplayMode.value();
+        auto toMode = curDisplayMode;
+        // Ensure ALL components (both from-mode and to-mode) are visible so the entering
+        // element can render during the animation. The entering components were previously
+        // GONE because they belonged to the non-active mode.
+        UpdateSideBarAndSideBarDividerVisibility(layoutWrapper, true);
+        UpdateTabBarAndDividerVisibility(layoutWrapper, true);
+        UpdateBgMaskNodeVisibility(layoutWrapper, true);
         auto context = tabsNode->GetContext();
         CHECK_NULL_VOID(context);
-        context->AddAfterLayoutTask([weakTabsPattern = WeakPtr<TabsPattern>(tabsPattern), curDisplayMode]() {
-            auto tabsPattern = weakTabsPattern.Upgrade();
-            CHECK_NULL_VOID(tabsPattern);
-            tabsPattern->FireBarDisplayModeChangeEvent(curDisplayMode);
-        });
+        // Mark that the next layout pass should additionally measure/layout the entering
+        // component (the one belonging to toMode) so it has geometry for the animation.
+        // The pattern resets this flag after the animation-start layout pass.
+        context->AddAfterLayoutTask(
+            [weakTabsPattern = WeakPtr<TabsPattern>(tabsPattern), fromMode, toMode]() {
+                auto tabsPattern = weakTabsPattern.Upgrade();
+                CHECK_NULL_VOID(tabsPattern);
+                TAG_LOGI(AceLogTag::ACE_TABS, "Start Tabs displayMode change animation"
+                    ", fromMode=%{public}d, toMode=%{public}d",
+                    static_cast<int32_t>(fromMode), static_cast<int32_t>(toMode));
+                tabsPattern->StartDisplayModeSwitchAnimation(fromMode, toMode);
+            });
+    } else {
+        // Non-animate path: first layout, external animation active, or re-entrant layout
+        // (isOnDisplayModeSwitchAnimation_ == true during FlushUITasks inside animation closure).
+        if (!isReentrantDuringAnim) {
+            tabsPattern->SetCurrentBarDisplayMode(curDisplayMode);
+        }
+        if (displayModeChanged && !isReentrantDuringAnim) {
+            UpdateSideBarAndSideBarDividerVisibility(layoutWrapper, curDisplayMode == TabBarDisplayMode::SIDEBAR);
+            UpdateTabBarAndDividerVisibility(layoutWrapper, curDisplayMode == TabBarDisplayMode::BOTTOMTABBAR);
+            UpdateBgMaskNodeVisibility(layoutWrapper, curDisplayMode == TabBarDisplayMode::BOTTOMTABBAR);
+            auto context = tabsNode->GetContext();
+            CHECK_NULL_VOID(context);
+            context->AddAfterLayoutTask([weakTabsPattern = WeakPtr<TabsPattern>(tabsPattern), curDisplayMode]() {
+                auto tabsPattern = weakTabsPattern.Upgrade();
+                CHECK_NULL_VOID(tabsPattern);
+                tabsPattern->FireBarDisplayModeChangeEvent(curDisplayMode);
+            });
+        }
     }
 
+    bool curIsDisableSwipe = tabsPattern->GetIsRealDisableSwipe();
     if (preIsDisableSwipe != curIsDisableSwipe) {
         auto context = tabsNode->GetContext();
         CHECK_NULL_VOID(context);
@@ -385,8 +469,8 @@ void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             tabsNode->MarkDirtyNode();
         });
     }
-    if (curDisplayMode == TabBarDisplayMode::SIDEBAR) {
-        MeasureInSideBarMode(layoutWrapper, layoutProperty, idealSize);
+    if (effectiveMode == TabBarDisplayMode::SIDEBAR) {
+        MeasureInSideBarMode(layoutWrapper, layoutProperty, idealSize, shouldAnimate || isReentrantDuringAnim);
         return;
     }
 
@@ -398,9 +482,13 @@ void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     SizeF tabBarSize = MeasureTabBar(layoutWrapper, childLayoutConstraint);
 
     // Measure effect node.
-    auto effectWrapper = layoutWrapper->GetOrCreateChildByIndex(itemIndex_.effectIndex);
-    if (effectWrapper) {
-        MeasureEffectNode(layoutProperty, effectWrapper, idealSize);
+    // Only measure effectNode when it actually exists — otherwise
+    // GetOrCreateChildByIndex(effectIndex) may return a different child.
+    if (tabsNode->HasEffectNode()) {
+        auto effectWrapper = layoutWrapper->GetOrCreateChildByIndex(itemIndex_.effectIndex);
+        if (effectWrapper) {
+            MeasureEffectNode(layoutProperty, effectWrapper, idealSize);
+        }
     }
 
     // Measure backgroundMask node.
@@ -450,6 +538,15 @@ void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             geometryNode->SetFrameHeight(dividerStrokeWidth + swiperSize.Height() + paddingV);
         }
     }
+    // Animation start layout (fromMode=BOTTOM → toMode=SIDEBAR): additionally measure the
+    // entering sidebar + sidebarDivider with their target-mode sizes so they have geometry
+    // for the enter animation.
+    // Re-entrant layout during animation (now in toMode=BOTTOM): also measure the exiting
+    // sidebar + sidebarDivider so they keep proper geometry while animating out.
+    if (shouldAnimate || isReentrantDuringAnim) {
+        MeasureSideBar(layoutWrapper, layoutProperty, idealSize);
+        MeasureSideBarDivider(layoutWrapper, layoutProperty, idealSize);
+    }
 }
 
 void TabsLayoutAlgorithm::LayoutInSideBarMode(LayoutWrapper* layoutWrapper)
@@ -475,7 +572,7 @@ void TabsLayoutAlgorithm::LayoutInSideBarMode(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(geometryNode);
     auto frameSize = geometryNode->GetFrameSize();
     auto swiperWrapper = layoutWrapper->GetOrCreateChildByIndex(itemIndex_.swiperIndex);
-    auto effectWrapper = layoutWrapper->GetChildByIndex(itemIndex_.effectIndex);
+    auto effectWrapper = tabsNode->HasEffectNode() ? layoutWrapper->GetChildByIndex(itemIndex_.effectIndex) : nullptr;
     if (!swiperWrapper || !sideBarDividerWrapper || !sideBarWrapper) {
         return;
     }
@@ -502,10 +599,65 @@ void TabsLayoutAlgorithm::LayoutInSideBarMode(LayoutWrapper* layoutWrapper)
         sideBarGeo->SetMarginFrameOffset(offsetList[SIDEBAR_INDEX]);
         sideBarWrapper->Layout();
     }
-    if (effectWrapper) {
+    if (measuringForAnimStart_ || tabsPattern->IsOnDisplayModeSwitchAnimation()) {
+        // Animation-start or re-entrant layout: also layout the bottom-mode components
+        // (tabbar + divider + effectNode + bgMaskNode) at their correct bottom-mode positions.
+        LayoutBottomComponentsForAnimation(layoutWrapper, layoutProperty, tabsNode, geometryNode);
+        LayoutBackgroundMask(layoutWrapper);
+        measuringForAnimStart_ = false;
+    } else if (effectWrapper) {
         auto geometryNode = effectWrapper->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
         geometryNode->SetMarginFrameOffset(offsetList[EFFECT_NODE_INDEX]);
+        effectWrapper->Layout();
+    }
+}
+
+void TabsLayoutAlgorithm::LayoutBottomComponentsForAnimation(LayoutWrapper* layoutWrapper,
+    const RefPtr<TabsLayoutProperty>& layoutProperty, const RefPtr<TabsNode>& tabsNode,
+    const RefPtr<GeometryNode>& geometryNode)
+{
+    auto tabBarWrapper = layoutWrapper->GetChildByIndex(itemIndex_.tabBarIndex);
+    auto tabBarDividerWrapper = layoutWrapper->GetOrCreateChildByIndex(itemIndex_.dividerIndex);
+    auto effectWrapper = tabsNode->HasEffectNode()
+        ? layoutWrapper->GetChildByIndex(itemIndex_.effectIndex) : nullptr;
+    CHECK_NULL_VOID(tabBarWrapper);
+    CHECK_NULL_VOID(tabBarDividerWrapper);
+
+    auto frameSizeForBottom = geometryNode->GetFrameSize();
+    std::vector<OffsetF> bottomOffsets = { OffsetF(), OffsetF(), OffsetF(), OffsetF() };
+    if (frameSizeForBottom.IsPositive()) {
+        MinusPaddingToSize(layoutProperty->CreatePaddingAndBorder(), frameSizeForBottom);
+        bottomOffsets = LayoutOffsetList(layoutWrapper, tabBarWrapper, effectWrapper, frameSizeForBottom);
+    }
+    if (layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL) {
+        auto tabsWidth = geometryNode->GetFrameSize().Width();
+        auto tabBarWidth = tabBarWrapper->GetGeometryNode()->GetMarginFrameSize().Width();
+        auto& tabBarOffset = bottomOffsets[itemIndex_.tabBarIndex];
+        tabBarOffset = OffsetF((tabsWidth - tabBarOffset.GetX() - tabBarWidth), tabBarOffset.GetY());
+        auto dividerWidth = tabBarDividerWrapper->GetGeometryNode()->GetFrameSize().Width();
+        auto& dividerOffset = bottomOffsets[itemIndex_.dividerIndex];
+        dividerOffset = OffsetF((tabsWidth - dividerOffset.GetX() - dividerWidth), dividerOffset.GetY());
+        if (effectWrapper) {
+            auto effectWidth = effectWrapper->GetGeometryNode()->GetMarginFrameSize().Width();
+            auto& effectOffset = bottomOffsets[itemIndex_.effectIndex];
+            effectOffset = OffsetF((tabsWidth - effectOffset.GetX() - effectWidth), effectOffset.GetY());
+        }
+    }
+    auto tabBarGeo = tabBarWrapper->GetGeometryNode();
+    if (tabBarGeo) {
+        tabBarGeo->SetMarginFrameOffset(bottomOffsets[itemIndex_.tabBarIndex]);
+        tabBarWrapper->Layout();
+    }
+    auto tabBarDividerGeo = tabBarDividerWrapper->GetGeometryNode();
+    if (tabBarDividerGeo) {
+        tabBarDividerGeo->SetMarginFrameOffset(bottomOffsets[itemIndex_.dividerIndex]);
+        tabBarDividerWrapper->Layout();
+    }
+    CHECK_NULL_VOID(effectWrapper);
+    auto effectNodeGeo = effectWrapper->GetGeometryNode();
+    if (effectNodeGeo) {
+        effectNodeGeo->SetMarginFrameOffset(bottomOffsets[itemIndex_.effectIndex]);
         effectWrapper->Layout();
     }
 }
@@ -531,7 +683,8 @@ void TabsLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutProperty);
     auto tabBarWrapper = layoutWrapper->GetChildByIndex(itemIndex_.tabBarIndex);
     auto dividerWrapper = layoutWrapper->GetOrCreateChildByIndex(itemIndex_.dividerIndex);
-    auto effectWrapper = layoutWrapper->GetChildByIndex(itemIndex_.effectIndex);
+    auto effectWrapper = tabsNode->HasEffectNode()
+        ? layoutWrapper->GetChildByIndex(itemIndex_.effectIndex) : nullptr;
     auto swiperWrapper = layoutWrapper->GetOrCreateChildByIndex(itemIndex_.swiperIndex);
     if (!tabBarWrapper || !dividerWrapper || !swiperWrapper) {
         return;
@@ -574,6 +727,49 @@ void TabsLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     tabBarWrapper->Layout();
 
     LayoutBackgroundMask(layoutWrapper);
+
+    if (measuringForAnimStart_ || tabsPattern->IsOnDisplayModeSwitchAnimation()) {
+        LayoutSidebarForAnimation(layoutWrapper, layoutProperty, geometryNode);
+        measuringForAnimStart_ = false;
+    }
+}
+
+void TabsLayoutAlgorithm::LayoutSidebarForAnimation(LayoutWrapper* layoutWrapper,
+    const RefPtr<TabsLayoutProperty>& layoutProperty,
+    const RefPtr<GeometryNode>& geometryNode)
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(layoutWrapper->GetHostNode());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabsPattern);
+    auto sideBar = tabsPattern->GetSideBarNode();
+    auto sideBarDivider = tabsPattern->GetSideBarDividerNode();
+    CHECK_NULL_VOID(sideBar);
+    CHECK_NULL_VOID(sideBarDivider);
+    auto sideBarIndex = tabsNode->GetChildIndexById(sideBar->GetId());
+    auto sideBarWrapper = layoutWrapper->GetOrCreateChildByIndex(sideBarIndex);
+    auto sideBarDividerIndex = tabsNode->GetChildIndexById(sideBarDivider->GetId());
+    auto sideBarDividerWrapper = layoutWrapper->GetOrCreateChildByIndex(sideBarDividerIndex);
+    CHECK_NULL_VOID(sideBarWrapper);
+    CHECK_NULL_VOID(sideBarDividerWrapper);
+
+    auto frameSizeForSideBar = geometryNode->GetFrameSize();
+    if (!frameSizeForSideBar.IsPositive()) {
+        return;
+    }
+    MinusPaddingToSize(layoutProperty->CreatePaddingAndBorder(), frameSizeForSideBar);
+    auto effectWrapper = tabsNode->HasEffectNode() ? layoutWrapper->GetChildByIndex(itemIndex_.effectIndex) : nullptr;
+    auto offsets = LayoutOffsetListInSideBarMode(layoutWrapper, sideBarWrapper, effectWrapper, frameSizeForSideBar);
+    auto sideBarGeo = sideBarWrapper->GetGeometryNode();
+    if (sideBarGeo) {
+        sideBarGeo->SetMarginFrameOffset(offsets[SIDEBAR_INDEX]);
+        sideBarWrapper->Layout();
+    }
+    auto sideBarDividerGeo = sideBarDividerWrapper->GetGeometryNode();
+    if (sideBarDividerGeo) {
+        sideBarDividerGeo->SetMarginFrameOffset(offsets[SIDEBAR_DIVIDER_INDEX]);
+        sideBarDividerWrapper->Layout();
+    }
 }
 
 void TabsLayoutAlgorithm::UpdateBarMargin(LayoutWrapper* layoutWrapper, OffsetF& barOffset) const
@@ -841,7 +1037,6 @@ float TabsLayoutAlgorithm::MeasureDivider(const RefPtr<TabsLayoutProperty>& layo
     const RefPtr<LayoutWrapper>& dividerWrapper, const SizeF& idealSize)
 {
     auto constraint = layoutProperty->GetLayoutConstraint();
-    
     auto dividerIdealSize = CreateIdealSize(
         constraint.value(), Axis::HORIZONTAL, layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true);
     TabsItemDivider defaultDivider;

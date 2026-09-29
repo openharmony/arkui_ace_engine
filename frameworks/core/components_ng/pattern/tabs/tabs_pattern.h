@@ -181,6 +181,10 @@ public:
 
     void FireBarDisplayModeChangeEvent(TabBarDisplayMode mode);
 
+    // Called by TabsLayoutAlgorithm's AfterLayoutTask to kick off the display-mode switch
+    // animation after the fromMode layout pass (which also measured the entering element).
+    void StartDisplayModeSwitchAnimation(TabBarDisplayMode fromMode, TabBarDisplayMode toMode);
+
     void HandleChildrenUpdated(const RefPtr<FrameNode>& swiperNode, const RefPtr<FrameNode>& tabBarNode);
 
     void UpdateSelectedState(const RefPtr<FrameNode>& swiperNode, const RefPtr<TabBarPattern>& tabBarPattern,
@@ -322,6 +326,11 @@ public:
     SideBarDragRange CalcSideBarDragRange(float tabsWidth);
     void ClampSideBarWidthToRange();
 
+    bool IsOnDisplayModeSwitchAnimation() const
+    {
+        return isOnDisplayModeSwitchAnimation_;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void OnAfterModifyDone() override;
@@ -413,6 +422,33 @@ private:
     float GetEffectiveSidebarDividerWidthPx() const;
     std::optional<Color> GetEffectiveSidebarBackgroundColor() const;
 
+    void OnDisplayModeSwitchAnimationsFinished();
+    void SetElementVisibilityForMode(TabBarDisplayMode targetMode);
+    // Compute the horizontal translate offset that places sidebar+divider just outside the
+    // tabs container (used as the sidebar enter/exit visual start position).
+    float CalcSidebarOutsideTranslateX() const;
+    // Apply initial transform state (translate for sidebar/divider, scale/opacity for tabbar)
+    // to entering elements without animation. Used on first-time animation start so that the
+    // entering element renders outside the container before the animation closure runs.
+    void ApplyEnteringElementInitialTransform(TabBarDisplayMode toMode);
+    void ApplyEnteringSidebarInitialTransform(float outsideX);
+    void ApplyEnteringBottomTabBarInitialTransform(const RefPtr<FrameNode>& tabBar,
+        const RefPtr<FrameNode>& tabBarDivider);
+    // Reset all transform/opacity previously applied by the mode-switch animation.
+    void ResetDisplayModeSwitchTransforms();
+    void StartNonFloatingTabBarAnimation(
+        TabBarDisplayMode toMode, bool toSidebar, float outsideX, float tabHeight,
+        const std::function<void()>& finishCb);
+    void ApplyNonFloatingTabBarAnimClosure(
+        TabBarDisplayMode toMode, bool toSidebar, float outsideX, float tabHeight);
+    void StartFloatingTabBarAnimation(
+        TabBarDisplayMode toMode, bool toSidebar, float outsideX, float baseScale,
+        const std::function<void()>& finishCb);
+    void StartFloatingSidebarTranslateAnim(TabBarDisplayMode toMode,
+        bool toSidebar, float outsideX, const std::function<void()>& finishCb);
+    void StartFloatingTabBarExitAnim(float baseScale, const std::function<void()>& finishCb);
+    void StartFloatingTabBarEnterAnim(float baseScale, const std::function<void()>& finishCb);
+
     bool isCustomAnimation_ = false;
     bool isDisableSwipe_ = false;
     bool isInit_ = true;
@@ -467,6 +503,17 @@ private:
     float preSideBarWidthPx_ = 0.0f;
     float minSideBarWidth_ = -1.0f;
     float maxSideBarWidth_ = -1.0f;
+
+    // Display mode switch animation state.
+    // sidebar translate + tabbar scale/opacity run as independent animations; a counter
+    // tracks in-flight animations so the final state is applied only after all of them
+    // finish. Interrupting switches do not stop in-flight animations — they start new ones
+    // and let old ones finish naturally; the last finish callback sets the steady state.
+    bool isOnDisplayModeSwitchAnimation_ = false;
+    int32_t displayModeAnimCount_ = 0;
+    std::optional<TabBarDisplayMode> displayModeAnimTarget_;
+    std::shared_ptr<AnimationUtils::Animation> sidebarTranslateAnim_;
+    std::shared_ptr<AnimationUtils::Animation> tabBarEnterExitAnim_;
 };
 
 } // namespace OHOS::Ace::NG

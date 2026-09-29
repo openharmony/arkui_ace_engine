@@ -139,6 +139,13 @@ void TabBarPattern::StartShowTabBar(int32_t delay)
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+    if (tabsNode) {
+        auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+        if (tabsPattern && tabsPattern->IsOnDisplayModeSwitchAnimation()) {
+            return;
+        }
+    }
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
@@ -162,7 +169,6 @@ void TabBarPattern::StartShowTabBar(int32_t delay)
             StartHideTabBar();
         }
     }
-
     if (delay == 0) {
         StartShowTabBarImmediately();
     }
@@ -324,6 +330,10 @@ void TabBarPattern::UpdateTabBarHiddenOffset(float offset)
     CHECK_NULL_VOID(renderContext);
     auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
     CHECK_NULL_VOID(tabsNode);
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    if (tabsPattern && tabsPattern->IsOnDisplayModeSwitchAnimation()) {
+        return;
+    }
     auto tabsLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(tabsNode->GetLayoutProperty());
     CHECK_NULL_VOID(tabsLayoutProperty);
 
