@@ -22,6 +22,11 @@ class LazyArkCommonShapeComponent extends ArkComponent {
     this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
   }
 
+  initialize(value: any): this {
+    this.lazyComponent.initialize(value);
+    return this;
+  }
+
   viewPort(value: ViewportRect): this {
     throw new Error('Method not implemented.');
   }

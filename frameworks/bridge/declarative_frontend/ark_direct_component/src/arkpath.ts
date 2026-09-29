@@ -33,10 +33,8 @@ function loadComponent(): ComponentObj | undefined {
         return 0;
       }
       resetPathOptions() {
-        modifierWithKey(this._modifiersWithKeys, CommonShapeWidthModifier.identity,
-          CommonShapeWidthModifier, undefined);
-        modifierWithKey(this._modifiersWithKeys, CommonShapeHeightModifier.identity,
-          CommonShapeHeightModifier, undefined);
+        this.width(undefined);
+        this.height(undefined);
         modifierWithKey(this._modifiersWithKeys, CommandsModifier.identity,
           CommandsModifier, undefined);
       }
@@ -46,18 +44,14 @@ function loadComponent(): ComponentObj | undefined {
           return this;
         }
         if (value[0].width !== undefined && value[0].width !== null) {
-          modifierWithKey(this._modifiersWithKeys, CommonShapeWidthModifier.identity,
-            CommonShapeWidthModifier, value[0].width);
+          this.width(value[0].width);
         } else {
-          modifierWithKey(this._modifiersWithKeys, CommonShapeWidthModifier.identity,
-            CommonShapeWidthModifier, undefined);
+          this.width(undefined);
         }
         if (value[0].height !== undefined && value[0].height !== null) {
-          modifierWithKey(this._modifiersWithKeys, CommonShapeHeightModifier.identity,
-            CommonShapeHeightModifier, value[0].height);
+          this.height(value[0].height);
         } else {
-          modifierWithKey(this._modifiersWithKeys, CommonShapeHeightModifier.identity,
-            CommonShapeHeightModifier, undefined);
+          this.height(undefined);
         }
         if (value[0].commands !== undefined && value[0].commands !== null) {
           modifierWithKey(this._modifiersWithKeys, CommandsModifier.identity,

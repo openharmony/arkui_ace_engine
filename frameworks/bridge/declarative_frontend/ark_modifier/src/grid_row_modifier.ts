@@ -24,6 +24,11 @@ class LazyArkGridRowComponent extends ArkComponent {
     this.lazyComponent = LazyArkGridRowComponent.module.createComponent(nativePtr, classType);
   }
 
+  initialize(value: any): this {
+    this.lazyComponent.initialize(value);
+    return this;
+  }
+
   setMap(): void {
     this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
   }

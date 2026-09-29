@@ -22,6 +22,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/shape/bridge/arkts_native_common_shape_bridge.h"
 #include "core/components_ng/pattern/shape/shape_model_ng.h"
 
 namespace OHOS::Ace::NG {
@@ -42,6 +43,8 @@ void ShapeBridge::RegisterShapeAttributes(Local<panda::ObjectRef> object, EcmaVM
         "resetShapeMesh",
         "setShapeInitialize",
         "resetShapeInitialize",
+        "setShapeWidth",
+        "setShapeHeight",
     };
     Local<JSValueRef> funcValues[] = {
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ShapeBridge::CreateShape),
@@ -51,6 +54,8 @@ void ShapeBridge::RegisterShapeAttributes(Local<panda::ObjectRef> object, EcmaVM
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ShapeBridge::ResetMesh),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ShapeBridge::SetShapeInitialize),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ShapeBridge::ResetShapeInitialize),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ShapeBridge::SetShapeWidth),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ShapeBridge::SetShapeHeight),
     };
     auto shape = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(functionNames), functionNames, funcValues);
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "shape"), shape);
@@ -63,7 +68,7 @@ ArkUINativeModuleValue ShapeBridge::CreateShape(ArkUIRuntimeCallInfo* runtimeCal
     RefPtr<PixelMap> pixMap = nullptr;
 #if !defined(PREVIEW) && defined(PIXEL_MAP_SUPPORTED)
     Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    if (valueArg->IsObject(vm)) {
+    if (runtimeCallInfo->GetArgsNumber() == NUM_1 && valueArg->IsObject(vm)) {
         pixMap = ArkTSUtils::CreatePixelMapFromNapiValue(vm, valueArg);
     }
 #endif
@@ -73,6 +78,64 @@ ArkUINativeModuleValue ShapeBridge::CreateShape(ArkUIRuntimeCallInfo* runtimeCal
     auto* frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ShapeModelNG::InitBox(frameNode, pixMap);
     return panda::NativePointerRef::New(vm, frameNode);
+}
+
+ArkUINativeModuleValue ShapeBridge::SetShapeWidth(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, nodeArg, vm), true, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> widthArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CalcDimension width;
+    RefPtr<ResourceObject> resObj;
+    bool isJsView = ArkTSUtils::IsJsView(vm, nodeArg);
+    if (isJsView) {
+        GetArkUINodeModifiers()->getShapeModifier()->setShapeWidth(
+            nativeNode, width.Value(), static_cast<int32_t>(width.Unit()));
+        return panda::JSValueRef::Undefined(vm);
+    } else {
+        if (!ArkTSUtils::ParseJsDimensionNG(vm, widthArg, width, DimensionUnit::VP, resObj)) {
+            GetArkUINodeModifiers()->getCommonShapeModifier()->resetShapeWidth(nativeNode);
+            return panda::JSValueRef::Undefined(vm);
+        }
+    }
+    if (LessNotEqual(width.Value(), 0.0)) {
+        width.SetValue(0.0);
+    }
+    GetArkUINodeModifiers()->getCommonShapeModifier()->setShapeWidth(
+        nativeNode, width.Value(), static_cast<int32_t>(width.Unit()), AceType::RawPtr(resObj));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ShapeBridge::SetShapeHeight(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, nodeArg, vm), true, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> heightArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CalcDimension height;
+    RefPtr<ResourceObject> resObj;
+    bool isJsView = ArkTSUtils::IsJsView(vm, nodeArg);
+    if (isJsView) {
+        GetArkUINodeModifiers()->getShapeModifier()->setShapeHeight(
+            nativeNode, height.Value(), static_cast<int32_t>(height.Unit()));
+        return panda::JSValueRef::Undefined(vm);
+    } else {
+        if (!ArkTSUtils::ParseJsDimensionNG(vm, heightArg, height, DimensionUnit::VP, resObj)) {
+            GetArkUINodeModifiers()->getCommonShapeModifier()->resetShapeHeight(nativeNode);
+            return panda::JSValueRef::Undefined(vm);
+        }
+    }
+    if (LessNotEqual(height.Value(), 0.0)) {
+        height.SetValue(0.0);
+    }
+    GetArkUINodeModifiers()->getCommonShapeModifier()->setShapeHeight(
+        nativeNode, height.Value(), static_cast<int32_t>(height.Unit()), AceType::RawPtr(resObj));
+    return panda::JSValueRef::Undefined(vm);
 }
 
 ArkUINativeModuleValue ShapeBridge::SetViewPort(ArkUIRuntimeCallInfo* runtimeCallInfo)

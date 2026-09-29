@@ -110,49 +110,62 @@ void ParseRectWidthAndHeight(EcmaVM* vm, ArkUINodeHandle nativeNode, const Local
     auto widthVal = paramObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "width"));
     CalcDimension width;
     RefPtr<ResourceObject> widthResObj;
-    CommonShapeBridge::ParseJsValue(vm, widthVal, width, widthResObj, true);
-    if (LessNotEqual(width.Value(), 0.0)) {
-        width.SetValue(0.0);
+    if (CommonShapeBridge::ParseJsValue(vm, widthVal, width, widthResObj, true)) {
+        if (LessNotEqual(width.Value(), 0.0)) {
+            width.SetValue(0.0);
+        }
+        GetArkUINodeModifiers()->getCommonShapeModifier()->setShapeWidth(
+            nativeNode, width.Value(), static_cast<int32_t>(width.Unit()), AceType::RawPtr(widthResObj));
     }
-    GetArkUINodeModifiers()->getCommonShapeModifier()->setShapeWidth(
-        nativeNode, width.Value(), static_cast<int32_t>(width.Unit()), AceType::RawPtr(widthResObj));
 
     auto heightVal = paramObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "height"));
     CalcDimension height;
     RefPtr<ResourceObject> heightResObj;
-    CommonShapeBridge::ParseJsValue(vm, heightVal, height, heightResObj, false);
-    if (LessNotEqual(height.Value(), 0.0)) {
-        height.SetValue(0.0);
+    if (CommonShapeBridge::ParseJsValue(vm, heightVal, height, heightResObj, false)) {
+        if (LessNotEqual(height.Value(), 0.0)) {
+            height.SetValue(0.0);
+        }
+        GetArkUINodeModifiers()->getCommonShapeModifier()->setShapeHeight(
+            nativeNode, height.Value(), static_cast<int32_t>(height.Unit()), AceType::RawPtr(heightResObj));
     }
-    GetArkUINodeModifiers()->getCommonShapeModifier()->setShapeHeight(
-        nativeNode, height.Value(), static_cast<int32_t>(height.Unit()), AceType::RawPtr(heightResObj));
 }
 
 void ParseRectRadiusOptions(EcmaVM* vm, ArkUINodeHandle nativeNode, const Local<ObjectRef>& paramObj)
 {
-    auto radiusWidthArg = paramObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "radiusWidth"));
-    if (!radiusWidthArg->IsUndefined() && !radiusWidthArg->IsNull()) {
-        CalcDimension radiusWidth(0.0f);
-        RefPtr<ResourceObject> radiusWidthResObj;
-        bool isSupportPercent = true;
-        if (!ArkTSUtils::ParseJsDimensionVpNG(vm, radiusWidthArg, radiusWidth, radiusWidthResObj, isSupportPercent)) {
-            radiusWidth.SetValue(0.0f);
+    auto radiusWidthKey = panda::StringRef::NewFromUtf8(vm, "radiusWidth");
+    if (paramObj->Has(vm, radiusWidthKey)) {
+        auto radiusWidthArg = paramObj->Get(vm, radiusWidthKey);
+        if (!radiusWidthArg->IsUndefined() && !radiusWidthArg->IsNull()) {
+            CalcDimension radiusWidth(0.0f);
+            RefPtr<ResourceObject> radiusWidthResObj;
+            bool isSupportPercent = true;
+            if (!ArkTSUtils::ParseJsDimensionVpNG(
+                    vm, radiusWidthArg, radiusWidth, radiusWidthResObj, isSupportPercent)) {
+                radiusWidth.SetValue(0.0f);
+            }
+            GetArkUINodeModifiers()->getRectModifier()->setRectRadiusWidth(nativeNode, radiusWidth.Value(),
+                static_cast<int32_t>(radiusWidth.Unit()), AceType::RawPtr(radiusWidthResObj));
+        } else {
+            GetArkUINodeModifiers()->getRectModifier()->resetRectRadiusWidth(nativeNode);
         }
-        GetArkUINodeModifiers()->getRectModifier()->setRectRadiusWidth(nativeNode, radiusWidth.Value(),
-            static_cast<int32_t>(radiusWidth.Unit()), AceType::RawPtr(radiusWidthResObj));
     }
 
-    auto radiusHeightArg = paramObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "radiusHeight"));
-    if (!radiusHeightArg->IsUndefined() && !radiusHeightArg->IsNull()) {
-        CalcDimension radiusHeight(0.0f);
-        RefPtr<ResourceObject> radiusHeightResObj;
-        bool isSupportPercent = true;
-        if (!ArkTSUtils::ParseJsDimensionVpNG(
-                vm, radiusHeightArg, radiusHeight, radiusHeightResObj, isSupportPercent)) {
-            radiusHeight.SetValue(0.0f);
+    auto radiusHeightKey = panda::StringRef::NewFromUtf8(vm, "radiusHeight");
+    if (paramObj->Has(vm, radiusHeightKey)) {
+        auto radiusHeightArg = paramObj->Get(vm, radiusHeightKey);
+        if (!radiusHeightArg->IsUndefined() && !radiusHeightArg->IsNull()) {
+            CalcDimension radiusHeight(0.0f);
+            RefPtr<ResourceObject> radiusHeightResObj;
+            bool isSupportPercent = true;
+            if (!ArkTSUtils::ParseJsDimensionVpNG(
+                    vm, radiusHeightArg, radiusHeight, radiusHeightResObj, isSupportPercent)) {
+                radiusHeight.SetValue(0.0f);
+            }
+            GetArkUINodeModifiers()->getRectModifier()->setRectRadiusHeight(nativeNode, radiusHeight.Value(),
+                static_cast<int32_t>(radiusHeight.Unit()), AceType::RawPtr(radiusHeightResObj));
+        } else {
+            GetArkUINodeModifiers()->getRectModifier()->resetRectRadiusHeight(nativeNode);
         }
-        GetArkUINodeModifiers()->getRectModifier()->setRectRadiusHeight(nativeNode, radiusHeight.Value(),
-            static_cast<int32_t>(radiusHeight.Unit()), AceType::RawPtr(radiusHeightResObj));
     }
 
     auto radiusArg = paramObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "radius"));
@@ -162,7 +175,7 @@ void ParseRectRadiusOptions(EcmaVM* vm, ArkUINodeHandle nativeNode, const Local<
     if (radiusArg->IsArray(vm)) {
         RadiusArrayResult result;
         SetRadiusWithArray(vm, radiusArg, result);
-        GetArkUINodeModifiers()->getRectModifier()->setRectRadiusWithArray(nativeNode, result.radiusValues.data(),
+        GetArkUINodeModifiers()->getRectModifier()->setCreateRectRadiusWithArray(nativeNode, result.radiusValues.data(),
             result.radiusUnits.data(), result.radiusValidPairs.data(), result.radiusValidPairs.size(),
             result.radiusXResObjArray.data(), result.radiusYResObjArray.data());
     } else if (radiusArg->IsNumber() || radiusArg->IsString(vm) || radiusArg->IsObject(vm)) {
@@ -239,10 +252,9 @@ ArkUINativeModuleValue RectBridge::SetRadiusWidth(ArkUIRuntimeCallInfo* runtimeC
         if (ArkTSUtils::IsJsView(vm, firstArg)) {
             GetArkUINodeModifiers()->getRectModifier()->setRectRadiusWidth(
                 nativeNode, 0.0f, static_cast<int32_t>(DimensionUnit::VP), nullptr);
-        } else {
-            GetArkUINodeModifiers()->getRectModifier()->resetRectRadiusWidth(nativeNode);
+            return panda::JSValueRef::Undefined(vm);
         }
-        return panda::JSValueRef::Undefined(vm);
+        GetArkUINodeModifiers()->getRectModifier()->resetRectRadiusWidth(nativeNode);
     }
     GetArkUINodeModifiers()->getRectModifier()->setRectRadiusWidth(
         nativeNode, radiusWidth.Value(), static_cast<int32_t>(radiusWidth.Unit()), AceType::RawPtr(resObj));
@@ -275,10 +287,9 @@ ArkUINativeModuleValue RectBridge::SetRadiusHeight(ArkUIRuntimeCallInfo* runtime
         if (ArkTSUtils::IsJsView(vm, firstArg)) {
             GetArkUINodeModifiers()->getRectModifier()->setRectRadiusHeight(
                 nativeNode, 0.0f, static_cast<int32_t>(DimensionUnit::VP), nullptr);
-        } else {
-            GetArkUINodeModifiers()->getRectModifier()->resetRectRadiusHeight(nativeNode);
+            return panda::JSValueRef::Undefined(vm);
         }
-        return panda::JSValueRef::Undefined(vm);
+        GetArkUINodeModifiers()->getRectModifier()->resetRectRadiusHeight(nativeNode);
     }
     GetArkUINodeModifiers()->getRectModifier()->setRectRadiusHeight(
         nativeNode, radiusHeight.Value(), static_cast<int32_t>(radiusHeight.Unit()), AceType::RawPtr(resObj));
@@ -304,6 +315,12 @@ ArkUINativeModuleValue RectBridge::SetRadius(ArkUIRuntimeCallInfo* runtimeCallIn
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(NUM_1);
+    bool isJsView = ArkTSUtils::IsJsView(firstArg, vm);
+    if (isJsView) {
+        CalcDimension value(0.0f);
+        GetArkUINodeModifiers()->getRectModifier()->setRadius(
+            nativeNode, value.Value(), static_cast<int32_t>(value.Unit()));
+    }
     if (jsValue->IsArray(vm)) {
         RadiusArrayResult result;
         SetRadiusWithArray(vm, jsValue, result);
