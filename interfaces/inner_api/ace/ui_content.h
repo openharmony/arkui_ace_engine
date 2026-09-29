@@ -679,6 +679,12 @@ public:
 
     virtual void SetFormDisplayId(const uint64_t displayId) {}
 
+    /**
+     * @description: Mark the UEC (UIExtension component) dpi follow host feature as enabled
+     * for current window instance (whitelist mark, once set it cannot be revoked).
+     */
+    virtual void MarkUIExtensionDensityFollowHost() {};
+
 private:
     static std::atomic<bool> successFlag_;
     static std::mutex mtx_;

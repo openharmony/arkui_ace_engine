@@ -126,7 +126,7 @@ RefPtr<SecurityUIExtensionPattern> SecurityUIExtensionComponentTestNg::CreateSec
     config.placeholderNode = placeholderNode;
     config.sessionType = SessionType::SECURITY_UI_EXTENSION_ABILITY;
     config.transferringCaller = true;
-    config.densityDpi = true;
+    config.dpiFollowStrategy = DpiFollowStrategy::FOLLOW_HOST_DPI;
 
     // create SecurityUEC
     UIExtensionModelNG uecNG;
@@ -233,7 +233,7 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionComponentCreateS
 #ifdef OHOS_STANDARD_SYSTEM
     auto pattern = CreateSecurityUEC();
 
-    ASSERT_EQ(pattern->densityDpi_, true);
+    ASSERT_EQ(pattern->dpiFollowStrategy_, DpiFollowStrategy::FOLLOW_HOST_DPI);
     ASSERT_EQ(pattern->sessionType_, SessionType::SECURITY_UI_EXTENSION_ABILITY);
 #endif
 }
@@ -929,7 +929,7 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionVisibleTest, Tes
 
 /**
  * @tc.name: SecurityUIExtensionDpiTest
- * @tc.desc: Test pattern SetDensityDpi/GetDensityDpi function
+ * @tc.desc: Test pattern SetDpiFollowStrategy/GetDpiFollowStrategy function
  * @tc.type: FUNC
  */
 HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionDpiTest, TestSize.Level1)
@@ -941,16 +941,16 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionDpiTest, TestSiz
     auto pattern = CreateSecurityUEC();
 
     /**
-     * @tc.steps: step2. SetDensityDpi false
+     * @tc.steps: step2. SetDpiFollowStrategy FOLLOW_UI_EXTENSION_ABILITY_DPI
      */
-    pattern->SetDensityDpi(false);
-    EXPECT_FALSE(pattern->GetDensityDpi());
+    pattern->SetDpiFollowStrategy(DpiFollowStrategy::FOLLOW_UI_EXTENSION_ABILITY_DPI);
+    EXPECT_FALSE(pattern->GetDpiFollowStrategy() == DpiFollowStrategy::FOLLOW_HOST_DPI);
 
     /**
-     * @tc.steps: step3. SetDensityDpi true
+     * @tc.steps: step3. SetDpiFollowStrategy FOLLOW_HOST_DPI
      */
-    pattern->SetDensityDpi(true);
-    EXPECT_TRUE(pattern->GetDensityDpi());
+    pattern->SetDpiFollowStrategy(DpiFollowStrategy::FOLLOW_HOST_DPI);
+    EXPECT_TRUE(pattern->GetDpiFollowStrategy() == DpiFollowStrategy::FOLLOW_HOST_DPI);
 #endif
 }
 
@@ -1035,26 +1035,26 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, DispatchFollowHostDensityTest001, T
     auto pattern = CreateSecurityUEC();
 
     /**
-     * @tc.steps: step2. test DispatchFollowHostDensity
+     * @tc.steps: step2. test DispatchFollowHostDensity (pure forward, does not mutate strategy)
      */
-    bool densityDpi = true;
-    pattern->densityDpi_ = false;
-    pattern->DispatchFollowHostDensity(densityDpi);
-    ASSERT_TRUE(pattern->densityDpi_);
+    pattern->dpiFollowStrategy_ = DpiFollowStrategy::FOLLOW_UI_EXTENSION_ABILITY_DPI;
+    pattern->DispatchFollowHostDensity(DpiFollowStrategy::FOLLOW_HOST_DPI);
+    ASSERT_EQ(pattern->dpiFollowStrategy_, DpiFollowStrategy::FOLLOW_UI_EXTENSION_ABILITY_DPI);
 
-    densityDpi = false;
-    pattern->DispatchFollowHostDensity(densityDpi);
-    ASSERT_FALSE(pattern->densityDpi_);
+    pattern->DispatchFollowHostDensity(DpiFollowStrategy::FOLLOW_HOST_DPI_ALL);
+    ASSERT_EQ(pattern->dpiFollowStrategy_, DpiFollowStrategy::FOLLOW_UI_EXTENSION_ABILITY_DPI);
+
+    pattern->DispatchFollowHostDensity(DpiFollowStrategy::FOLLOW_UI_EXTENSION_ABILITY_DPI);
+    ASSERT_EQ(pattern->dpiFollowStrategy_, DpiFollowStrategy::FOLLOW_UI_EXTENSION_ABILITY_DPI);
 
     /**
      * @tc.steps: step3. test OnDpiConfigurationUpdate
      */
-    ASSERT_FALSE(pattern->GetDensityDpi());
+    ASSERT_FALSE(pattern->GetDpiFollowStrategy() == DpiFollowStrategy::FOLLOW_HOST_DPI);
     pattern->OnDpiConfigurationUpdate();
 
-    densityDpi = true;
-    pattern->DispatchFollowHostDensity(densityDpi);
-    ASSERT_TRUE(pattern->GetDensityDpi());
+    pattern->DispatchFollowHostDensity(DpiFollowStrategy::FOLLOW_HOST_DPI_ALL);
+    ASSERT_EQ(pattern->GetDpiFollowStrategy(), DpiFollowStrategy::FOLLOW_UI_EXTENSION_ABILITY_DPI);
     pattern->OnDpiConfigurationUpdate();
 #endif
 }
@@ -1169,7 +1169,7 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionEventTest, TestS
     NG::UIExtensionConfig config;
     config.sessionType = SessionType::SECURITY_UI_EXTENSION_ABILITY;
     config.transferringCaller = true;
-    config.densityDpi = true;
+    config.dpiFollowStrategy = DpiFollowStrategy::FOLLOW_HOST_DPI;
     pattern->Initialize(config);
     ASSERT_NE(pattern->sessionWrapper_, nullptr);
     ASSERT_EQ(pattern->accessibilityChildTreeCallback_, nullptr);
@@ -1261,7 +1261,7 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionChildTreeCallbac
     NG::UIExtensionConfig config;
     config.sessionType = SessionType::SECURITY_UI_EXTENSION_ABILITY;
     config.transferringCaller = true;
-    config.densityDpi = true;
+    config.dpiFollowStrategy = DpiFollowStrategy::FOLLOW_HOST_DPI;
     pattern->Initialize(config);
     ASSERT_NE(pattern, nullptr);
     ASSERT_NE(pattern->GetAccessibilitySessionAdapter(), nullptr);
@@ -1641,7 +1641,7 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionComponentMemberV
     config.placeholderNode = placeholderNode;
     config.sessionType = SessionType::SECURITY_UI_EXTENSION_ABILITY;
     config.transferringCaller = true;
-    config.densityDpi = true;
+    config.dpiFollowStrategy = DpiFollowStrategy::FOLLOW_HOST_DPI;
     auto pattern = CreateSecurityUEC(config);
     ValidSessionWrapper(pattern);
     /**
@@ -1651,7 +1651,7 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionComponentMemberV
     EXPECT_EQ(pattern->isVisible_, true);
     EXPECT_NE(pattern->placeholderNode_, nullptr);
     EXPECT_EQ(pattern->sessionType_, config.sessionType);
-    EXPECT_EQ(pattern->densityDpi_, config.densityDpi);
+    EXPECT_EQ(pattern->dpiFollowStrategy_, config.dpiFollowStrategy);
     EXPECT_EQ(pattern->contentNode_, nullptr);
 #endif
 }

@@ -29,6 +29,7 @@
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/ui_extension/preview_ui_extension_component/preview_ui_extension_adapter.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_utils.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
 #include "interfaces/include/ws_common.h"
@@ -432,7 +433,7 @@ void JSSecurityUIExtension::Create(const JSCallbackInfo& info)
         }
         JSRef<JSVal> enableDensityDPI = obj->GetProperty("dpiFollowStrategy");
         if (enableDensityDPI->IsNumber()) {
-            config.densityDpi = (enableDensityDPI->ToNumber<int32_t>())==0 ? true : false;
+            config.dpiFollowStrategy = NG::ParseDpiFollowStrategy(enableDensityDPI->ToNumber<int32_t>());
         }
         do {
             JSRef<JSVal> componentContent = obj->GetProperty("placeholder");
@@ -659,7 +660,7 @@ void JSPreviewUIExtension::Create(const JSCallbackInfo& info)
         }
         JSRef<JSVal> enableDensityDPI = obj->GetProperty("dpiFollowStrategy");
         if (enableDensityDPI->IsNumber()) {
-            config.densityDpi = (enableDensityDPI->ToNumber<int32_t>())==0 ? true : false;
+            config.dpiFollowStrategy = NG::ParseDpiFollowStrategy(enableDensityDPI->ToNumber<int32_t>());
         }
         do {
             JSRef<JSVal> componentContent = obj->GetProperty("placeholder");

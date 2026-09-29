@@ -4865,7 +4865,7 @@
       "OHOS::Ace::NG::SecurityUIExtensionStatic::SetSecurityOnReceive(OHOS::Ace::NG::FrameNode*, std::__h::function<void (OHOS::AAFwk::WantParams const&)>&&)";
       "OHOS::Ace::NG::SecurityUIExtensionStatic::SetSecurityOnRemoteReady(OHOS::Ace::NG::FrameNode*, std::__h::function<void (OHOS::Ace::RefPtr<OHOS::Ace::NG::SecurityUIExtensionProxy> const&)>&&)";
       "OHOS::Ace::NG::SecurityUIExtensionStatic::SetSecurityOnTerminated(OHOS::Ace::NG::FrameNode*, std::__h::function<void (int, OHOS::Ace::RefPtr<OHOS::Ace::WantWrap> const&)>&&)";
-      "OHOS::Ace::NG::SecurityUIExtensionStatic::UpdateSecurityUecConfig(OHOS::Ace::NG::FrameNode*, bool, bool, bool, std::__h::map<OHOS::Ace::NG::PlaceholderType, OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode>, std::__h::less<OHOS::Ace::NG::PlaceholderType>, std::__h::allocator<std::__h::pair<OHOS::Ace::NG::PlaceholderType const, OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode>>>> const&)";
+      "OHOS::Ace::NG::SecurityUIExtensionStatic::UpdateSecurityUecConfig(OHOS::Ace::NG::FrameNode*, bool, OHOS::Ace::NG::DpiFollowStrategy, bool, std::__h::map<OHOS::Ace::NG::PlaceholderType, OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode>, std::__h::less<OHOS::Ace::NG::PlaceholderType>, std::__h::allocator<std::__h::pair<OHOS::Ace::NG::PlaceholderType const, OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode>>>> const&)";
       "OHOS::Ace::NG::SecurityUIExtensionStatic::UpdateSecurityWant(OHOS::Ace::NG::FrameNode*, OHOS::AAFwk::Want const&)";
       "OHOS::Ace::NG::SetRegisterBeforeCreateLayoutBuilder(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode>, std::__h::optional<bool>)";
       "OHOS::Ace::NG::SmartGestureManager::ClearSelected()";
@@ -4884,7 +4884,7 @@
       "OHOS::Ace::NG::UIExtensionStatic::SetOnRelease(OHOS::Ace::NG::FrameNode*, std::__h::function<void (int)>&&)";
       "OHOS::Ace::NG::UIExtensionStatic::SetOnResult(OHOS::Ace::NG::FrameNode*, std::__h::function<void (int, OHOS::AAFwk::Want const&)>&&)";
       "OHOS::Ace::NG::UIExtensionStatic::SetOnTerminated(OHOS::Ace::NG::FrameNode*, std::__h::function<void (int, OHOS::Ace::RefPtr<OHOS::Ace::WantWrap> const&)>&&)";
-      "OHOS::Ace::NG::UIExtensionStatic::UpdateUecConfig(OHOS::Ace::NG::FrameNode*, bool, bool, bool, std::__h::map<OHOS::Ace::NG::PlaceholderType, OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode>, std::__h::less<OHOS::Ace::NG::PlaceholderType>, std::__h::allocator<std::__h::pair<OHOS::Ace::NG::PlaceholderType const, OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode>>>> const&)";
+      "OHOS::Ace::NG::UIExtensionStatic::UpdateUecConfig(OHOS::Ace::NG::FrameNode*, bool, OHOS::Ace::NG::DpiFollowStrategy, bool, std::__h::map<OHOS::Ace::NG::PlaceholderType, OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode>, std::__h::less<OHOS::Ace::NG::PlaceholderType>, std::__h::allocator<std::__h::pair<OHOS::Ace::NG::PlaceholderType const, OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode>>>> const&)";
       "OHOS::Ace::NG::UIExtensionStatic::UpdateWant(OHOS::Ace::NG::FrameNode*, OHOS::AAFwk::Want const&)";
       "OHOS::Ace::NG::UINode::AddChildAfter(OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode> const&, OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode> const&)";
       "OHOS::Ace::NG::UINode::AllowUseParentTheme(bool)";

@@ -36,8 +36,9 @@ public:
         const InnerModalUIExtensionConfig& config);
 
     void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap,
-        const std::map<NG::PlaceholderType, RefPtr<NG::FrameNode>>& placeholderMap,
-        bool transferringCaller = false, bool densityDpi = true, bool isWindowModeFollowHost = false) override;
+        const std::map<NG::PlaceholderType, RefPtr<NG::FrameNode>>& placeholderMap, bool transferringCaller = false,
+        NG::DpiFollowStrategy dpiFollowStrategy = NG::DpiFollowStrategy::FOLLOW_UI_EXTENSION_ABILITY_DPI,
+        bool isWindowModeFollowHost = false) override;
     // for Embedded Component
     void Create(const EmbeddedUIExtensionConfig& config) override;
     void Create(const UIExtensionConfig& config) override;

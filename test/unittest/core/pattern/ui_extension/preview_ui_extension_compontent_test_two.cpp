@@ -118,7 +118,7 @@ public:
         config.placeholderNode = placeholderNode;
         config.sessionType = SessionType::UI_EXTENSION_ABILITY;
         config.transferringCaller = true;
-        config.densityDpi = true;
+        config.dpiFollowStrategy = DpiFollowStrategy::FOLLOW_HOST_DPI;
         // create PreviewUEC
         PreviewUIExtensionAdapter previewAdapter;
         frameNode_ = previewAdapter.CreatePreviewUIExtensionNode(config);
@@ -1104,11 +1104,11 @@ HWTEST_F(PreviewUIExtensionComponentTestNgTwo, PreviewSessionWrapperSetDensityDp
     ASSERT_NE(pattern, nullptr);
     auto wrapper = CreatePreviewSessionWrapperImpl(pattern);
     ASSERT_NE(wrapper, nullptr);
-    wrapper->SetDensityDpiImpl(true);
-    wrapper->SetDensityDpiImpl(false);
+    wrapper->SetDensityDpiImpl(DpiFollowStrategy::FOLLOW_HOST_DPI);
+    wrapper->SetDensityDpiImpl(DpiFollowStrategy::FOLLOW_UI_EXTENSION_ABILITY_DPI);
     AttachValidSession(wrapper);
-    wrapper->SetDensityDpiImpl(true);
-    wrapper->SetDensityDpiImpl(false);
+    wrapper->SetDensityDpiImpl(DpiFollowStrategy::FOLLOW_HOST_DPI);
+    wrapper->SetDensityDpiImpl(DpiFollowStrategy::FOLLOW_UI_EXTENSION_ABILITY_DPI);
     EXPECT_TRUE(wrapper->session_ == nullptr || wrapper->session_ != nullptr);
 #endif
 }
@@ -1378,7 +1378,7 @@ HWTEST_F(PreviewUIExtensionComponentTestNgTwo, PreviewPatternAndWrapperIntegrati
     ASSERT_NE(wrapper, nullptr);
     wrapper->NotifyCreate();
     wrapper->NotifyConfigurationUpdate();
-    wrapper->SetDensityDpiImpl(true);
+    wrapper->SetDensityDpiImpl(DpiFollowStrategy::FOLLOW_HOST_DPI);
     EXPECT_NE(wrapper, nullptr);
 #endif
 }
@@ -1773,11 +1773,11 @@ HWTEST_F(PreviewUIExtensionComponentTestNgTwo, PreviewSessionWrapperBulk014, Tes
     ASSERT_NE(pattern, nullptr);
     auto wrapper = CreatePreviewSessionWrapperImpl(pattern);
     ASSERT_NE(wrapper, nullptr);
-    wrapper->SetDensityDpiImpl(true);
-    wrapper->SetDensityDpiImpl(false);
+    wrapper->SetDensityDpiImpl(DpiFollowStrategy::FOLLOW_HOST_DPI);
+    wrapper->SetDensityDpiImpl(DpiFollowStrategy::FOLLOW_UI_EXTENSION_ABILITY_DPI);
     AttachValidSession(wrapper);
-    wrapper->SetDensityDpiImpl(true);
-    wrapper->SetDensityDpiImpl(false);
+    wrapper->SetDensityDpiImpl(DpiFollowStrategy::FOLLOW_HOST_DPI);
+    wrapper->SetDensityDpiImpl(DpiFollowStrategy::FOLLOW_UI_EXTENSION_ABILITY_DPI);
     EXPECT_NE(wrapper, nullptr);
 #endif
 }

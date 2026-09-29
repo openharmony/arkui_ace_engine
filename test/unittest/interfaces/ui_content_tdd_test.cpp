@@ -357,4 +357,19 @@ HWTEST_F(UIContentTddTest, XComponentAngleConcurrentSetAndGet001, TestSize.Level
     EXPECT_FALSE(finalConfig.empty());
 }
 
+/**
+ * @tc.name: MarkUIExtensionDensityFollowHost001
+ * @tc.desc: Test MarkUIExtensionDensityFollowHost interface existence
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIContentTddTest, MarkUIExtensionDensityFollowHost001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Take pointer-to-member of UIContent::MarkUIExtensionDensityFollowHost
+     * @tc.expected: The virtual interface is declared (compile-time contract)
+     */
+    void (UIContent::*setter)() = &UIContent::MarkUIExtensionDensityFollowHost;
+    EXPECT_NE(setter, nullptr);
+}
+
 } // namespace OHOS::Ace

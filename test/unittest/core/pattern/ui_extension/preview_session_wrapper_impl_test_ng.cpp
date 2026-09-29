@@ -128,7 +128,7 @@ WeakPtr<PreviewUIExtensionPattern> PreviewSessionWrapperImplTestNg::CreatePrevie
     config.placeholderNode = placeholderNode;
     config.sessionType = SessionType::UI_EXTENSION_ABILITY;
     config.transferringCaller = true;
-    config.densityDpi = true;
+    config.dpiFollowStrategy = DpiFollowStrategy::FOLLOW_HOST_DPI;
 
     // create PreviewUEC
     PreviewUIExtensionAdapter previewAdapter;
@@ -467,8 +467,8 @@ HWTEST_F(PreviewSessionWrapperImplTestNg, PreviewSessionWrapperImplTestNg007, Te
     /**
      * @tc.steps: step3. test SetDensityDpiImpl
      */
-    sessionWrapper->SetDensityDpiImpl(true);
-    sessionWrapper->SetDensityDpiImpl(false);
+    sessionWrapper->SetDensityDpiImpl(DpiFollowStrategy::FOLLOW_HOST_DPI);
+    sessionWrapper->SetDensityDpiImpl(DpiFollowStrategy::FOLLOW_UI_EXTENSION_ABILITY_DPI);
 
     /**
      * @tc.steps: step4. test SendDataSync

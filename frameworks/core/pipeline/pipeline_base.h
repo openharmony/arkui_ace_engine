@@ -985,6 +985,16 @@ public:
         return density_;
     }
 
+    void SetUIExtensionDensityFollowHost(bool isEnabled)
+    {
+        isUIExtensionDensityFollowHost_ = isEnabled;
+    }
+
+    bool IsUIExtensionDensityFollowHost() const
+    {
+        return isUIExtensionDensityFollowHost_;
+    }
+
     RefPtr<PlatformResRegister> GetPlatformResRegister() const;
 
     void SetTouchPipeline(const WeakPtr<PipelineBase>& context);
@@ -1712,6 +1722,7 @@ protected:
     float viewScale_ = 1.0f;
     double density_ = 1.0;
     double dipScale_ = 1.0;
+    std::atomic<bool> isUIExtensionDensityFollowHost_ { false };
     bool isCurrentInForceSplitMode_ = false;
     double rootHeight_ = 0.0;
     double rootWidth_ = 0.0;

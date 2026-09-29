@@ -45,7 +45,7 @@ void PreviewUIExtensionAdapter::Create(const NG::UIExtensionConfig& config)
     pattern->Initialize(config);
     pattern->SetPlaceholderNode(config.placeholderNode);
     pattern->UpdateWant(config.wantWrap);
-    pattern->SetDensityDpi(config.densityDpi);
+    pattern->SetDpiFollowStrategy(config.dpiFollowStrategy);
     stack->Push(frameNode);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -75,7 +75,7 @@ void PreviewUIExtensionAdapter::UpdatePreviewUIExtensionConfig(const RefPtr<Fram
     pattern->Initialize(config);
     pattern->SetPlaceholderNode(config.placeholderNode);
     pattern->UpdateWant(config.wantWrap);
-    pattern->SetDensityDpi(config.densityDpi);
+    pattern->SetDpiFollowStrategy(config.dpiFollowStrategy);
 }
 
 void PreviewUIExtensionAdapter::SetWant(const RefPtr<FrameNode>& frameNode, const RefPtr<OHOS::Ace::WantWrap>& wantWrap)

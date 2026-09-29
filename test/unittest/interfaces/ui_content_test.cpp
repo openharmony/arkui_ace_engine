@@ -112,4 +112,27 @@ HWTEST_F(UiContentTest, GetWindowIdTest001, TestSize.Level1)
     auto windowIdByDefault = UIContent::GetUIContentWindowID(CONTAINER_ID_DIVIDE_SIZE);
     EXPECT_TRUE(windowIdByDefault == -1);
 }
+
+/**
+ * @tc.name: UIExtensionDensityFollowHostApiTest001
+ * @tc.desc: test UIContent::MarkUIExtensionDensityFollowHost interface existence and default behavior
+ * @tc.type: FUNC
+ */
+HWTEST_F(UiContentTest, UIExtensionDensityFollowHostApiTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Take pointer-to-member of UIContent::MarkUIExtensionDensityFollowHost
+     * @tc.expected: The virtual interface is declared (compile-time contract)
+     */
+    void (UIContent::*setter)() = &UIContent::MarkUIExtensionDensityFollowHost;
+    EXPECT_NE(setter, nullptr);
+
+    /**
+     * @tc.steps2: Call UIContent::Create with null parameters and invoke MarkUIExtensionDensityFollowHost
+     * @tc.expected: Default empty implementation returns normally without crash
+     */
+    std::shared_ptr<UIContent> ret = UIContent::Create(nullptr, nullptr);
+    ASSERT_TRUE(ret);
+    ret->MarkUIExtensionDensityFollowHost();
+}
 } // namespace OHOS::Ace

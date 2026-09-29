@@ -73,18 +73,16 @@ enum class WindowMode : uint32_t;
 namespace OHOS::Ace::NG {
 
 struct SessionViewportConfig {
-    bool isDensityFollowHost_ = false;
+    DpiFollowStrategy dpiFollowStrategy_ = DpiFollowStrategy::FOLLOW_UI_EXTENSION_ABILITY_DPI;
     float density_ = 1.0f;
     uint64_t displayId_ = 0;
     int32_t orientation_ = 0;
     uint32_t transform_ = 0;
     bool operator==(const SessionViewportConfig& other) const
     {
-        return (isDensityFollowHost_ == other.isDensityFollowHost_) &&
-            (NearZero(std::abs(density_ - other.density_))) &&
-            (displayId_ == other.displayId_) &&
-            (orientation_ == other.orientation_) &&
-            (transform_ == other.transform_);
+        return (NearZero(std::abs(density_ - other.density_))) && (displayId_ == other.displayId_) &&
+               (orientation_ == other.orientation_) && (transform_ == other.transform_) &&
+               (dpiFollowStrategy_ == other.dpiFollowStrategy_);
     }
 };
 
@@ -170,8 +168,9 @@ public:
     bool GetIsTransferringCaller();
     void SetIsTransferringCaller(bool isTransferringCaller);
     /* only for 1.2 end */
-    void SetDensityDpi(bool densityDpi);
-    bool GetDensityDpi();
+    void SetDpiFollowStrategy(DpiFollowStrategy dpiFollowStrategy);
+    DpiFollowStrategy GetDpiFollowStrategy();
+    DpiFollowStrategy GetEffectiveDpiFollowStrategy();
     bool IsCompatibleOldVersion();
 
     void NotifySizeChangeReason(
@@ -263,6 +262,7 @@ public:
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpOthers();
+    void DumpDpiFollowInfo();
     void AddExtraInfoWithParamConfig(
         std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig()) override;
     void ExecuteDumpTask(
@@ -480,7 +480,7 @@ private:
     PlaceholderType curPlaceholderType_ = PlaceholderType::NONE;
     bool isFoldStatusChanged_ = false;
     bool isRotateStatusChanged_ = false;
-    bool densityDpi_ = false;
+    DpiFollowStrategy dpiFollowStrategy_ = DpiFollowStrategy::FOLLOW_UI_EXTENSION_ABILITY_DPI;
     WeakPtr<Pattern> weakSystemWindowScene_;
     SessionViewportConfig sessionViewportConfig_;
     bool viewportConfigChanged_ = false;

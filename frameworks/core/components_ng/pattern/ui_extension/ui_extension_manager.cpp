@@ -348,7 +348,7 @@ void UIExtensionManager::UpdateSessionViewportConfig(const ViewportConfig& confi
             displayId = container->GetCurrentDisplayId();
         }
         SessionViewportConfig newConfig = {
-            .isDensityFollowHost_ = uiExtension->GetDensityDpi(),
+            .dpiFollowStrategy_ = uiExtension->GetEffectiveDpiFollowStrategy(),
             .density_ = config.Density(),
             .displayId_ = displayId,
             .orientation_ = config.Orientation(),

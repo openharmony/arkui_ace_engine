@@ -45,7 +45,7 @@ struct EmbeddedUIExtensionConfig {
     RefPtr<OHOS::Ace::WantWrap> wantWrap = nullptr;
     NG::SessionType sessionType = NG::SessionType::EMBEDDED_UI_EXTENSION;
     std::map<NG::PlaceholderType, RefPtr<NG::FrameNode>> placeholderMap;
-    bool densityDpi = false;
+    NG::DpiFollowStrategy dpiFollowStrategy = NG::DpiFollowStrategy::FOLLOW_UI_EXTENSION_ABILITY_DPI;
     bool isWindowModeFollowHost = false;
 };
 
@@ -53,7 +53,7 @@ struct UIExtensionConfig {
     RefPtr<OHOS::Ace::WantWrap> wantWrap = nullptr;
     RefPtr<NG::FrameNode> placeholderNode = nullptr;
     bool transferringCaller = false;
-    bool densityDpi = false;
+    NG::DpiFollowStrategy dpiFollowStrategy = NG::DpiFollowStrategy::FOLLOW_UI_EXTENSION_ABILITY_DPI;
     NG::SessionType sessionType = NG::SessionType::UI_EXTENSION_ABILITY;
     bool backgroundTransparent = true;
     bool allowCrossProcessNesting = false;
@@ -67,8 +67,9 @@ public:
     virtual ~UIExtensionModel() = default;
 
     virtual void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap,
-        const std::map<NG::PlaceholderType, RefPtr<NG::FrameNode>>& placeholderMap,
-        bool transferringCaller = false, bool densityDpi = false, bool isWindowModeFollowHost = false);
+        const std::map<NG::PlaceholderType, RefPtr<NG::FrameNode>>& placeholderMap, bool transferringCaller = false,
+        NG::DpiFollowStrategy dpiFollowStrategy = NG::DpiFollowStrategy::FOLLOW_UI_EXTENSION_ABILITY_DPI,
+        bool isWindowModeFollowHost = false);
     // for Embedded Component
     virtual void Create(const NG::EmbeddedUIExtensionConfig& config);
     virtual void Create(const NG::UIExtensionConfig& config) {}

@@ -124,7 +124,7 @@ WeakPtr<SecurityUIExtensionPattern> SecuritySessionWrapperImplTestNg::CreateSecu
     config.placeholderNode = placeholderNode;
     config.sessionType = SessionType::SECURITY_UI_EXTENSION_ABILITY;
     config.transferringCaller = true;
-    config.densityDpi = true;
+    config.dpiFollowStrategy = DpiFollowStrategy::FOLLOW_HOST_DPI;
 
     // create SecurityUEC
     UIExtensionModelNG uecNG;
@@ -481,8 +481,8 @@ HWTEST_F(SecuritySessionWrapperImplTestNg, SecuritySessionWrapperImplTestNg007, 
     /**
      * @tc.steps: step3. test SetDensityDpiImpl
      */
-    sessionWrapper->SetDensityDpiImpl(true);
-    sessionWrapper->SetDensityDpiImpl(false);
+    sessionWrapper->SetDensityDpiImpl(DpiFollowStrategy::FOLLOW_HOST_DPI);
+    sessionWrapper->SetDensityDpiImpl(DpiFollowStrategy::FOLLOW_UI_EXTENSION_ABILITY_DPI);
 
     /**
      * @tc.steps: step4. test SendDataSync

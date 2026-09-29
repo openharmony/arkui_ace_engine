@@ -251,7 +251,7 @@ bool SecuritySessionWrapperImpl::NotifyOccupiedAreaChangeInfo(
     return true;
 }
 
-void SecuritySessionWrapperImpl::SetDensityDpiImpl(bool isDensityDpi)
+void SecuritySessionWrapperImpl::SetDensityDpiImpl(DpiFollowStrategy dpiFollowStrategy)
 {
 }
 

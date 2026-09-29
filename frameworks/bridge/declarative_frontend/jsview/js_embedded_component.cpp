@@ -36,6 +36,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_utils.h"
 #include "frameworks/core/components_ng/base/view_abstract_model.h"
 
 namespace OHOS::Ace::Framework {
@@ -153,7 +154,7 @@ void JSEmbeddedComponent::Create(const JSCallbackInfo& info)
     RefPtr<OHOS::Ace::WantWrap> want = CreateWantWrapFromNapiValue(wantObj);
 
     NG::SessionType sessionType = NG::SessionType::EMBEDDED_UI_EXTENSION;
-    bool densityDpi = false;
+    NG::DpiFollowStrategy dpiFollowStrategy = NG::DpiFollowStrategy::FOLLOW_UI_EXTENSION_ABILITY_DPI;
     bool windowModeStrategy = false;
     std::map<NG::PlaceholderType, RefPtr<NG::FrameNode>> placeholderMap;
     if (info.Length() > 1 && info[1]->IsNumber()) {
@@ -163,7 +164,7 @@ void JSEmbeddedComponent::Create(const JSCallbackInfo& info)
         auto obj = JSRef<JSObject>::Cast(info[2]);
         JSRef<JSVal> enableDensityDPI = obj->GetProperty("dpiFollowStrategy");
         if (enableDensityDPI->IsNumber()) {
-            densityDpi = (enableDensityDPI->ToNumber<int32_t>())==0 ? true : false;
+            dpiFollowStrategy = NG::ParseDpiFollowStrategy(enableDensityDPI->ToNumber<int32_t>());
         }
         JSRef<JSVal> windowModeStrategyValue = obj->GetProperty("windowModeFollowStrategy");
         if (windowModeStrategyValue->IsNumber()) {
@@ -177,7 +178,7 @@ void JSEmbeddedComponent::Create(const JSCallbackInfo& info)
     config.wantWrap = want;
     config.sessionType = sessionType;
     config.placeholderMap = placeholderMap;
-    config.densityDpi = densityDpi;
+    config.dpiFollowStrategy = dpiFollowStrategy;
     config.isWindowModeFollowHost = windowModeStrategy;
     UIExtensionModel::GetInstance()->Create(config);
     

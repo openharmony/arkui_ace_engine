@@ -93,7 +93,7 @@ public:
         WindowSizeChangeReason reason) const override;
     bool NotifyOccupiedAreaChangeInfo(
         sptr<Rosen::OccupiedAreaChangeInfo> info, bool needWaitLayout) override;
-    void SetDensityDpiImpl(bool isDensityDpi) override;
+    void SetDensityDpiImpl(DpiFollowStrategy dpiFollowStrategy) override;
  
     // The interface to send the data for ArkTS
     void SendDataAsync(const AAFwk::WantParams& params) const override;
