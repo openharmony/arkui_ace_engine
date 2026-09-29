@@ -256,6 +256,7 @@ void RichEditorPattern::SetStyledString(const RefPtr<SpanString>& value)
         }
         subValue = value->GetSubSpanString(0, subLength);
     }
+    auto subValueLength = subValue->GetLength();
     IF_TRUE(hasActiveFilter_, FilterStyledStringBeforeInsert(subValue));
     IF_TRUE(IsPreviewTextInputting() && !previewTextRecord_.previewTextExiting, NotifyExitTextPreview(true));
     auto length = styledString_->GetLength();
@@ -265,7 +266,7 @@ void RichEditorPattern::SetStyledString(const RefPtr<SpanString>& value)
     ResetSelection();
     styledString_->RemoveCustomSpan();
     styledString_->ReplaceSpanString(0, length, subValue);
-    if (subValue->GetLength() == value->GetLength()) {
+    if (subValueLength == value->GetLength()) {
         HandleCounterWithLength(0, maxLength_);
     }
     SetCaretPosition(styledString_->GetLength());
@@ -486,8 +487,8 @@ void RichEditorPattern::PrepareInsertChangeRange(
     }
 }
 
-void RichEditorPattern::InsertValueInStyledString(
-    const std::u16string& insertValue, bool shouldCommitInput, bool isPaste, bool preFiltered)
+void RichEditorPattern::InsertValueInStyledString(const std::u16string& insertValue,
+    bool shouldCommitInput, bool isPaste, bool preFiltered, bool isInsertValueSplit)
 {
     CHECK_NULL_VOID(styledString_);
     IF_TRUE(shouldCommitInput && previewTextRecord_.IsValid(), FinishTextPreviewInner());
@@ -496,10 +497,12 @@ void RichEditorPattern::InsertValueInStyledString(
     int32_t changeLength = 0;
     PrepareInsertChangeRange(shouldCommitInput, changeStart, changeLength);
     auto subValue = insertValue;
+    auto originInsertLength = static_cast<int32_t>(subValue.length());
     auto subWasNonEmpty = !subValue.empty();
     if (!preFiltered && hasActiveFilter_ && (shouldCommitInput || !IsPreviewTextInputting())) {
         FilterWithInputFilter(subValue);
         if (subWasNonEmpty && subValue.empty()) {
+            HandleCounterWithLength(originInsertLength, maxLength_);
             return;
         }
     }
@@ -516,11 +519,13 @@ void RichEditorPattern::InsertValueInStyledString(
         IF_TRUE(shouldCommitInput, undoManager_->ClearPreviewInputRecord());
         return;
     }
+    if (!isPreventChange && shouldCommitInput) {
+        // Trigger counter overflow if split and content length equals max, or not split but value differs.
+        HandleCounterWithLength((isInsertValueSplit && GetTextContentLength() == GetMaxLength()) ||
+            (!isInsertValueSplit && insertValue != subValue) ? DEFAULT_LENGTH : 0, maxLength_);
+    }
     HandleStyledStringInsertion(insertStyledString, record, subValue, needReplaceInTextPreview, shouldCommitInput);
     IF_TRUE(shouldCommitInput, undoManager_->RecordInsertOperation(record));
-    if (!isPreventChange && shouldCommitInput) {
-        HandleCounterWithLength(static_cast<int32_t>(subValue.length()), maxLength_);
-    }
     AfterStyledStringChange(record);
     IF_TRUE(!isPaste, OnReportRichEditorEvent("onIMEInputComplete"));
 }
@@ -7471,9 +7476,11 @@ void RichEditorPattern::ProcessInsertValue(const std::u16string& insertValue, Op
     CONTENT_MODIFY_LOCK(this);
     auto text = insertValue;
     auto wasNonEmpty = !text.empty();
+    auto insertValueLength = static_cast<int32_t>(text.length());
     if (hasActiveFilter_ && (shouldCommitInput || !IsPreviewTextInputting())) {
         FilterWithInputFilter(text);
         if (wasNonEmpty && text.empty()) {
+            HandleCounterWithLength(insertValueLength, maxLength_);
             return;
         }
     }
@@ -7493,7 +7500,8 @@ void RichEditorPattern::ProcessInsertValue(const std::u16string& insertValue, Op
         return;
     }
     if (isSpanStringMode_) {
-        InsertValueInStyledString(text, shouldCommitInput, false, true);
+        InsertValueInStyledString(text, shouldCommitInput, false, true,
+            insertValueLength != static_cast<int32_t>(text.length()));
         return;
     }
     OperationRecord record;
@@ -8085,7 +8093,7 @@ void RichEditorPattern::DeleteToMaxLength(std::optional<int32_t> length)
     int32_t textContentLength = GetTextContentLength();
     if (isSpanStringMode_) {
         bool ret = DeleteValueInStyledString(maxLength, textContentLength - maxLength);
-        IF_TRUE(!ret && GetTextContentLength() <= maxLength, HandleCounterWithLength(DEFAULT_LENGTH, maxLength_));
+        IF_TRUE(!ret && GetTextContentLength() <= maxLength, HandleCounterWithLength(DEFAULT_LENGTH, maxLength));
     } else {
         while (textContentLength > maxLength) {
             textContentLength -= CalculateDeleteLength(CUSTOM_CONTENT_LENGTH, true);
@@ -16288,7 +16296,10 @@ void RichEditorPattern::SetThemeBorderAttr()
             BorderRadiusProperty borderRadius(radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX());
             renderContext->UpdateBorderRadius(borderRadius);
         },
-        renderContext->ResetBorderRadius(),
+        {
+            BorderRadiusProperty borderRadius;
+            renderContext->UpdateBorderRadius(borderRadius);
+        },
         renderContext->UpdateBorderRadius(GetBorderRadiusFlagByUserValue()));
 
     APPLY_BORDER_ATTR(HasBorderWidthFlagByUser,

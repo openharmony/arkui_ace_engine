@@ -356,7 +356,8 @@ ohos_unittest("native_node_napi_test") {
     "native_styled_string_test.cpp",
     "capi_swiper_test_ng.cpp",
     "capi_textpicker_option_test.cpp",
-    "capi_ui_thread_detection_test.cpp"
+    "capi_ui_thread_detection_test.cpp",
+    "capi_texteditor_test_ng.cpp"
   ]
 
   sources += [

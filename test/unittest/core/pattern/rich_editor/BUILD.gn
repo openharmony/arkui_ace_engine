@@ -87,6 +87,7 @@ ace_unittest("rich_editor_test_ng") {
     "rich_editor_cancel_button_test_ng.cpp",
     "rich_editor_border_utils_test_ng.cpp",
     "rich_editor_margin_utils_test_ng.cpp",
+    "rich_editor_counter_core_test_ng.cpp",
   ]
 
   if (!ace_enable_full_test_suite) {

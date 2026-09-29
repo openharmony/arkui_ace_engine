@@ -193,9 +193,15 @@ float CounterDecorator::MeasureTextNodeHeight()
     UpdateCounterContentAndStyle(textLength, maxLength);
     // Both the non-backend rendering process and the backend rendering process will be called.
 	// note using this statement have any impact on the back-end rendering process.
+    auto restoreConstraint = host->NeedRestoreMeasureConstraint();
+    auto constraint = counterGeometryNode->GetParentLayoutConstraint();
     ScopedLayout scope(decoratedNode->GetContext());
     textNode->Measure(LayoutConstraintF());
-    return counterGeometryNode->GetFrameRect().Height();
+    auto height = counterGeometryNode->GetFrameRect().Height();
+    if (restoreConstraint) {
+        textNode->Measure(constraint);
+    }
+    return height;
 }
 
 void CounterDecorator::UpdateCounterContentAndStyle(uint32_t textLength, uint32_t maxLength, bool isVisible)
@@ -323,8 +329,12 @@ float CounterDecorator::MeasureDecorator(float contentWidth, const std::u16strin
         !isInlineStyle && !isShowPassword) {
         auto counterNodeLayoutWrapper = decoratedNode->GetOrCreateChildByIndex(decoratedNode->GetChildIndex(textNode));
         if (counterNodeLayoutWrapper) {
-            auto textLength =
-                static_cast<uint32_t>(showPlaceHolder ? 0 : textContent.length());
+            uint32_t textLength = 0;
+            if (!showPlaceHolder) {
+                textLength = host->ShouldUseHostTextLength()
+                    ? host->GetTextLength()
+                    : static_cast<uint32_t>(textContent.length());
+            }
             auto maxLength = host->GetRealMaxLength();
             LayoutConstraintF textContentConstraint;
             textContentConstraint.UpdateIllegalSelfIdealSizeWithCheck(OptionalSizeF(contentWidth, std::nullopt));
