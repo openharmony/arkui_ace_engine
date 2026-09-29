@@ -34,10 +34,10 @@ build_component_ng("radio_pattern_ng") {
   ]
 
   if (!is_arkui_x) {
-    if (!ace_engine_feature_wearable) {
-      ark_sources += [ "bridge/radio_static_modifier.cpp" ]
-    }
-    ark_sources += [ "bridge/radio_model_impl.cpp" ]
+    ark_sources += [
+      "bridge/radio_static_modifier.cpp",
+      "bridge/radio_model_impl.cpp"
+    ]
   }
 
   if (!build_ohos_sdk) {

@@ -34,12 +34,10 @@ build_component_ng("linear_split_pattern_ng") {
   ]
 
   if (!is_arkui_x) {
-    if (!ace_engine_feature_wearable) {
-      ark_sources += [
-        "bridge/column_split_static_modifier.cpp",
-        "bridge/row_split_static_modifier.cpp", 
-        ]
-    }
-    ark_sources += [ "linear_split_model_impl.cpp" ]
+    ark_sources += [
+      "bridge/column_split_static_modifier.cpp",
+      "bridge/row_split_static_modifier.cpp", 
+      "linear_split_model_impl.cpp"
+    ]
   }
 }

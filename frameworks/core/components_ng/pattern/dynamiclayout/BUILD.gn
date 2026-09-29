@@ -34,11 +34,9 @@ build_component_ng("dynamiclayout_pattern_ng") {
     "bridge/lazy_dynamic_layout_dynamic_module.cpp",
   ]
   if (!is_arkui_x) {
-    if (!ace_engine_feature_wearable) {
-      ark_sources += [
-        "bridge/dynamic_layout_static_ani_modifier.cpp",
-        "bridge/lazy_dynamic_layout_static_ani_modifier.cpp",
-        ]
-    }
+    ark_sources += [
+      "bridge/dynamic_layout_static_ani_modifier.cpp",
+      "bridge/lazy_dynamic_layout_static_ani_modifier.cpp",
+      ]
   }
 }

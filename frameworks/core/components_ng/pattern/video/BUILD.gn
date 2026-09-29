@@ -62,8 +62,6 @@ build_component_ng("video_pattern_ng") {
     if (!build_ohos_sdk) {
       deps = [ "${ace_root}/interfaces/inner_api/ui_session" ]
     }
-    if (!ace_engine_feature_wearable) {
-      ark_sources += [ "bridge/video_static_modifier.cpp" ]
-    }
+    ark_sources += [ "bridge/video_static_modifier.cpp" ]
   }
 }

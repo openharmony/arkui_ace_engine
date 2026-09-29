@@ -31,9 +31,7 @@ build_component_ng("text_picker_pattern_ng") {
     "toss_animation_controller.cpp",
   ]
 
-  if (!ace_engine_feature_wearable) {
-    sources += [ "textpicker_dialog_view.cpp" ]
-  }
+  sources += [ "textpicker_dialog_view.cpp" ]
 
   ark_sources = [
     "bridge/arkts_native_textpicker_bridge.cpp",
@@ -46,14 +44,12 @@ build_component_ng("text_picker_pattern_ng") {
   ]
 
   if (!is_arkui_x) {
-    if (!ace_engine_feature_wearable) {
-      ark_sources += [
-        "bridge/text_picker_dialog_extender.cpp",
-        #"bridge/text_picker_dialog_static_accessor.cpp",
-        "bridge/textpickerdialog_static_modifier.cpp",
-        "bridge/textpicker_static_modifier.cpp"
-      ]
-    }
+    ark_sources += [
+      "bridge/text_picker_dialog_extender.cpp",
+      #"bridge/text_picker_dialog_static_accessor.cpp",
+      "bridge/textpickerdialog_static_modifier.cpp",
+      "bridge/textpicker_static_modifier.cpp"
+    ]
   }
 
   if (!build_ohos_sdk) {

@@ -52,17 +52,13 @@ build_component_ng("waterflow_pattern_ng") {
   ]
 
   if (!is_arkui_x) {
-    if (!ace_engine_feature_wearable) {
-      ark_sources += [
-        "bridge/flowitem/water_flow_item_static_modifier.cpp",
-        "bridge/waterflow/ui_water_flow_event_static_accessor.cpp",
-        "bridge/waterflow/water_flow_static_ani_modifier.cpp",
-        "bridge/waterflow/water_flow_static_modifier.cpp",
-      ]
-    }
     ark_sources += [
       "bridge/flowitem/water_flow_item_model_impl.cpp",
       "bridge/waterflow/water_flow_model_impl.cpp",
+      "bridge/flowitem/water_flow_item_static_modifier.cpp",
+      "bridge/waterflow/ui_water_flow_event_static_accessor.cpp",
+      "bridge/waterflow/water_flow_static_ani_modifier.cpp",
+      "bridge/waterflow/water_flow_static_modifier.cpp",
     ]
   }
   if (!build_ohos_sdk && !is_arkui_x) {

@@ -38,9 +38,7 @@ build_component_ng("progress_pattern_ng") {
   ]
 
   if (!is_arkui_x) {
-    if (!ace_engine_feature_wearable) {
-      ark_sources += [ "bridge/progress_static_modifier.cpp" ]
-    }
+    ark_sources += [ "bridge/progress_static_modifier.cpp" ]
   }
   if (!is_arkui_x) {
     deps = [ "${ace_root}/interfaces/inner_api/ace:ace_forward_compatibility" ]

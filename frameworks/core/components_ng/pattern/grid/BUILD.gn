@@ -62,14 +62,10 @@ build_component_ng("grid_pattern_ng") {
   ]
 
   if (!is_arkui_x) {
-    if (!ace_engine_feature_wearable) {
-      ark_sources += [
-        "bridge/grid/grid_static_modifier.cpp",
-        "bridge/grid/ui_grid_event_static_accessor.cpp",
-        "bridge/griditem/grid_item_static_modifier.cpp",
-      ]
-    }
     ark_sources += [
+      "bridge/grid/grid_static_modifier.cpp",
+      "bridge/grid/ui_grid_event_static_accessor.cpp",
+      "bridge/griditem/grid_item_static_modifier.cpp",
       "bridge/grid/grid_model_impl.cpp",
       "bridge/griditem/grid_item_model_impl.cpp",
     ]

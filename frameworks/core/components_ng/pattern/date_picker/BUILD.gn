@@ -30,9 +30,7 @@ build_component_ng("date_picker_pattern_ng") {
     "datepicker_pattern.cpp",
   ]
 
-  if (!ace_engine_feature_wearable) {
-    sources += [ "datepicker_dialog_view.cpp" ]
-  }
+  sources += [ "datepicker_dialog_view.cpp" ]
 
   ark_sources = [
     "bridge/arkts_native_date_picker_bridge.cpp",
@@ -44,13 +42,11 @@ build_component_ng("date_picker_pattern_ng") {
   ]
 
   if (!is_arkui_x) {
-    if (!ace_engine_feature_wearable) {
-      ark_sources += [
-        "bridge/date_picker_dialog_extender.cpp",
-        "bridge/datepickerdialog_static_modifier.cpp",
-        "bridge/datepicker_static_modifier.cpp"
-      ]
-    }
+    ark_sources += [
+      "bridge/date_picker_dialog_extender.cpp",
+      "bridge/datepickerdialog_static_modifier.cpp",
+      "bridge/datepicker_static_modifier.cpp"
+    ]
   }
 
   if (!build_ohos_sdk) {

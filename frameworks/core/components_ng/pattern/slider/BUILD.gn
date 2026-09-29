@@ -38,13 +38,8 @@ build_component_ng("slider_pattern_ng") {
   if (!is_arkui_x) {
     ark_sources += [
       "bridge/slider_model_impl.cpp",
+      "bridge/slider_static_modifier.cpp",
     ]
-
-    if (!ace_engine_feature_wearable) {
-      ark_sources += [
-        "bridge/slider_static_modifier.cpp",
-      ]
-    }
   }
 
   if (!build_ohos_sdk) {

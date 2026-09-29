@@ -36,10 +36,8 @@ build_component_ng("texttimer_pattern_ng") {
   ]
 
   if (!is_arkui_x) {
-    if (!ace_engine_feature_wearable) {
-      if (include_generated_sources) {
-        ark_sources += [ "bridge/text_timer_static_modifier.cpp" ]
-      }
+    if (include_generated_sources) {
+      ark_sources += [ "bridge/text_timer_static_modifier.cpp" ]
     }
   }
   if (!is_arkui_x) {

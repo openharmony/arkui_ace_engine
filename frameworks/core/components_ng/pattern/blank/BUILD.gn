@@ -31,11 +31,6 @@ build_component_ng("blank_pattern_ng") {
   if (!is_arkui_x) {
     ark_sources += [
       "bridge/blank_model_impl.cpp",
-    ]
-  }
-
-  if (!is_arkui_x && !ace_engine_feature_wearable) {
-    ark_sources += [
       "bridge/blank_static_modifier.cpp",
     ]
   }

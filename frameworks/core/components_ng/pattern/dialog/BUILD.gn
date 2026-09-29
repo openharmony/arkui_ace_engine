@@ -40,14 +40,12 @@ build_component_ng("dialog_pattern_ng") {
   ]
 
   if (!is_arkui_x) {
-    if (!ace_engine_feature_wearable) {
-      ark_sources += [
-        "action_sheet/bridge/action_sheet_static_accessor.cpp",
-        "alert_dialog/bridge/alert_dialog_static_accessor.cpp",
-        "custom_dialog/bridge/custom_dialog_controller_static_extender_accessor.cpp",
-        "custom_dialog/bridge/custom_dialog_controller_static_peer_impl.cpp",
-      ]
-    }
+    ark_sources += [
+      "action_sheet/bridge/action_sheet_static_accessor.cpp",
+      "alert_dialog/bridge/alert_dialog_static_accessor.cpp",
+      "custom_dialog/bridge/custom_dialog_controller_static_extender_accessor.cpp",
+      "custom_dialog/bridge/custom_dialog_controller_static_peer_impl.cpp",
+    ]
   }
 
   if (!build_ohos_sdk) {

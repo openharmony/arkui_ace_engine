@@ -52,15 +52,10 @@ build_component_ng("checkbox_pattern_ng") {
     ark_sources += [
       "checkbox_model_impl.cpp",
       "../checkboxgroup/checkboxgroup_model_impl.cpp",
+      "bridge/checkbox_static_modifier.cpp",
+      "../checkboxgroup/bridge/checkboxgroup_static_modifier.cpp",
+      "../checkboxgroup/bridge/checkboxgroup_static_configuration_accessor.cpp",
     ]
-
-    if (!ace_engine_feature_wearable) {
-      ark_sources += [
-        "bridge/checkbox_static_modifier.cpp",
-        "../checkboxgroup/bridge/checkboxgroup_static_modifier.cpp",
-        "../checkboxgroup/bridge/checkboxgroup_static_configuration_accessor.cpp",
-      ]
-    }
   }
 
   if (!build_ohos_sdk) {

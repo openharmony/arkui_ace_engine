@@ -35,11 +35,9 @@ build_component_ng("button_pattern_ng") {
 
   if (!is_arkui_x) {
     ark_sources += [
-        "button_model_impl.cpp",
+      "button_model_impl.cpp",
+      "bridge/button_static_modifier.cpp"
     ]
-    if (!ace_engine_feature_wearable) {
-      ark_sources += [ "bridge/button_static_modifier.cpp" ]
-    }
   }
 
   if (!build_ohos_sdk) {

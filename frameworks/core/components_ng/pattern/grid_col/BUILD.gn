@@ -29,7 +29,7 @@ build_component_ng("grid_col_pattern_ng") {
     "bridge/grid_col_dynamic_module.cpp",
   ]
 
-  if (!is_arkui_x && !ace_engine_feature_wearable) {
+  if (!is_arkui_x) {
     ark_sources += [
       "bridge/grid_col_static_modifier.cpp",
     ]

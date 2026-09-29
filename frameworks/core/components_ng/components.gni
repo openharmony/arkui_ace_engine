@@ -233,9 +233,7 @@ template("build_component_ng") {
             "napi:ace_napi",
             "node:node_header_notice",
           ]
-          if (!ace_engine_feature_wearable) {
-            defines += [ "INCLUDE_GENERATED_SOURCES" ]
-          }
+          defines += [ "INCLUDE_GENERATED_SOURCES" ]
         }
       }
 
