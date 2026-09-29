@@ -30,6 +30,20 @@
 #endif
 
 namespace OHOS::Ace::NG {
+namespace {
+bool RefreshPrevious(SizeF& previous, const SizeF& current)
+{
+    bool changed = current != previous;
+    previous = current;
+    return changed;
+}
+bool RefreshPrevious(OffsetF& previous, const OffsetF& current)
+{
+    bool changed = current != previous;
+    previous = current;
+    return changed;
+}
+} // namespace
 
 CanvasPattern::~CanvasPattern()
 {
@@ -110,34 +124,42 @@ RefPtr<NodePaintMethod> CanvasPattern::CreateNodePaintMethod()
 
 bool CanvasPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    ACE_SCOPED_TRACE("CanvasPattern::OnDirtyLayoutWrapperSwap");
-    bool needReset = !(config.skipMeasure || dirty->SkipMeasureContent());
+    ACE_SCOPED_TRACE("Canvas[%d] CanvasPattern::OnDirtyLayoutWrapperSwap", GetId());
+    recordNeedReset_ = recordNeedReset_ || !(config.skipMeasure || dirty->SkipMeasureContent());
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto context = host->GetContext();
     CHECK_NULL_RETURN(context, false);
-    context->AddAfterLayoutTask([weak = WeakClaim(this), config, needReset]() {
+    context->AddAfterLayoutTask([weak = WeakClaim(this), gen = ++onSizeChangedGen_]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->OnSizeChanged(config, needReset);
+        if (gen != pattern->onSizeChangedGen_) {
+            return;
+        }
+        pattern->OnSizeChanged(pattern->recordNeedReset_);
+        pattern->recordNeedReset_ = false;
+        pattern->onSizeChangedGen_ = 0;
     });
     return true;
 }
 
-void CanvasPattern::OnSizeChanged(const DirtySwapConfig& config, bool needReset)
+void CanvasPattern::OnSizeChanged(bool needReset)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     SizeF currentPixelGridRoundSize = geometryNode->GetPixelGridRoundSize();
-    bool pixelGridRoundSizeChange = currentPixelGridRoundSize != dirtyPixelGridRoundSize_;
-    lastDirtyPixelGridRoundSize_ = dirtyPixelGridRoundSize_;
-    dirtyPixelGridRoundSize_ = currentPixelGridRoundSize;
+    SizeF lastDirtyPixelGridRoundSize = dirtyPixelGridRoundSize_;
+    bool pixelGridRoundSizeChange = RefreshPrevious(dirtyPixelGridRoundSize_, currentPixelGridRoundSize);
+    bool frameSizeChange = RefreshPrevious(dirtyFrameSize_, geometryNode->GetFrameSize());
+    bool contentSizeChange = RefreshPrevious(dirtyContentSize_, geometryNode->GetContentSize());
+    bool frameOffsetChange = RefreshPrevious(dirtyFrameOffset_, geometryNode->GetFrameOffset());
+    bool contentOffsetChange = RefreshPrevious(dirtyContentOffset_, geometryNode->GetContentOffset());
 
     // Canvas is first time onReady && Visibility is None
     if (!needReset && (currentPixelGridRoundSize == SizeF { 0, 0 }) &&
-        (lastDirtyPixelGridRoundSize_ == SizeF { -1, -1 })) {
+        (lastDirtyPixelGridRoundSize == SizeF { -1, -1 })) {
         return;
     }
     // Visibility is None
@@ -151,35 +173,41 @@ void CanvasPattern::OnSizeChanged(const DirtySwapConfig& config, bool needReset)
         return;
     }
 
-    needReset = config.frameSizeChange || config.contentSizeChange;
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN)) {
-        needReset = needReset && pixelGridRoundSizeChange;
+        needReset = pixelGridRoundSizeChange && (frameSizeChange || contentSizeChange);
     } else {
-        needReset = needReset || config.frameOffsetChange || config.contentOffsetChange;
+        needReset = frameSizeChange || contentSizeChange || frameOffsetChange || contentOffsetChange;
     }
 
     if (needReset) {
         if (IsSupportImageAnalyzerFeature()) {
             imageAnalyzerManager_->UpdateAnalyzerUIConfig(geometryNode);
         }
-        auto renderContext = host->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        CHECK_NULL_VOID(contentModifier_);
-        contentModifier_->SetRenderContext(renderContext);
-        bool hybridRenderEnabled = false;
-#ifdef ENABLE_ROSEN_BACKEND
-        hybridRenderEnabled = Rosen::RSUIDirector::GetHybridRenderCanvasEnabled();
-#endif
-        if (hybridRenderEnabled) {
-            contentModifier_->ResetSurface(static_cast<int>(currentPixelGridRoundSize.Width()),
-                static_cast<int>(currentPixelGridRoundSize.Height()));
-        } else {
-            contentModifier_->SetNeedResetSurface();
-        }
-        CHECK_NULL_VOID(paintMethod_);
-        paintMethod_->UpdateRecordingCanvas(currentPixelGridRoundSize.Width(), currentPixelGridRoundSize.Height());
-        FireReadyEvent();
+        ResetSurfaceAndFireReady(currentPixelGridRoundSize);
     }
+}
+
+void CanvasPattern::ResetSurfaceAndFireReady(const SizeF& canvasSize)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    CHECK_NULL_VOID(contentModifier_);
+    contentModifier_->SetRenderContext(renderContext);
+    bool hybridRenderEnabled = false;
+#ifdef ENABLE_ROSEN_BACKEND
+    hybridRenderEnabled = Rosen::RSUIDirector::GetHybridRenderCanvasEnabled();
+#endif
+    if (hybridRenderEnabled) {
+        contentModifier_->ResetSurface(static_cast<int>(canvasSize.Width()),
+            static_cast<int>(canvasSize.Height()));
+    } else {
+        contentModifier_->SetNeedResetSurface();
+    }
+    CHECK_NULL_VOID(paintMethod_);
+    paintMethod_->UpdateRecordingCanvas(canvasSize.Width(), canvasSize.Height());
+    FireReadyEvent();
 }
 
 void CanvasPattern::SetAntiAlias(bool isEnabled)
