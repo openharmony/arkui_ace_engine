@@ -233,7 +233,7 @@ export class MonitorValueInternal implements IMonitorValue<Any>, ITrackedDecorat
             // check decide. Non-wildcard paths keep the old suppress
             // semantics: a thrown user lambda is treated as "no callback this
             // drain", matching the long-standing edge-case contract.
-            if (isFirstRun || this.enableWildcard === false) {
+            if (isFirstRun) {
                 StateMgmtConsole.log(
                     `Caught exception while reading monitor path ${this.path} value: ${e}.`);
                 return false;
