@@ -932,7 +932,11 @@ void ScrollablePattern::SetStartSnapAnimationCallback(const RefPtr<Scrollable>& 
     auto startSnapAnimationCallback = [weak = WeakClaim(this)](SnapAnimationOptions snapAnimationOptions) -> bool {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
-        return pattern->StartSnapAnimation(snapAnimationOptions);
+        bool started = pattern->StartSnapAnimation(snapAnimationOptions);
+        if (started) {
+            pattern->MarkUserScrollSource(snapAnimationOptions.source);
+        }
+        return started;
     };
     scrollable->SetStartSnapAnimationCallback(std::move(startSnapAnimationCallback));
 }
