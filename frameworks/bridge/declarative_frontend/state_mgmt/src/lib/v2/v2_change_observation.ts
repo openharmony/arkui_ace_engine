@@ -1929,29 +1929,32 @@ class ObserveV2 {
     names.forEach(name => snapshot[name] = this[name]);
     names.forEach(name => this[name] = new Set());
 
-    // Execute the task — any state changes here will be recorded in the cleared sets
-    let retValue;
     try {
-      retValue = task();     
-    } catch (error) {
-      stateMgmtConsole.applicationError(`UIUtils.applySync - task execution caught error ${error} !`);
-      throw error;
+      // Execute the task — any state changes here will be recorded in the cleared sets
+      let retValue;
+      try {
+        retValue = task();
+      } catch (error) {
+        stateMgmtConsole.applicationError(`UIUtils.applySync - task execution caught error ${error} !`);
+        throw error;
+      }
+
+      // Remove IDs added by task() from the original snapshot
+      names.forEach((name) =>
+        this[name].forEach(Set.prototype.delete, snapshot[name])
+      );
+
+      // Process the new changes immediately (may produce further changes) and
+      // remove IDs added by updateDirty2 from the original snapshot
+      this.updateDirty2(false, false, snapshot);
+
+      return retValue;
+    } finally {
+      // Restore unprocessed IDs from the snapshot and reset the counter
+      // on both success and error paths — applySyncRunningCount_ must never leak
+      names.forEach((name) => this[name] = snapshot[name]);
+      this.applySyncRunningCount_--;
     }
-
-    // Remove IDs added by task() from the original snapshot
-    names.forEach((name) =>
-      this[name].forEach(Set.prototype.delete, snapshot[name])
-    );
-
-    // Process the new changes immediately (may produce further changes) and
-    // remove IDs added by updateDirty2 from the original snapshot
-    this.updateDirty2(false, false, snapshot);
-
-    // Restore unprocessed IDs from the snapshot
-    names.forEach((name) => this[name] = snapshot[name]);
-
-    this.applySyncRunningCount_--;
-    return retValue;
   }
 
   // Immediately processes all updates
