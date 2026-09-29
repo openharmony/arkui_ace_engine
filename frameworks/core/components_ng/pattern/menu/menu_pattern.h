@@ -987,6 +987,8 @@ private:
     std::vector<RefPtr<FrameNode>> menuItems_;
     std::optional<int32_t> foldStatusChangedCallbackId_;
     std::optional<int32_t> halfFoldHoverCallbackId_;
+    WeakPtr<PipelineContext> foldStatusPipeline_;
+    WeakPtr<PipelineContext> halfFoldHoverPipeline_;
 
     bool isSelectMenu_ = false;
     bool isSelectMenuBackgroundColorJsview_ = true;
