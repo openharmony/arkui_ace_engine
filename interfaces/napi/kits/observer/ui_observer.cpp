@@ -166,6 +166,7 @@ void UIObserver::UnRegisterNavigationCallback(napi_value cb)
 {
     if (cb == nullptr) {
         unspecifiedNavigationListeners_.clear();
+        TAG_LOGI(AceLogTag::ACE_OBSERVER, "SubEvent op=off_all, kit=ArkUI, event=navDestinationUpdate");
         return;
     }
 
@@ -191,6 +192,8 @@ void UIObserver::UnRegisterNavigationCallback(std::string navigationId, napi_val
     auto& holder = iter->second;
     if (cb == nullptr) {
         holder.clear();
+        TAG_LOGI(AceLogTag::ACE_OBSERVER,
+            "SubEvent op=off_all, kit=ArkUI, event=navDestinationUpdate, id=%{public}s", navigationId.c_str());
         return;
     }
     holder.erase(
@@ -215,6 +218,9 @@ void UIObserver::UnRegisterNavigationCallback(int32_t navigationUniqueId, napi_v
     auto& holder = iter->second;
     if (cb == nullptr) {
         holder.clear();
+        TAG_LOGI(AceLogTag::ACE_OBSERVER,
+            "SubEvent op=off_all, kit=ArkUI, event=navDestinationUpdateByUniqueId, uniqueId=%{public}d",
+            navigationUniqueId);
         return;
     }
     holder.erase(
@@ -407,6 +413,7 @@ void UIObserver::UnRegisterRouterPageCallback(napi_env env, napi_value uiAbility
             auto& holder = abilityContextRouterPageListeners_[listenerPair.first];
             if (callback == nullptr) {
                 holder.clear();
+                TAG_LOGI(AceLogTag::ACE_OBSERVER, "SubEvent op=off_all, kit=ArkUI, event=routerPageUpdate");
             } else {
                 holder.erase(
                     std::remove_if(
@@ -440,6 +447,7 @@ void UIObserver::UnRegisterRouterPageCallback(int32_t uiContextInstanceId, napi_
     auto& holder = iter->second;
     if (callback == nullptr) {
         holder.clear();
+        TAG_LOGI(AceLogTag::ACE_OBSERVER, "SubEvent op=off_all, kit=ArkUI, event=routerPageUpdate");
         return;
     }
     holder.erase(
@@ -624,6 +632,7 @@ void UIObserver::UnRegisterDensityCallback(int32_t uiContextInstanceId, napi_val
     auto& holder = iter->second;
     if (callback == nullptr) {
         holder.clear();
+        TAG_LOGI(AceLogTag::ACE_OBSERVER, "SubEvent op=off_all, kit=ArkUI, event=densityUpdate");
         return;
     }
     holder.erase(
@@ -809,6 +818,7 @@ void UIObserver::UnRegisterNavDestinationSwitchCallback(napi_env env, napi_value
         auto& listeners = it->second;
         if (callback == nullptr) {
             listeners.clear();
+            TAG_LOGI(AceLogTag::ACE_OBSERVER, "SubEvent op=off_all, kit=ArkUI, event=navDestinationSwitch");
         } else {
             listeners.erase(std::remove_if(listeners.begin(), listeners.end(),
                 [callback](const std::shared_ptr<UIObserverListener>& registeredListener) {
@@ -855,6 +865,7 @@ void UIObserver::UnRegisterNavDestinationSwitchCallback(int32_t uiContextInstanc
     auto& listeners = it->second;
     if (callback == nullptr) {
         listeners.clear();
+        TAG_LOGI(AceLogTag::ACE_OBSERVER, "SubEvent op=off_all, kit=ArkUI, event=navDestinationSwitch");
     } else {
         listeners.erase(std::remove_if(listeners.begin(), listeners.end(),
             [callback](const std::shared_ptr<UIObserverListener>& registeredListener) {
@@ -1830,6 +1841,7 @@ void UIObserver::UnRegisterTabContentStateCallback(napi_value cb)
 {
     if (cb == nullptr) {
         tabContentStateListeners_.clear();
+        TAG_LOGI(AceLogTag::ACE_OBSERVER, "SubEvent op=off_all, kit=ArkUI, event=tabContentState");
         return;
     }
 
@@ -1854,6 +1866,8 @@ void UIObserver::UnRegisterTabContentStateCallback(const std::string& id, napi_v
     auto& holder = iter->second;
     if (cb == nullptr) {
         holder.clear();
+        TAG_LOGI(AceLogTag::ACE_OBSERVER,
+            "SubEvent op=off_all, kit=ArkUI, event=tabContentState, id=%{public}s", id.c_str());
         return;
     }
     holder.erase(
@@ -1912,6 +1926,7 @@ void UIObserver::UnRegisterTabChangeCallback(napi_value cb)
 {
     if (cb == nullptr) {
         tabChangeListeners_.clear();
+        TAG_LOGI(AceLogTag::ACE_OBSERVER, "SubEvent op=off_all, kit=ArkUI, event=tabChange");
         return;
     }
     tabChangeListeners_.erase(
@@ -1934,6 +1949,8 @@ void UIObserver::UnRegisterTabChangeCallback(const std::string& id, napi_value c
     auto& holder = iter->second;
     if (cb == nullptr) {
         holder.clear();
+        TAG_LOGI(AceLogTag::ACE_OBSERVER,
+            "SubEvent op=off_all, kit=ArkUI, event=tabChange, id=%{public}s", id.c_str());
         return;
     }
     holder.erase(
