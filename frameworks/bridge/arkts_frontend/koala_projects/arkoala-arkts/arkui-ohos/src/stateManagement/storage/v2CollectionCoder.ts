@@ -1026,6 +1026,11 @@ function restorePlainObject(target: Any, source: Any, classNameToCreator: Map<st
         }
     } catch (e) {}
 
+    if (typeof target !== 'object') {
+        reportError('TypeError: Receiver is not a JSObject', onError);
+        return;
+    }
+
     reflect.getInstanceFieldsRecursive(Class.of(realTarget as Object)).forEach((field: reflect.InstanceField) => {
         restoreField(field, realTarget, source, classNameToCreator, visitedTargets, visitedSources, onError);
     });
