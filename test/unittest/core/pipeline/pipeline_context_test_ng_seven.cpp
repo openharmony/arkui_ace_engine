@@ -2051,4 +2051,21 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest087, TestSize.Level1
     context_->stageManager_ = stageManagerBackup;
 }
 
+/**
+ * @tc.name: PipelineContextSevenTest088
+ * @tc.desc: Test SetContainerModalTitleHeightWithVp early return when not CONTAINER_MODAL.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextSevenTest088, TestSize.Level1)
+{
+    AssertValidContext();
+    auto originalWindowModal = context_->windowModal_;
+    context_->windowModal_ = WindowModal::NORMAL;
+
+    context_->SetContainerModalTitleHeightWithVp(50.0);
+    EXPECT_EQ(context_->windowModal_, WindowModal::NORMAL);
+
+    context_->windowModal_ = originalWindowModal;
+}
+
 } // namespace OHOS::Ace::NG

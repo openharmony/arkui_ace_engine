@@ -89,6 +89,7 @@ class InspectorOffscreenNodesMgr;
 class OverlayManager;
 class PostEventManager;
 class PrivacySensitiveManager;
+class ContainerModalPattern;
 class SafeAreaManager;
 class SelectOverlayManager;
 class SharedOverlayManager;
@@ -833,6 +834,7 @@ public:
     RefPtr<FrameNode> GetContainerModalNode() const;
     void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow);
     void SetContainerModalTitleHeight(int32_t height);
+    void SetContainerModalTitleHeightWithVp(double heightVp);
     int32_t GetContainerModalTitleHeight();
     bool GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons);
     void SubscribeContainerModalButtonsRectChange(
@@ -1376,6 +1378,8 @@ protected:
     void PostKeyboardAvoidTask();
 
 private:
+    RefPtr<ContainerModalPattern> GetContainerModalPatternForTitleHeight();
+
     void ExecuteSurfaceChangedCallbacks(int32_t newWidth, int32_t newHeight, WindowSizeChangeReason type);
 
     void FlushWindowStateChangedCallback(bool isShow);

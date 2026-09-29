@@ -235,7 +235,7 @@ void AppBarView::UpdateVisibilityOfMenuBarRow(const RefPtr<FrameNode>& menubarRo
 {
     CHECK_NULL_VOID(menubarRow);
     CHECK_NULL_VOID(container);
-    CHECK_EQUAL_VOID(container->IsSubWindow(), false);
+    CHECK_EQUAL_VOID(container->IsSubWindow() || container->IsPipWindow(), false);
     auto layoutProperty = menubarRow->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);

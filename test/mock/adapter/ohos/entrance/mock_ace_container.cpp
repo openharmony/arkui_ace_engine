@@ -81,6 +81,11 @@ bool AceContainer::IsCrossAxisWindow()
     return false;
 }
 
+bool AceContainer::IsPipWindow() const
+{
+    return false;
+}
+
 void AceContainer::DumpSimplifyTreeWithParamConfig(
     std::shared_ptr<JsonValue>& root, ParamConfig config, bool isInSubWindow)
 {}

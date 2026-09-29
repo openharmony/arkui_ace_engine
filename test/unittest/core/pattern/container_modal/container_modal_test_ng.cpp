@@ -14,6 +14,8 @@
  */
 #include "gtest/gtest.h"
 
+#include <limits>
+
 #define private public
 #define protected public
 #include "test/mock/frameworks/core/common/mock_resource_adapter.h"
@@ -1116,5 +1118,70 @@ HWTEST_F(ContainerModelTestNg, CheckNodeOnContainerModalTitle, TestSize.Level1)
     frameNode_->AddChild(toolbarItem);
     result = pattern_->CheckNodeOnContainerModalTitle(toolbarItem);
     EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: TitleHeightWithVpTest001
+ * @tc.desc: Test SetContainerModalTitleHeightWithVp with negative and zero height.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, TitleHeightWithVpTest001, TestSize.Level1)
+{
+    CreateContainerModal();
+
+    pattern_->windowMode_ = WindowMode::WINDOW_MODE_FLOATING;
+    pattern_->SetContainerModalTitleVisible(true, true);
+
+    /**
+     * @tc.steps: call SetContainerModalTitleHeightWithVp with negative height.
+     * @tc.expected: titleHeight_ is clamped to 0.
+     */
+    pattern_->SetContainerModalTitleHeightWithVp(-10.5);
+    EXPECT_DOUBLE_EQ(pattern_->titleHeight_.Value(), 0.0);
+    EXPECT_EQ(pattern_->GetContainerModalTitleHeight(), 0);
+
+    /**
+     * @tc.steps: call SetContainerModalTitleHeightWithVp with zero height.
+     * @tc.expected: titleHeight_ is 0.
+     */
+    pattern_->SetContainerModalTitleHeightWithVp(0.0);
+    EXPECT_DOUBLE_EQ(pattern_->titleHeight_.Value(), 0.0);
+    EXPECT_EQ(pattern_->GetContainerModalTitleHeight(), 0);
+}
+
+/**
+ * @tc.name: TitleHeightWithVpTest002
+ * @tc.desc: Test SetContainerModalTitleHeightWithVp with NaN and infinite height.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, TitleHeightWithVpTest002, TestSize.Level1)
+{
+    CreateContainerModal();
+
+    pattern_->windowMode_ = WindowMode::WINDOW_MODE_FLOATING;
+    pattern_->SetContainerModalTitleVisible(true, true);
+
+    /**
+     * @tc.steps: set a valid height first.
+     * @tc.expected: titleHeight_ is the valid value.
+     */
+    pattern_->SetContainerModalTitleHeightWithVp(50.0);
+    EXPECT_DOUBLE_EQ(pattern_->titleHeight_.Value(), 50.0);
+
+    /**
+     * @tc.steps: call SetContainerModalTitleHeightWithVp with NaN.
+     * @tc.expected: NaN is rejected, titleHeight_ keeps the previous value.
+     */
+    pattern_->SetContainerModalTitleHeightWithVp(std::numeric_limits<double>::quiet_NaN());
+    EXPECT_DOUBLE_EQ(pattern_->titleHeight_.Value(), 50.0);
+
+    /**
+     * @tc.steps: call SetContainerModalTitleHeightWithVp with positive and negative infinity.
+     * @tc.expected: non-finite values are rejected, titleHeight_ keeps the previous value.
+     */
+    pattern_->SetContainerModalTitleHeightWithVp(std::numeric_limits<double>::infinity());
+    EXPECT_DOUBLE_EQ(pattern_->titleHeight_.Value(), 50.0);
+    pattern_->SetContainerModalTitleHeightWithVp(-std::numeric_limits<double>::infinity());
+    EXPECT_DOUBLE_EQ(pattern_->titleHeight_.Value(), 50.0);
 }
 } // namespace OHOS::Ace::NG

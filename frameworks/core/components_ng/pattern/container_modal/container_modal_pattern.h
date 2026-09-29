@@ -179,6 +179,7 @@ public:
     void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow);
     bool GetContainerModalTitleVisible(bool isImmersive);
     virtual void SetContainerModalTitleHeight(int32_t height);
+    virtual void SetContainerModalTitleHeightWithVp(double heightVp);
     void SetContainerModalTitleWithoutButtonsHeight(Dimension height);
     void SetControlButtonsRowHeight(Dimension height);
     int32_t GetContainerModalTitleHeight();
