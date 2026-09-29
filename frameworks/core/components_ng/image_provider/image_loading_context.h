@@ -28,6 +28,8 @@
 
 namespace OHOS::Ace::NG {
 
+constexpr double IMAGE_PIXEL_COUNT_THRESHOLD = 50000000.0;
+
 using PendingMakeCanvasImageTask = std::function<void()>;
 // [ImageLoadingContext] do two things:
 // 1. Provide interfaces for who owns it, notify it's owner when loading events come.
@@ -82,6 +84,10 @@ public:
     /* interfaces to set properties */
     void SetImageFit(ImageFit imageFit);
     void SetAutoResize(bool needResize);
+    void SetForcePixelCap(bool forcePixelCap)
+    {
+        forcePixelCap_ = forcePixelCap;
+    }
     void SetSourceSize(const std::optional<SizeF>& sourceSize = std::nullopt);
     const ImageSourceInfo GetSrc() const
     {
@@ -220,6 +226,7 @@ private:
     bool isHdrDecoderNeed_ = false;
     PixelFormat photoDecodeFormat_ = PixelFormat::UNKNOWN;
     bool autoResize_ = true;
+    bool forcePixelCap_ = false;
     bool syncLoad_ = false;
     bool isSceneBoardWindow_ = false;
 
