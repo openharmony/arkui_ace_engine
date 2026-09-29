@@ -16,6 +16,7 @@
 #include "frameworks/core/components_ng/base/view_advanced_register.h"
 #include "frameworks/core/components_ng/pattern/root/root_pattern.h"
 #ifdef ENABLE_SPLIT_MODE
+#include "core/common/force_split/force_split_utils.h"
 #include "frameworks/core/components_ng/pattern/stage/force_split/parallel_page_pattern.h"
 #include "frameworks/core/components_ng/pattern/stage/force_split/parallel_stage_manager.h"
 #include "frameworks/core/components_ng/pattern/stage/force_split/parallel_stage_pattern.h"
@@ -35,8 +36,7 @@ std::shared_ptr<ViewAdvancedRegister> ViewAdvancedRegister::GetInstance()
 RefPtr<PagePattern> ViewAdvancedRegister::CreatePagePattern(const RefPtr<PageInfo>& pageInfo)
 {
 #ifdef ENABLE_SPLIT_MODE
-    if (SystemProperties::GetDeviceType() == DeviceType::TABLET ||
-        SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE ||
+    if (ForceSplitUtils::IsForceSplitSupportedDeviceType() ||
         SystemProperties::IsForcibleLandscapeEnabled()) {
         return AceType::MakeRefPtr<ParallelPagePattern>(pageInfo);
     }
@@ -48,8 +48,7 @@ RefPtr<Pattern> ViewAdvancedRegister::GeneratePattern(const std::string& pattern
 {
     if (patternName == V2::STAGE_ETS_TAG) {
 #ifdef ENABLE_SPLIT_MODE
-        if (SystemProperties::GetDeviceType() == DeviceType::TABLET ||
-            SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE ||
+        if (ForceSplitUtils::IsForceSplitSupportedDeviceType() ||
             SystemProperties::IsForcibleLandscapeEnabled()) {
             return AceType::MakeRefPtr<ParallelStagePattern>();
         }
@@ -65,8 +64,7 @@ RefPtr<Pattern> ViewAdvancedRegister::GeneratePattern(const std::string& pattern
 RefPtr<StageManager> ViewAdvancedRegister::GenerateStageManager(const RefPtr<FrameNode>& stage)
 {
 #ifdef ENABLE_SPLIT_MODE
-    if (SystemProperties::GetDeviceType() == DeviceType::TABLET ||
-        SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE ||
+    if (ForceSplitUtils::IsForceSplitSupportedDeviceType() ||
         SystemProperties::IsForcibleLandscapeEnabled()) {
         return AceType::MakeRefPtr<ParallelStageManager>(stage);
     }

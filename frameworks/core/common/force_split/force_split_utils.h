@@ -53,6 +53,7 @@ struct ForceSplitParam {
 
 class ForceSplitUtils {
 public:
+    static bool IsForceSplitSupportedDeviceType();
     static RefPtr<FrameNode> CreatePlaceHolderContent(const RefPtr<PipelineContext>& context);
     static RefPtr<NavDestinationGroupNode> CreateNavDestinationProxyNode();
     static bool IsHomePageNavDestination(const RefPtr<NavDestinationGroupNode>& node);

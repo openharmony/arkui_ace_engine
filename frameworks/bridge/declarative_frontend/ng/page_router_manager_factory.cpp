@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/ng/page_router_manager_factory.h"
 #ifdef ENABLE_SPLIT_MODE
+#include "core/common/force_split/force_split_utils.h"
 #include "frameworks/bridge/declarative_frontend/ng/force_split/parallel_page_router_manager.h"
 #endif
 namespace OHOS::Ace::NG {
@@ -23,7 +24,7 @@ RefPtr<PageRouterManager> PageRouterManagerFactory::CreateManager()
 #ifdef ENABLE_SPLIT_MODE
     auto type = SystemProperties::GetDeviceType();
     TAG_LOGI(AceLogTag::ACE_ROUTER, "createManager, deviceType: %{public}d", static_cast<int32_t>(type));
-    if (type == DeviceType::TABLET || type == DeviceType::TWO_IN_ONE ||
+    if (ForceSplitUtils::IsForceSplitSupportedDeviceType() ||
         SystemProperties::IsForcibleLandscapeEnabled()) {
         TAG_LOGI(AceLogTag::ACE_ROUTER, "will create parallel PageRouterManager!");
         return AceType::MakeRefPtr<ParallelPageRouterManager>();

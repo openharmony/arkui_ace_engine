@@ -23,6 +23,7 @@
 #include "base/geometry/dimension.h"
 #include "base/json/json_util.h"
 #include "base/utils/string_utils.h"
+#include "base/utils/system_properties.h"
 #include "core/common/container.h"
 #include "core/common/force_split/force_split_constants.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -36,6 +37,13 @@
 #include "core/components_ng/manager/navigation/navigation_manager.h"
 
 namespace OHOS::Ace::NG {
+
+bool ForceSplitUtils::IsForceSplitSupportedDeviceType()
+{
+    const auto type = SystemProperties::GetDeviceType();
+    return type == DeviceType::TABLET || type == DeviceType::TWO_IN_ONE ||
+           type == DeviceType::TV || type == DeviceType::CAR;
+}
 
 namespace {
 constexpr Dimension APP_ICON_SIZE = 64.0_vp;
