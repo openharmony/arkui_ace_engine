@@ -5661,6 +5661,8 @@ void OverlayManager::RemoveFilterWithNode(const RefPtr<FrameNode>& filterNode)
         TAG_LOGI(AceLogTag::ACE_OVERLAY, "filter has no parent, skip remove filterId: %{public}d", filterNode->GetId());
     }
 
+    RemoveFilterOnDisappear(filterNode->GetId());
+
     auto columnNode = filterColumnNodeWeak_.Upgrade();
     auto isRemoveCurrentFilter = columnNode && columnNode->GetId() == filterNode->GetId();
     if (isRemoveCurrentFilter) {

@@ -316,6 +316,7 @@ void MenuPattern::OnAttachToFrameNode()
     };
     foldStatusChangedCallbackId_ =
         pipelineContext->RegisterFoldStatusChangedCallback(std::move(foldStatusChangeCallback));
+    foldStatusPipeline_ = pipelineContext;
 }
 
 int32_t MenuPattern::RegisterHalfFoldHover(const RefPtr<FrameNode>& menuNode)
@@ -346,19 +347,24 @@ int32_t MenuPattern::RegisterHalfFoldHover(const RefPtr<FrameNode>& menuNode)
             pipelineContext->FlushUITasks();
         });
     });
+    halfFoldHoverPipeline_ = pipelineContext;
     return callbackId;
 }
 
 void MenuPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
     if (foldStatusChangedCallbackId_.has_value()) {
-        pipeline->UnRegisterFoldStatusChangedCallback(foldStatusChangedCallbackId_.value_or(-1));
+        auto pipeline = foldStatusPipeline_.Upgrade();
+        if (pipeline) {
+            pipeline->UnRegisterFoldStatusChangedCallback(foldStatusChangedCallbackId_.value_or(-1));
+        }
     }
     if (halfFoldHoverCallbackId_.has_value()) {
-        pipeline->UnRegisterHalfFoldHoverChangedCallback(halfFoldHoverCallbackId_.value_or(-1));
+        auto pipeline = halfFoldHoverPipeline_.Upgrade();
+        if (pipeline) {
+            pipeline->UnRegisterHalfFoldHoverChangedCallback(halfFoldHoverCallbackId_.value_or(-1));
+        }
     }
 
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
