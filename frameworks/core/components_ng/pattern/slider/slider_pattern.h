@@ -450,6 +450,7 @@ private:
     void ApplyBlendMode(const RefPtr<FrameNode>& frameNode);
     std::shared_ptr<Rosen::BrightnessBlender> CreateBrightnessBlender();
     void ResetHostMaterialEffects();
+    void ResetHostMaterialEffectsInner();
     AnimationOption CreateDragAnimationOption() const;
     AnimationOption CreateLowGradeSpringOption() const;
     float GetBlockRadius() const;
