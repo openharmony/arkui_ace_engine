@@ -242,6 +242,7 @@ interface ImageAnimatorAttribute extends CommonAttribute {
     fixedSize(value: boolean): ImageAnimatorAttribute;
     preDecode(value: number): ImageAnimatorAttribute;
     fillMode(value: FillMode): ImageAnimatorAttribute;
+    interpolation(value: ImageInterpolation): ImageAnimatorAttribute;
     iterations(value: number): ImageAnimatorAttribute;
     onStart(event: () => void): ImageAnimatorAttribute;
     onPause(event: () => void): ImageAnimatorAttribute;

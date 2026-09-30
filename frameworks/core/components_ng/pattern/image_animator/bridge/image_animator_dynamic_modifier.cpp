@@ -39,6 +39,7 @@ namespace OHOS::Ace::NG {
 constexpr int32_t DEFAULT_DURATION = 1000; // ms
 constexpr int32_t DEFAULT_ITERATION = 1;
 constexpr FillMode DEFAULT_FILL_MODE = FillMode::FORWARDS;
+constexpr ImageInterpolation DEFAULT_INTERPOLATION = ImageInterpolation::LOW;
 constexpr uint32_t DEFAULT_ITERATIONS = 1;
 constexpr int32_t IMAGES_LENGTH = 4;
 constexpr int32_t DEFAULT_STATE = 0;
@@ -133,6 +134,27 @@ void ResetFillMode(ArkUINodeHandle node)
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     ImageAnimatorModelNG::SetFillMode(frameNode, static_cast<int32_t>(DEFAULT_FILL_MODE));
+}
+
+void SetInterpolation(ArkUINodeHandle node, int32_t interpolation)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+
+    if (interpolation < static_cast<int32_t>(ImageInterpolation::NONE) ||
+        interpolation > static_cast<int32_t>(ImageInterpolation::HIGH)) {
+        ImageAnimatorModelNG::ResetImageInterpolation(frameNode);
+        return;
+    }
+
+    ImageAnimatorModelNG::SetImageInterpolation(frameNode, interpolation);
+}
+
+void ResetInterpolation(ArkUINodeHandle node)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageAnimatorModelNG::ResetImageInterpolation(frameNode);
 }
 
 void SetReverse(ArkUINodeHandle node, uint32_t value)
@@ -308,6 +330,13 @@ int32_t GetFillMode(ArkUINodeHandle node)
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_RETURN(frameNode, static_cast<int32_t>(DEFAULT_FILL_MODE));
     return ImageAnimatorModelNG::GetFillMode(frameNode);
+}
+
+int32_t GetInterpolation(ArkUINodeHandle node)
+{
+    auto* frameNode = GetFrameNode(node);
+    CHECK_NULL_RETURN(frameNode, static_cast<int32_t>(DEFAULT_INTERPOLATION));
+    return ImageAnimatorModelNG::GetInterpolation(frameNode);
 }
 
 int32_t GetIteration(ArkUINodeHandle node)
@@ -559,6 +588,17 @@ void SetFillModeImpl(ArkUINodeHandle node, int32_t fillMode)
     GetImageAnimatorModelImpl()->SetFillMode(value);
 }
 
+void SetInterpolationImpl(ArkUINodeHandle node, int32_t interpolation)
+{
+    int32_t value = interpolation;
+    if (value < static_cast<int32_t>(ImageInterpolation::NONE) ||
+        value > static_cast<int32_t>(ImageInterpolation::HIGH)) {
+        value = static_cast<int32_t>(DEFAULT_INTERPOLATION);
+    }
+
+    GetImageAnimatorModelImpl()->SetImageInterpolation(value);
+}
+
 void SetReverseImpl(ArkUINodeHandle node, uint32_t value)
 {
     GetImageAnimatorModelImpl()->SetIsReverse(static_cast<bool>(value));
@@ -652,6 +692,8 @@ const ArkUIImageAnimatorModifier* GetImageAnimatorDynamicModifier()
             .resetFixedSize = nullptr,
             .setFillMode = ImageAnimatorModifier::SetFillModeImpl,
             .resetFillMode = nullptr,
+            .setInterpolation = ImageAnimatorModifier::SetInterpolationImpl,
+            .resetInterpolation = nullptr,
             .setReverse = ImageAnimatorModifier::SetReverseImpl,
             .resetReverse = nullptr,
             .setImages = ImageAnimatorModifier::SetImagesImpl,
@@ -667,6 +709,7 @@ const ArkUIImageAnimatorModifier* GetImageAnimatorDynamicModifier()
             .getState = nullptr,
             .getFixedSize = nullptr,
             .getFillMode = nullptr,
+            .getInterpolation = nullptr,
             .getIteration = nullptr,
             .getImagesSize = nullptr,
             .setImageAnimatorOnStart = ImageAnimatorModifier::SetImageAnimatorOnStartImpl,
@@ -701,6 +744,8 @@ const ArkUIImageAnimatorModifier* GetImageAnimatorDynamicModifier()
         .resetFixedSize = ImageAnimatorModifier::ResetFixedSize,
         .setFillMode = ImageAnimatorModifier::SetFillMode,
         .resetFillMode = ImageAnimatorModifier::ResetFillMode,
+        .setInterpolation = ImageAnimatorModifier::SetInterpolation,
+        .resetInterpolation = ImageAnimatorModifier::ResetInterpolation,
         .setReverse = ImageAnimatorModifier::SetReverse,
         .resetReverse = ImageAnimatorModifier::ResetReverse,
         .setImages = ImageAnimatorModifier::SetImages,
@@ -716,6 +761,7 @@ const ArkUIImageAnimatorModifier* GetImageAnimatorDynamicModifier()
         .getState = ImageAnimatorModifier::GetState,
         .getFixedSize = ImageAnimatorModifier::GetIsFixedSize,
         .getFillMode = ImageAnimatorModifier::GetFillMode,
+        .getInterpolation = ImageAnimatorModifier::GetInterpolation,
         .getIteration = ImageAnimatorModifier::GetIteration,
         .getImagesSize = ImageAnimatorModifier::GetImagesSize,
         .setImageAnimatorOnStart = ImageAnimatorModifier::SetImageAnimatorOnStart,
@@ -751,6 +797,8 @@ const CJUIImageAnimatorModifier* GetCJUIImageAnimatorModifier()
         .resetFixedSize = ImageAnimatorModifier::ResetFixedSize,
         .setFillMode = ImageAnimatorModifier::SetFillMode,
         .resetFillMode = ImageAnimatorModifier::ResetFillMode,
+        .setInterpolation = ImageAnimatorModifier::SetInterpolation,
+        .resetInterpolation = ImageAnimatorModifier::ResetInterpolation,
         .setReverse = ImageAnimatorModifier::SetReverse,
         .resetReverse = ImageAnimatorModifier::ResetReverse,
         .setImages = ImageAnimatorModifier::SetImages,
@@ -764,6 +812,7 @@ const CJUIImageAnimatorModifier* GetCJUIImageAnimatorModifier()
         .getState = ImageAnimatorModifier::GetState,
         .getFixedSize = ImageAnimatorModifier::GetIsFixedSize,
         .getFillMode = ImageAnimatorModifier::GetFillMode,
+        .getInterpolation = ImageAnimatorModifier::GetInterpolation,
         .getIteration = ImageAnimatorModifier::GetIteration,
         .getImagesSize = ImageAnimatorModifier::GetImagesSize,
     };

@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/image_animator/image_animator_pattern.h"
 
 #include "base/image/controlled_animator.h"
+#include "core/common/container.h"
 #include "base/utils/multi_thread.h"
 #include "core/components/image/image_theme.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -38,6 +39,61 @@ ImageAnimatorPattern::ImageAnimatorPattern()
     controlledAnimator_->SetFillMode(FillMode::FORWARDS);
     controlledAnimator_->SetDuration(DEFAULT_DURATION);
     ResetFormAnimationFlag();
+}
+
+void ImageAnimatorPattern::SetImageInterpolation(ImageInterpolation interpolation)
+{
+    if (interpolation_ == interpolation) {
+        return;
+    }
+    interpolation_ = interpolation;
+    ApplyImageInterpolation();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void ImageAnimatorPattern::ResetImageInterpolation()
+{
+    if (!interpolation_.has_value()) {
+        return;
+    }
+    interpolation_.reset();
+    ApplyImageInterpolation();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void ImageAnimatorPattern::ApplyImageInterpolation()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto applyInterpolation = [this](const RefPtr<FrameNode>& imageNode) {
+        CHECK_NULL_VOID(imageNode);
+        auto paintProperty = imageNode->GetPaintProperty<ImageRenderProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        if (interpolation_.has_value()) {
+            paintProperty->UpdateImageInterpolation(interpolation_.value());
+        } else {
+            paintProperty->ResetImageInterpolation();
+        }
+    };
+    for (const auto& child : host->GetChildren()) {
+        applyInterpolation(AceType::DynamicCast<FrameNode>(child));
+    }
+    for (auto& cacheImage : cacheImages_) {
+        applyInterpolation(cacheImage.imageNode);
+    }
+}
+
+ImageInterpolation ImageAnimatorPattern::GetDefaultInterpolation() const
+{
+    auto container = Container::Current();
+    if (container && container->IsSceneBoardWindow()) {
+        return ImageInterpolation::NONE;
+    }
+    return ImageInterpolation::LOW;
 }
 
 std::vector<PictureInfo> ImageAnimatorPattern::CreatePictureAnimation(int32_t size)
@@ -343,6 +399,7 @@ void ImageAnimatorPattern::OnModifyDone()
     if (size > 0) {
         GenerateCachedImages();
     }
+    ApplyImageInterpolation();
     auto index = nowImageIndex_;
     if ((status_ == ControlledAnimator::ControlStatus::IDLE || status_ == ControlledAnimator::ControlStatus::STOPPED) &&
         !firstUpdateEvent_) {
@@ -490,6 +547,9 @@ void ImageAnimatorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const I
     json->PutExtAttr("fixedSize", fixedSize_ ? "true" : "false", filter);
     static const char* FILL_MODE[] = { "FillMode.None", "FillMode.Forwards", "FillMode.Backwards", "FillMode.Both" };
     json->PutExtAttr("fillMode", FILL_MODE[static_cast<int32_t>(controlledAnimator_->GetFillMode())], filter);
+    static const char* INTERPOLATION[] = { "ImageInterpolation.None", "ImageInterpolation.Low",
+        "ImageInterpolation.Medium", "ImageInterpolation.High" };
+    json->PutExtAttr("interpolation", INTERPOLATION[static_cast<int32_t>(GetInterpolation())], filter);
     json->PutExtAttr("iterations", std::to_string(controlledAnimator_->GetIteration()).c_str(), filter);
     json->PutExtAttr("images", ImagesToString().c_str(), filter);
     json->PutExtAttr("monitorInvisibleArea", isAutoMonitorInvisibleArea_ ? "true" : "false", filter);

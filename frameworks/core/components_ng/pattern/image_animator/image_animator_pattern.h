@@ -105,6 +105,13 @@ public:
         fixedSize_ = fixedSize;
     }
 
+    void SetImageInterpolation(ImageInterpolation interpolation);
+    void ResetImageInterpolation();
+    ImageInterpolation GetInterpolation() const
+    {
+        return interpolation_.value_or(GetDefaultInterpolation());
+    }
+
     void OnInActiveImageAnimator()
     {
         if (status_ == ControlledAnimator::ControlStatus::RUNNING) {
@@ -201,6 +208,8 @@ private:
     void CheckClearUserDefinedSize(const RefPtr<LayoutProperty>& layoutProperty);
     void AdaptSelfSize();
     void SetShowingIndex(int32_t index);
+    void ApplyImageInterpolation();
+    ImageInterpolation GetDefaultInterpolation() const;
     void DisablePreAnimatedImageAnimation(uint32_t index);
     void ControlAnimatedImageAnimation(const RefPtr<FrameNode>& imageFrameNode, bool play);
     void EnableFirstAnimatedImageAnimation();
@@ -233,6 +242,7 @@ private:
     int32_t nowImageIndex_ = 0;
     bool isReverse_ = false;
     bool fixedSize_ = true;
+    std::optional<ImageInterpolation> interpolation_;
 
     bool isImagesSame_ = false;
     bool imagesChangedFlag_ = false;

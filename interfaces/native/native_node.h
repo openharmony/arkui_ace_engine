@@ -9968,6 +9968,17 @@ typedef enum {
     */
     NODE_IMAGE_ANIMATOR_ITERATION = 19006,
     /**
+     * @brief 设置帧动画中帧图片缩放时的插值质量。支持属性设置，属性重置和属性获取接口。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：图片缩放插值质量，参数类型为{@link ArkUI_ImageInterpolation}，默认值为LOW。 \n
+     *
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].i32：图片缩放插值质量，参数类型为{@link ArkUI_ImageInterpolation}。 \n
+     *
+    */
+    NODE_IMAGE_ANIMATOR_INTERPOLATION = 19007,
+    /**
      * @brief Defines the disabled date range of the calendar picker.
      * This attribute can be set, reset, and obtained as required through APIs.
      *

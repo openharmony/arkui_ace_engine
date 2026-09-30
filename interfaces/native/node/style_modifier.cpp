@@ -19977,6 +19977,35 @@ const ArkUI_AttributeItem* GetImageAnimatorIterations(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+int32_t SetImageAnimatorInterpolation(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (item->size == 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (item->value[0].i32 < NUM_0 || item->value[0].i32 > NUM_3) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getImageAnimatorModifier()->setInterpolation(node->uiNodeHandle, item->value[0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetImageAnimatorInterpolation(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getImageAnimatorModifier()->resetInterpolation(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetImageAnimatorInterpolation(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    int32_t value = fullImpl->getNodeModifiers()->getImageAnimatorModifier()->getInterpolation(node->uiNodeHandle);
+    g_numberValues[NUM_0].i32 = value;
+    g_attributeItem.size = RETURN_SIZE_ONE;
+    return &g_attributeItem;
+}
+
 // grid attribute
 int32_t SetGridColumnsTemplate(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
@@ -22568,7 +22597,8 @@ void ResetRadioAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 int32_t SetImageAnimatorAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item)
 {
     static Setter* setters[] = { SetImageAnimatorSrc, SetImageAnimatorState, SetImageAnimatorDuration,
-        SetImageAnimatorReverse, SetImageAnimatorFixedSize, SetImageAnimatorFillMode, SetImageAnimatorIterations };
+        SetImageAnimatorReverse, SetImageAnimatorFixedSize, SetImageAnimatorFillMode, SetImageAnimatorIterations,
+        SetImageAnimatorInterpolation };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "imageAnimator node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -22579,7 +22609,8 @@ int32_t SetImageAnimatorAttribute(ArkUI_NodeHandle node, int32_t subTypeId, cons
 const ArkUI_AttributeItem* GetImageAnimatorAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Getter* getters[] = { GetImageAnimatorSrc, GetImageAnimatorState, GetImageAnimatorDuration,
-        GetImageAnimatorReverse, GetImageAnimatorFixedSize, GetImageAnimatorFillMode, GetImageAnimatorIterations };
+        GetImageAnimatorReverse, GetImageAnimatorFixedSize, GetImageAnimatorFillMode, GetImageAnimatorIterations,
+        GetImageAnimatorInterpolation };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "imageAnimator node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -22591,7 +22622,7 @@ void ResetImageAnimatorAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Resetter* setters[] = { ResetImageAnimatorSrc, ResetImageAnimatorState, ResetImageAnimatorDuration,
         ResetImageAnimatorReverse, ResetImageAnimatorFixedSize, ResetImageAnimatorFillMode,
-        ResetImageAnimatorIterations };
+        ResetImageAnimatorIterations, ResetImageAnimatorInterpolation };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "imageAnimator node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

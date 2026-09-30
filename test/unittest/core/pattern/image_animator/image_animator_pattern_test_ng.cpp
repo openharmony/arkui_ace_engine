@@ -401,6 +401,49 @@ HWTEST_F(ImageAnimatorPatternTestNg, SetDuration, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ImageAnimatorPatternTestNg_SetImageInterpolation
+ * @tc.desc: Test SetImageInterpolation of ImageAnimator.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorPatternTestNg, SetImageInterpolation, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create imageAnimatorView and get frameNode.
+     * @tc.expected: step1. default interpolation is LOW.
+     */
+    CreateImageAnimator(3);
+    EXPECT_EQ(pattern_->GetInterpolation(), ImageInterpolation::LOW);
+    /**
+     * @tc.steps: step2. set interpolation to HIGH.
+     * @tc.expected: step2. pattern interpolation is HIGH.
+     */
+    pattern_->SetImageInterpolation(ImageInterpolation::HIGH);
+    EXPECT_EQ(pattern_->GetInterpolation(), ImageInterpolation::HIGH);
+    /**
+     * @tc.steps: step3. check child image node paint property.
+     * @tc.expected: step3. child image interpolation is HIGH.
+     */
+    auto childNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildren().front());
+    ASSERT_NE(childNode, nullptr);
+    auto paintProperty = childNode->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetImageInterpolation().value_or(ImageInterpolation::NONE), ImageInterpolation::HIGH);
+    /**
+     * @tc.steps: step4. set interpolation to NONE.
+     * @tc.expected: step4. pattern interpolation is NONE.
+     */
+    pattern_->SetImageInterpolation(ImageInterpolation::NONE);
+    EXPECT_EQ(pattern_->GetInterpolation(), ImageInterpolation::NONE);
+    EXPECT_EQ(paintProperty->GetImageInterpolation().value_or(ImageInterpolation::LOW), ImageInterpolation::NONE);
+    /**
+     * @tc.steps: step5. reset interpolation.
+     * @tc.expected: step5. pattern interpolation falls back to default LOW.
+     */
+    pattern_->ResetImageInterpolation();
+    EXPECT_EQ(pattern_->GetInterpolation(), ImageInterpolation::LOW);
+}
+
+/**
  * @tc.name: OnePicFinish001
  * @tc.desc: test Finish.
  * @tc.type: FUNC
