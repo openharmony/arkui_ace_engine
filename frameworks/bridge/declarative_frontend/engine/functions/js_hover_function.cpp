@@ -91,6 +91,7 @@ void JsHoverFunction::AccessibilityHoverExecute(bool isHover, AccessibilityHover
     JSRef<JSVal> hoverVal = JSRef<JSObject>::Cast(hoverObj);
     JSRef<JSVal> params[] = { isHoverParam, hoverVal };
     JsFunction::ExecuteJS((sizeof(params) / sizeof(params[0])), params);
+    hoverObj->Wrap<AccessibilityHoverInfo>(nullptr);
 }
 
 } // namespace OHOS::Ace::Framework
