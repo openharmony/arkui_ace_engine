@@ -30,6 +30,7 @@
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/event/pan_event.h"
+#include "core/components/common/properties/gradient.h"
 #include "core/animation/curve.h"
 
 namespace OHOS::Ace::NG {
@@ -56,9 +57,24 @@ public:
         headerNode_ = header;
     }
 
+    void SetFooterNode(const RefPtr<UINode>& footer)
+    {
+        footerNode_ = footer;
+    }
+
+    void SetBottomBarNode(const RefPtr<UINode>& bottomBar)
+    {
+        bottomBarNode_ = bottomBar;
+    }
+
     RefPtr<UINode> GetHeaderNode() const
     {
         return curHeaderNode_;
+    }
+
+    RefPtr<FrameNode> GetBottomBarContainerNode() const
+    {
+        return bottomBarContainerNode_;
     }
 
     RefPtr<FrameNode> GetHeaderContainerNode() const
@@ -81,6 +97,21 @@ public:
         return headerContainerMaskNode_;
     }
 
+    RefPtr<FrameNode> GetBottomBarMaskBlurNode() const
+    {
+        return bottomBarMaskBlurNode_;
+    }
+
+    RefPtr<FrameNode> GetBottomBarMaskNode() const
+    {
+        return bottomBarMaskNode_;
+    }
+
+    RefPtr<FrameNode> GetFooterContainerNode() const
+    {
+        return footerContainerNode_;
+    }
+
     void SetSwiperController(const RefPtr<SwiperController>& controller)
     {
         swiperController_ = controller;
@@ -98,30 +129,53 @@ public:
         return isScrollEffectEnabled_;
     }
 
+    bool IsBottomBarScrollEffectEnabled() const
+    {
+        return isBottomBarScrollEffectEnabled_;
+    }
+
 private:
     void OnModifyDone() override;
     void CreateTabListIfNeeded(const RefPtr<FrameNode>& tabsNode);
     void UpdateTabListIfNeeded();
     void UpdateHeaderNodeIfNeeded();
+    void UpdateFooterNodeIfNeeded();
+    void UpdateBottomBarNodeIfNeeded();
     void UpdateSearchNodeIfNeeded();
     void OnSearchChange(const std::u16string& newText);
     void CreateHeaderContainerIfNeeded();
+    void CreateBottomBarContainerIfNeeded();
     RefPtr<FrameNode> CreateSearchContainer();
     void CreateMaskNodeIfNeeded();
-    void OnTabListScroll(float totalOffset);
+    void CreateBottomBarMaskNodeIfNeeded();
+    void OnTabListScroll(float totalOffset, float scrollableDistance);
 
     // Gradual blur effect
     void InitHeaderContainerScrollEffect(bool isScrollEffectEnabled);
     void UpdateHeaderContainerBlurStyle(float scrollScale);
+    void InitBottomBarScrollEffect(bool isScrollEffectEnabled);
+    void UpdateBottomBarBlurStyle(float scrollScale);
+    void InitScrollEffectImpl(bool isScrollEffectEnabled, bool& isEnabledFlag, float& cachedScale,
+        const RefPtr<FrameNode>& maskBlurNode, const RefPtr<FrameNode>& maskNode,
+        GradientDirection direction);
+    void UpdateBlurStyleImpl(float scrollScale, float& cachedScale, bool isEnabled,
+        const RefPtr<FrameNode>& maskBlurNode, const RefPtr<FrameNode>& maskNode,
+        GradientDirection direction);
     RefPtr<FrameNode> CreateEffectNode(const std::string& tag);
 
     WeakPtr<FrameNode> tabsNode_ = nullptr;
     RefPtr<UINode> headerNode_ = nullptr;
+    RefPtr<UINode> footerNode_ = nullptr;
+    RefPtr<UINode> bottomBarNode_ = nullptr;
     std::optional<TabsSidebarSearchableOptions> incommingOptions_;
     TabsSidebarSearchableOptions searchableOptions_;
     RefPtr<UINode> curHeaderNode_ = nullptr;
+    RefPtr<UINode> curFooterNode_ = nullptr;
+    RefPtr<UINode> curBottomBarNode_ = nullptr;
     RefPtr<FrameNode> searchContainerNode_ = nullptr;
     RefPtr<FrameNode> headerContainerNode_ = nullptr;
+    RefPtr<FrameNode> bottomBarContainerNode_ = nullptr;
+    RefPtr<FrameNode> footerContainerNode_ = nullptr;
     RefPtr<FrameNode> tabListNode_ = nullptr;
     RefPtr<SwiperController> swiperController_ = nullptr;
 
@@ -130,6 +184,12 @@ private:
     RefPtr<FrameNode> headerContainerMaskNode_ = nullptr;
     bool isScrollEffectEnabled_ = false;
     float scrollScale_ = -1.0f;
+
+    // BottomBar gradual blur effect nodes & state
+    RefPtr<FrameNode> bottomBarMaskBlurNode_ = nullptr;
+    RefPtr<FrameNode> bottomBarMaskNode_ = nullptr;
+    bool isBottomBarScrollEffectEnabled_ = false;
+    float bottomBarScrollScale_ = -1.0f;
 };
 
 } // namespace OHOS::Ace::NG

@@ -37,7 +37,10 @@ public:
 private:
     float MeasureHeaderContainer(LayoutWrapper* layoutWrapper, const SizeF& size);
     void MeasureHeaderContainerMaskNode(LayoutWrapper* layoutWrapper, const SizeF& size, float headerContainerHeight);
-    void MeasureTabList(LayoutWrapper* layoutWrapper, const SizeF& size, float totalFixedHeight);
+    float MeasureBottomBarContainer(LayoutWrapper* layoutWrapper, const SizeF& size);
+    void MeasureBottomBarMaskNode(LayoutWrapper* layoutWrapper, const SizeF& size, float bottomBarHeight);
+    void MeasureTabList(LayoutWrapper* layoutWrapper, const SizeF& size,
+        float totalFixedHeight, float bottomFixedHeight);
     void LayoutChild(LayoutWrapper* layoutWrapper, const RefPtr<FrameNode>& hostNode,
         const RefPtr<UINode>& childUINode, const OffsetF& offset);
 };

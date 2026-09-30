@@ -64,6 +64,9 @@ namespace {
 constexpr int32_t HEADER_CONTAINER_MASK_BLUR_ZINDEX = 1;
 constexpr int32_t HEADER_CONTAINER_MASK_ZINDEX = 2;
 constexpr int32_t HEADER_CONTAINER_NODE_ZINDEX = 3;
+constexpr int32_t BOTTOM_BAR_CONTAINER_MASK_BLUR_ZINDEX = 1;
+constexpr int32_t BOTTOM_BAR_CONTAINER_MASK_ZINDEX = 2;
+constexpr int32_t BOTTOM_BAR_CONTAINER_NODE_ZINDEX = 3;
 const Dimension DEFAULT_SEARCH_NODE_HEIGHT = 56.0_vp;
 
 // Gradual blur constants (referencing TitleBar's GRADUAL_BLUR parameters)
@@ -108,6 +111,28 @@ void TabsSideBarPattern::CreateHeaderContainerIfNeeded()
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
+void TabsSideBarPattern::CreateBottomBarContainerIfNeeded()
+{
+    if (bottomBarContainerNode_) {
+        return;
+    }
+    auto host = AceType::DynamicCast<FrameNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    auto columnNode = FrameNode::GetOrCreateFrameNode(
+        V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    CHECK_NULL_VOID(columnNode);
+    auto property = columnNode->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    property->UpdateFlexDirection(FlexDirection::COLUMN);
+    auto renderContext = columnNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateZIndex(BOTTOM_BAR_CONTAINER_NODE_ZINDEX);
+    bottomBarContainerNode_ = columnNode;
+    columnNode->MountToParent(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
 void TabsSideBarPattern::CreateMaskNodeIfNeeded()
 {
     auto host = AceType::DynamicCast<FrameNode>(GetHost());
@@ -142,6 +167,40 @@ void TabsSideBarPattern::CreateMaskNodeIfNeeded()
     maskNode->MountToParent(host);
 }
 
+void TabsSideBarPattern::CreateBottomBarMaskNodeIfNeeded()
+{
+    auto host = AceType::DynamicCast<FrameNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    do {
+        if (bottomBarMaskBlurNode_) {
+            break;
+        }
+        auto maskBlurNode = CreateEffectNode("TabsSideBarBottomBarMaskBlur");
+        CHECK_NULL_BREAK(maskBlurNode);
+        auto property = maskBlurNode->GetLayoutProperty();
+        CHECK_NULL_BREAK(property);
+        property->UpdateVisibility(VisibleType::INVISIBLE);
+        auto maskBlurRenderContext = maskBlurNode->GetRenderContext();
+        CHECK_NULL_BREAK(maskBlurRenderContext);
+        maskBlurRenderContext->UpdateZIndex(BOTTOM_BAR_CONTAINER_MASK_BLUR_ZINDEX);
+        bottomBarMaskBlurNode_ = maskBlurNode;
+        maskBlurNode->MountToParent(host);
+    } while (false);
+    if (bottomBarMaskNode_) {
+        return;
+    }
+    auto maskNode = CreateEffectNode("TabsSideBarBottomBarMask");
+    CHECK_NULL_VOID(maskNode);
+    auto property = maskNode->GetLayoutProperty();
+    CHECK_NULL_VOID(property);
+    property->UpdateVisibility(VisibleType::INVISIBLE);
+    auto maskRenderContext = maskNode->GetRenderContext();
+    CHECK_NULL_VOID(maskRenderContext);
+    maskRenderContext->UpdateZIndex(BOTTOM_BAR_CONTAINER_MASK_ZINDEX);
+    bottomBarMaskNode_ = maskNode;
+    maskNode->MountToParent(host);
+}
+
 RefPtr<FrameNode> TabsSideBarPattern::CreateSearchContainer()
 {
     auto containerNode = FrameNode::GetOrCreateFrameNode(V2::STACK_ETS_TAG,
@@ -167,6 +226,8 @@ void TabsSideBarPattern::CreateChildNodeIfNeeded(const RefPtr<FrameNode>& tabsNo
     CreateHeaderContainerIfNeeded();
     CreateMaskNodeIfNeeded();
     CreateTabListIfNeeded(tabsNode);
+    CreateBottomBarContainerIfNeeded();
+    CreateBottomBarMaskNodeIfNeeded();
 }
 
 void TabsSideBarPattern::CreateTabListIfNeeded(const RefPtr<FrameNode>& tabsNode)
@@ -213,7 +274,8 @@ void TabsSideBarPattern::CreateTabListIfNeeded(const RefPtr<FrameNode>& tabsNode
         auto scrollPattern = weakScrollPattern.Upgrade();
         CHECK_NULL_VOID(scrollPattern);
         float totalOffset = static_cast<float>(scrollPattern->GetTotalOffset());
-        pattern->OnTabListScroll(totalOffset);
+        float scrollableDistance = scrollPattern->GetScrollableDistance();
+        pattern->OnTabListScroll(totalOffset, scrollableDistance);
     };
     controller->SetObserver(observer);
     // Hide scrollbar for sidebar tab list
@@ -223,6 +285,18 @@ void TabsSideBarPattern::CreateTabListIfNeeded(const RefPtr<FrameNode>& tabsNode
     ScrollableModelNG::SetContentClip(AceType::RawPtr(scrollNode),
         ContentClipMode::SAFE_AREA, nullptr);
 
+    // Create content container (parent of item column and footer container, goes inside Scroll)
+    auto contentContainer = FrameNode::GetOrCreateFrameNode(
+        V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    CHECK_NULL_VOID(contentContainer);
+    auto contentLayoutProperty = contentContainer->GetLayoutProperty<LinearLayoutProperty>();
+    if (contentLayoutProperty) {
+        contentLayoutProperty->UpdateFlexDirection(FlexDirection::COLUMN);
+        contentLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
+        contentLayoutProperty->UpdateCrossAxisAlign(FlexAlign::FLEX_START);
+    }
+
     // Create ColumnNode (vertical container for tab items)
     auto columnNode = FrameNode::GetOrCreateFrameNode(
         V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -231,7 +305,7 @@ void TabsSideBarPattern::CreateTabListIfNeeded(const RefPtr<FrameNode>& tabsNode
     auto columnLayoutProperty = columnNode->GetLayoutProperty<LinearLayoutProperty>();
     if (columnLayoutProperty) {
         columnLayoutProperty->UpdateFlexDirection(FlexDirection::COLUMN);
-        // Column fills parent (Scroll) width so tab items can be left-aligned
+        // Column fills parent width so tab items can be left-aligned
         // within the full width. Height remains content-based for scrolling.
         columnLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
         // Children left-aligned (default, explicit for clarity)
@@ -239,8 +313,24 @@ void TabsSideBarPattern::CreateTabListIfNeeded(const RefPtr<FrameNode>& tabsNode
     }
     tabListPattern->SetColumnNode(columnNode);
 
-    // Assemble: Column -> Scroll -> SideBarTabListNode -> SideBarNode(host)
-    columnNode->MountToParent(scrollNode);
+    // Create footer container (sibling of item column inside content container)
+    auto footerContainer = FrameNode::GetOrCreateFrameNode(
+        V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    CHECK_NULL_VOID(footerContainer);
+    auto footerLayoutProperty = footerContainer->GetLayoutProperty<LinearLayoutProperty>();
+    if (footerLayoutProperty) {
+        footerLayoutProperty->UpdateFlexDirection(FlexDirection::COLUMN);
+        footerLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
+        footerLayoutProperty->UpdateCrossAxisAlign(FlexAlign::FLEX_START);
+    }
+    footerContainerNode_ = footerContainer;
+
+    // Assemble: columnNode + footerContainer -> contentContainer -> Scroll
+    //           -> SideBarTabListNode -> SideBarNode(host)
+    columnNode->MountToParent(contentContainer);
+    footerContainer->MountToParent(contentContainer);
+    contentContainer->MountToParent(scrollNode);
     scrollNode->MountToParent(tabListNode);
     tabListNode->MountToParent(host);
     tabListNode_ = tabListNode;
@@ -278,6 +368,47 @@ void TabsSideBarPattern::UpdateHeaderNodeIfNeeded()
         curHeaderNode_ = headerNode_;
     }
     headerContainerNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void TabsSideBarPattern::UpdateFooterNodeIfNeeded()
+{
+    CHECK_NULL_VOID(footerContainerNode_);
+
+    if (footerNode_ == curFooterNode_) {
+        return;
+    }
+    // Remove old footer
+    if (curFooterNode_) {
+        footerContainerNode_->RemoveChild(curFooterNode_);
+        footerContainerNode_->MarkNeedSyncRenderTree();
+        curFooterNode_ = nullptr;
+    }
+    // Mount new footer to footer container
+    if (footerNode_) {
+        footerNode_->MountToParent(footerContainerNode_);
+        curFooterNode_ = footerNode_;
+    }
+    footerContainerNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void TabsSideBarPattern::UpdateBottomBarNodeIfNeeded()
+{
+    CHECK_NULL_VOID(bottomBarContainerNode_);
+    if (bottomBarNode_ == curBottomBarNode_) {
+        return;
+    }
+    // Remove old bottomBar
+    if (curBottomBarNode_) {
+        bottomBarContainerNode_->RemoveChild(curBottomBarNode_);
+        bottomBarContainerNode_->MarkNeedSyncRenderTree();
+        curBottomBarNode_ = nullptr;
+    }
+    // Mount new bottomBar
+    if (bottomBarNode_) {
+        bottomBarNode_->MountToParent(bottomBarContainerNode_);
+        curBottomBarNode_ = bottomBarNode_;
+    }
+    bottomBarContainerNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void TabsSideBarPattern::UpdateSearchNodeIfNeeded()
@@ -374,7 +505,9 @@ void TabsSideBarPattern::OnModifyDone()
 
     UpdateTabListIfNeeded();
     UpdateHeaderNodeIfNeeded();
+    UpdateFooterNodeIfNeeded();
     UpdateSearchNodeIfNeeded();
+    UpdateBottomBarNodeIfNeeded();
     bool isHeaderContainerVisible;
     bool isScrollEffectEnabled;
     if (!curHeaderNode_ && !searchContainerNode_) {
@@ -391,7 +524,18 @@ void TabsSideBarPattern::OnModifyDone()
                 isHeaderContainerVisible ? VisibleType::VISIBLE : VisibleType::GONE);
         }
     }
+    if (bottomBarContainerNode_) {
+        auto bottomBarProperty = bottomBarContainerNode_->GetLayoutProperty();
+        if (bottomBarProperty) {
+            bool isBottomBarVisible = curBottomBarNode_ != nullptr;
+            bottomBarProperty->UpdateVisibility(
+                isBottomBarVisible ? VisibleType::VISIBLE : VisibleType::GONE);
+        }
+    }
     InitHeaderContainerScrollEffect(isScrollEffectEnabled);
+
+    bool isBottomBarScrollEffect = curBottomBarNode_ != nullptr;
+    InitBottomBarScrollEffect(isBottomBarScrollEffect);
 }
 
 RefPtr<FrameNode> TabsSideBarPattern::CreateEffectNode(const std::string& tag)
@@ -406,54 +550,87 @@ RefPtr<FrameNode> TabsSideBarPattern::CreateEffectNode(const std::string& tag)
     return node;
 }
 
-void TabsSideBarPattern::OnTabListScroll(float totalOffset)
+void TabsSideBarPattern::OnTabListScroll(float totalOffset, float scrollableDistance)
 {
     auto threshold = static_cast<float>(GRADUAL_BLUR_SCROLL_THRESHOLD.ConvertToPx());
     float scrollScale = (threshold > 0.0f) ? std::clamp(totalOffset / threshold, 0.0f, 1.0f) : 0.0f;
     UpdateHeaderContainerBlurStyle(scrollScale);
+
+    float exceed = scrollableDistance - totalOffset;
+    float bottomScrollScale = (threshold > 0.0f && exceed > 0.0f)
+        ? std::clamp(exceed / threshold, 0.0f, 1.0f)
+        : 0.0f;
+    UpdateBottomBarBlurStyle(bottomScrollScale);
 }
 
 void TabsSideBarPattern::InitHeaderContainerScrollEffect(bool isScrollEffectEnabled)
 {
-    if (isScrollEffectEnabled == isScrollEffectEnabled_) {
+    InitScrollEffectImpl(isScrollEffectEnabled, isScrollEffectEnabled_, scrollScale_,
+        headerContainerMaskBlurNode_, headerContainerMaskNode_, GradientDirection::BOTTOM);
+}
+
+void TabsSideBarPattern::InitBottomBarScrollEffect(bool isScrollEffectEnabled)
+{
+    InitScrollEffectImpl(isScrollEffectEnabled, isBottomBarScrollEffectEnabled_, bottomBarScrollScale_,
+        bottomBarMaskBlurNode_, bottomBarMaskNode_, GradientDirection::TOP);
+}
+
+void TabsSideBarPattern::InitScrollEffectImpl(bool isScrollEffectEnabled, bool& isEnabledFlag,
+    float& cachedScale, const RefPtr<FrameNode>& maskBlurNode, const RefPtr<FrameNode>& maskNode,
+    GradientDirection direction)
+{
+    if (isScrollEffectEnabled == isEnabledFlag) {
         return;
     }
-    isScrollEffectEnabled_ = isScrollEffectEnabled;
+    isEnabledFlag = isScrollEffectEnabled;
     do {
-        CHECK_NULL_BREAK(headerContainerMaskBlurNode_);
-        auto property = headerContainerMaskBlurNode_->GetLayoutProperty();
+        CHECK_NULL_BREAK(maskBlurNode);
+        auto property = maskBlurNode->GetLayoutProperty();
         CHECK_NULL_BREAK(property);
-        property->UpdateVisibility(isScrollEffectEnabled_ ? VisibleType::VISIBLE : VisibleType::INVISIBLE);
+        property->UpdateVisibility(isEnabledFlag ? VisibleType::VISIBLE : VisibleType::INVISIBLE);
     } while (false);
     do {
-        CHECK_NULL_BREAK(headerContainerMaskNode_);
-        auto property = headerContainerMaskNode_->GetLayoutProperty();
+        CHECK_NULL_BREAK(maskNode);
+        auto property = maskNode->GetLayoutProperty();
         CHECK_NULL_BREAK(property);
-        property->UpdateVisibility(isScrollEffectEnabled_ ? VisibleType::VISIBLE : VisibleType::INVISIBLE);
+        property->UpdateVisibility(isEnabledFlag ? VisibleType::VISIBLE : VisibleType::INVISIBLE);
     } while (false);
-    if (!isScrollEffectEnabled_) {
+    if (!isEnabledFlag) {
         return;
     }
-    auto scale = std::clamp(scrollScale_, 0.0f, 1.0f);
-    UpdateHeaderContainerBlurStyle(scale);
+    auto scale = std::clamp(cachedScale, 0.0f, 1.0f);
+    UpdateBlurStyleImpl(scale, cachedScale, isEnabledFlag, maskBlurNode, maskNode, direction);
 }
 
 void TabsSideBarPattern::UpdateHeaderContainerBlurStyle(float scrollScale)
 {
-    if (NearEqual(scrollScale_, scrollScale)) {
+    UpdateBlurStyleImpl(scrollScale, scrollScale_, isScrollEffectEnabled_,
+        headerContainerMaskBlurNode_, headerContainerMaskNode_, GradientDirection::BOTTOM);
+}
+
+void TabsSideBarPattern::UpdateBottomBarBlurStyle(float scrollScale)
+{
+    UpdateBlurStyleImpl(scrollScale, bottomBarScrollScale_, isBottomBarScrollEffectEnabled_,
+        bottomBarMaskBlurNode_, bottomBarMaskNode_, GradientDirection::TOP);
+}
+
+void TabsSideBarPattern::UpdateBlurStyleImpl(float scrollScale, float& cachedScale, bool isEnabled,
+    const RefPtr<FrameNode>& maskBlurNode, const RefPtr<FrameNode>& maskNode,
+    GradientDirection direction)
+{
+    if (NearEqual(cachedScale, scrollScale)) {
         return;
     }
-    scrollScale_ = scrollScale;
-    if (!isScrollEffectEnabled_) {
+    cachedScale = scrollScale;
+    if (!isEnabled) {
         return;
     }
-    CHECK_NULL_VOID(headerContainerMaskBlurNode_ && headerContainerMaskNode_);
-    auto maskBlurRenderContext = headerContainerMaskBlurNode_->GetRenderContext();
-    auto maskRenderContext = headerContainerMaskNode_->GetRenderContext();
+    CHECK_NULL_VOID(maskBlurNode && maskNode);
+    auto maskBlurRenderContext = maskBlurNode->GetRenderContext();
+    auto maskRenderContext = maskNode->GetRenderContext();
     CHECK_NULL_VOID(maskBlurRenderContext && maskRenderContext);
-    // Interpolate blur radius: 0 → maxRadius based on scrollScale
+
     float blurRadius = scrollScale * static_cast<float>(GRADUAL_BLUR_MAX_RADIUS.ConvertToPx());
-    // MaskBlur node: apply radius gradient blur with vertical gradient mask
     maskBlurRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     if (NearZero(blurRadius)) {
         maskBlurRenderContext->UpdateBackBlurRadius(Dimension(0.0, DimensionUnit::VP));
@@ -461,25 +638,22 @@ void TabsSideBarPattern::UpdateHeaderContainerBlurStyle(float scrollScale)
     } else {
         maskBlurRenderContext->UpdateBackBlurRadius(Dimension());
         LinearGradientBlurPara gradientBlurPara(
-            Dimension(blurRadius, DimensionUnit::PX), MASK_BLUR_STOPS, GradientDirection::BOTTOM);
+            Dimension(blurRadius, DimensionUnit::PX), MASK_BLUR_STOPS, direction);
         maskBlurRenderContext->UpdateRadiusGradientBlur(gradientBlurPara);
     }
 
-    // Mask node: apply fade-out gradient with interpolated opacity
     maskRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     double opacity = scrollScale * GRADUAL_BLUR_MAX_OPACITY;
     if (NearZero(opacity)) {
-        // No gradient at scroll position 0 — fully transparent
         Gradient emptyGradient;
         emptyGradient.CreateGradientWithType(GradientType::LINEAR);
         maskRenderContext->UpdateLinearGradient(emptyGradient);
     } else {
-        // Use sidebar background color with interpolated opacity for the gradient
         Color blendColor = Color::FromARGB(
             static_cast<uint8_t>(opacity * 255), 0xF1, 0xF3, 0xF5);
         Gradient gradient;
         gradient.CreateGradientWithType(GradientType::LINEAR);
-        gradient.SetDirection(GradientDirection::BOTTOM);
+        gradient.SetDirection(direction);
         for (const auto& fractionStop : FADE_OUT_GRADIENT_STOPS) {
             GradientColor stepColor(blendColor.BlendOpacity(fractionStop.first));
             stepColor.SetDimension(fractionStop.second * 100.0f, DimensionUnit::PERCENT);

@@ -2599,6 +2599,24 @@ void TabsModelNG::SetSidebarHeader(FrameNode* frameNode, const RefPtr<AceType>& 
     pattern->SetSidebarHeaderNode(customHeader);
 }
 
+void TabsModelNG::SetSidebarFooter(FrameNode* frameNode, const RefPtr<AceType>& footer)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto customFooter = AceType::DynamicCast<NG::UINode>(footer);
+    pattern->SetSidebarFooterNode(customFooter);
+}
+
+void TabsModelNG::SetSidebarBottomBar(FrameNode* frameNode, const RefPtr<AceType>& bottomBar)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto customBottomBar = AceType::DynamicCast<NG::UINode>(bottomBar);
+    pattern->SetSidebarBottomBarNode(customBottomBar);
+}
+
 void TabsModelNG::SetSidebarSearchableOptions(const TabsSidebarSearchableOptions& options)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
