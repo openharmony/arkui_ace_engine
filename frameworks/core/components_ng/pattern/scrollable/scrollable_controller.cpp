@@ -44,7 +44,7 @@ bool ScrollableController::AnimateTo(
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_RETURN(pattern, false);
     auto host = pattern->GetHost();
-    // call AnimateToMultiThread by multi thread
+    // call AnimateToMultiThread by multiple threads
     FREE_NODE_CHECK(host, AnimateTo, position, duration, curve, smooth, canOverScroll);
     CHECK_NULL_RETURN(host, false);
     if (pattern->GetAxis() != Axis::NONE) {
